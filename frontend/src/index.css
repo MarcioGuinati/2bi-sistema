@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy-900: #0A192F;
+  --color-navy-800: #112240;
+  --color-navy-700: #1B2C4D;
+  
+  --color-gold: #C5A059;
+  --color-gold-500: #D4AF37;
+  --color-gold-600: #B8860B;
+  
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-heading: "Outfit", sans-serif;
+}
+
+@layer base {
+  :root {
+    --bg-primary: #F8F9FA;
+    --bg-secondary: #FFFFFF;
+    --text-primary: #0A192F;
+    --text-secondary: #64748B;
+    --border-primary: #F1F5F9;
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .dark {
+    --bg-primary: #0A192F;
+    --bg-secondary: #112240;
+    --text-primary: #F8F9FA;
+    --text-secondary: #94A3B8;
+    --border-primary: #1B2C4D;
+    --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply antialiased transition-colors duration-300;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight transition-colors duration-300;
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-gold text-white font-semibold rounded-lg transition-all duration-300 transform shadow-lg active:scale-95 cursor-pointer;
+    --tw-shadow-color: rgba(197, 160, 89, 0.2);
+  }
+  .btn-primary:hover {
+    @apply bg-gold-500 -translate-y-1;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 border-2 border-gold text-gold font-semibold rounded-lg transition-all duration-300 active:scale-95 cursor-pointer hover:bg-gold hover:text-white;
+  }
+  
+  .glass {
+    @apply backdrop-blur-md border transition-all duration-300;
+    background-color: theme('colors.white / 10%');
+    border-color: theme('colors.white / 10%');
+  }
+
+  .dark .glass {
+    background-color: rgba(17, 34, 64, 0.7);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .card-premium {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--card-shadow);
+    @apply rounded-[1.5rem] md:rounded-[2.5rem] transition-all duration-300;
+  }
+
+  .table-responsive {
+    @apply block w-full overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .custom-scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 10px;
+  opacity: 0.5;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-500);
+}

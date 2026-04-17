@@ -1,0 +1,146 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Institutional
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import About from './components/About';
+import Partners from './components/Partners';
+import Services from './components/Services';
+import HowItWorks from './components/HowItWorks';
+import Stats from './components/Stats';
+import Contact from './components/Contact';
+import Footer from './components/Footer';
+
+// System Pages
+import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminFinances from './pages/AdminFinances';
+import ClientDashboard from './pages/ClientDashboard';
+import FinanceManagement from './pages/FinanceManagement';
+import CategoryManagement from './pages/CategoryManagement';
+import AccountManagement from './pages/AccountManagement';
+import BudgetManagement from './pages/BudgetManagement';
+import Mentoria from './pages/Mentoria';
+
+const Institutional = () => (
+  <div className="min-h-screen">
+    <Navbar />
+    <main>
+      <Hero />
+      <About />
+      <Partners />
+      <Services />
+      <Stats />
+      <HowItWorks />
+      <Contact />
+    </main>
+    <Footer />
+  </div>
+);
+
+const DashboardRedirect = () => {
+    const { user } = useAuth();
+    if (!user) return <Navigate to="/login" />;
+    if (user.role === 'admin') return <Navigate to="/admin" />;
+    return <Navigate to="/dashboard" />;
+};
+
+function App() {
+  return (
+    <NotificationProvider>
+      <AuthProvider>
+        <BrowserRouter>
+        <Routes>
+          {/* Public Route */}
+          <Route path="/" element={<Institutional />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* Admin Protected Routes */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute role="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/finances" 
+            element={
+              <ProtectedRoute role="admin">
+                <AdminFinances />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Client Protected Routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute role="client">
+                <ClientDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/finance" 
+            element={
+              <ProtectedRoute role="client">
+                <FinanceManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/categories" 
+            element={
+              <ProtectedRoute role="client">
+                <CategoryManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/accounts" 
+            element={
+              <ProtectedRoute role="client">
+                <AccountManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/budgets" 
+            element={
+              <ProtectedRoute role="client">
+                <BudgetManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/mentoria" 
+            element={
+              <ProtectedRoute>
+                <Mentoria />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Catch-all/Redirect */}
+          <Route 
+            path="/panel" 
+            element={
+              <ProtectedRoute>
+                <DashboardRedirect />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </BrowserRouter>
+      </AuthProvider>
+    </NotificationProvider>
+  );
+}
+
+export default App;

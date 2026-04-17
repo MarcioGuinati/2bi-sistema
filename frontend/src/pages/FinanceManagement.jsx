@@ -1,0 +1,394 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Plus,
+  Search,
+  X,
+  CreditCard,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  Trash2,
+  Edit2,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownLeft
+} from 'lucide-react';
+import api from '../services/api';
+import SystemLayout from '../components/SystemLayout';
+import { useNotification } from '../context/NotificationContext';
+
+const FinanceManagement = () => {
+  const { success, error, confirm } = useNotification();
+  const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
+  const [loading, setLoading] = useState(true);
+
+  // Pagination & Filters
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Initialize dates for current month
+  const getInitialDates = () => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {
+      start: firstDay.toISOString().split('T')[0],
+      end: now.toISOString().split('T')[0]
+    };
+  };
+
+  const initialDates = getInitialDates();
+
+  const [filters, setFilters] = useState({
+    type: '',
+    category_id: '',
+    account_id: '',
+    description: '',
+    startDate: initialDates.start,
+    endDate: initialDates.end
+  });
+
+  const [showTransModal, setShowTransModal] = useState(false);
+  const [editingTrans, setEditingTrans] = useState(null);
+
+  const [form, setForm] = useState({
+    amount: '',
+    description: '',
+    type: 'expense',
+    category_id: '',
+    account_id: '',
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams({
+        page,
+        limit: 10,
+        ...filters
+      }).toString();
+
+      const [transRes, catsRes, accsRes, statsRes] = await Promise.all([
+        api.get(`/transactions?${queryParams}`),
+        api.get('/categories'),
+        api.get('/accounts'),
+        api.get('/transactions/stats')
+      ]);
+
+      setTransactions(transRes.data.rows);
+      setTotalPages(transRes.data.pages);
+      setCategories(catsRes.data);
+      setAccounts(accsRes.data);
+      setStats(statsRes.data);
+    } catch (err) {
+      console.error('Error fetching financial data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [page, filters]);
+
+  const handleTransSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingTrans) {
+        await api.put(`/transactions/${editingTrans.id}`, form);
+      } else {
+        await api.post('/transactions', form);
+      }
+      setShowTransModal(false);
+      success(editingTrans ? 'Lançamento atualizado!' : 'Lançamento registrado com sucesso!');
+      fetchData();
+    } catch (err) { error('Erro ao processar transação'); }
+  };
+
+  const handleDeleteTrans = (id) => {
+    confirm({
+      title: 'Excluir Transação',
+      message: 'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/transactions/${id}`);
+          success('Transação excluída com sucesso');
+          fetchData();
+        } catch (err) { error('Erro ao excluir transação'); }
+      }
+    });
+  };
+
+  const handleOpenEdit = (t) => {
+    setEditingTrans(t);
+    setForm({
+      amount: t.amount,
+      description: t.description,
+      type: t.type,
+      category_id: t.category_id,
+      account_id: t.account_id,
+      date: t.date
+    });
+    setShowTransModal(true);
+  };
+
+  const clearFilters = () => {
+    const dates = getInitialDates();
+    setFilters({
+      type: '',
+      category_id: '',
+      account_id: '',
+      description: '',
+      startDate: dates.start,
+      endDate: dates.end
+    });
+  };
+
+  return (
+    <SystemLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold font-heading tracking-tight">Extrato Financeiro</h1>
+            <p className="text-[var(--text-secondary)] font-medium tracking-tight">Análise detalhada do seu fluxo de caixa estratégico.</p>
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => { setEditingTrans(null); setForm({ ...form, amount: '', description: '' }); setShowTransModal(true); }}
+              className="btn-primary flex items-center gap-2"
+            >
+              <Plus size={20} /> Novo Lançamento
+            </button>
+          </div>
+        </div>
+
+        {/* Filters Panel */}
+        <div className="card-premium p-8 space-y-6">
+          <div className="flex items-center gap-2 font-bold text-sm mb-2">
+            <Calendar size={18} className="text-gold" /> Filtros de Pesquisa
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-black text-slate-400 ml-1">Descrição</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={filters.description}
+                  onChange={e => setFilters({ ...filters, description: e.target.value })}
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] pl-10 pr-4 py-3 rounded-xl text-sm outline-none focus:border-gold"
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-black text-slate-400 ml-1">De (Data Inicial)</label>
+              <input
+                type="date"
+                value={filters.startDate}
+                onChange={e => setFilters({ ...filters, startDate: e.target.value })}
+                className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-black text-slate-400 ml-1">Até (Data Final)</label>
+              <input
+                type="date"
+                value={filters.endDate}
+                onChange={e => setFilters({ ...filters, endDate: e.target.value })}
+                className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+              />
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1 space-y-1">
+                <label className="text-[10px] uppercase font-black text-slate-400 ml-1">Tipo</label>
+                <select
+                  value={filters.type}
+                  onChange={e => setFilters({ ...filters, type: e.target.value })}
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+                >
+                  <option value="">Todos</option>
+                  <option value="income">Receitas</option>
+                  <option value="expense">Despesas</option>
+                </select>
+              </div>
+              <button
+                onClick={clearFilters}
+                className="p-3 bg-[var(--bg-primary)] text-slate-400 hover:text-[var(--text-primary)] rounded-xl transition-colors self-end"
+                title="Resetar Filtros"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-black text-slate-400 ml-1">Conta Bancária</label>
+              <select
+                value={filters.account_id}
+                onChange={e => setFilters({ ...filters, account_id: e.target.value })}
+                className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+              >
+                <option value="">Todas as Contas</option>
+                {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-black text-slate-400 ml-1">Categoria</label>
+              <select
+                value={filters.category_id}
+                onChange={e => setFilters({ ...filters, category_id: e.target.value })}
+                className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+              >
+                <option value="">Todas as Categorias</option>
+                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name} ({cat.type})</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Transactions list */}
+        <div className="card-premium overflow-hidden">
+          <div className="p-8 border-b border-[var(--border-primary)] flex justify-between items-center">
+            <h3 className="text-xl font-bold font-heading">Transações Encontradas</h3>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                className="p-2 rounded-xl border border-slate-100 disabled:opacity-30 hover:bg-slate-50"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <span className="text-sm font-bold text-navy-900">Página {page} de {totalPages}</span>
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="p-2 rounded-xl border border-[var(--border-primary)] disabled:opacity-30 hover:bg-[var(--bg-primary)]"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-[var(--bg-primary)] text-slate-400 text-[10px] uppercase tracking-widest font-bold">
+                  <th className="px-8 py-5">Data</th>
+                  <th className="px-8 py-5">Descrição / Origem</th>
+                  <th className="px-8 py-5">Categoria</th>
+                  <th className="px-8 py-5">Valor</th>
+                  <th className="px-8 py-5 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-primary)]">
+                {transactions.map((t) => (
+                  <tr key={t.id} className="hover:bg-slate-50/20 group">
+                    <td className="px-8 py-5">
+                      <div className="text-sm font-bold text-navy-900">{new Date(t.date).toLocaleDateString('pt-BR')}</div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <div className="text-sm font-bold tracking-tight">{t.description}</div>
+                      <div className="text-[10px] text-[var(--text-secondary)] uppercase font-black tracking-widest italic">{t.Account?.name || 'Geral'}</div>
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className="text-xs font-bold px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+                        {t.Category?.name || 'Sem Categoria'}
+                      </span>
+                    </td>
+                    <td className={`px-8 py-5 font-black text-sm ${t.type === 'income' ? 'text-green-600' : 'text-[var(--text-primary)]'}`}>
+                      {t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-8 py-5 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => handleOpenEdit(t)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
+                      <button onClick={() => handleDeleteTrans(t.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
+                    </td>
+                  </tr>
+                ))}
+                {transactions.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic">Nenhuma transação encontrada no período.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* TRANSACTION MODAL */}
+      <AnimatePresence>
+        {showTransModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl">
+              <div className="bg-navy-900 p-8 text-white flex justify-between items-center">
+                <div>
+                  <h3 className="text-2xl font-black font-heading tracking-tight">{editingTrans ? 'Alterar Lançamento' : 'Novo Registro'}</h3>
+                  <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Controle de Fluxo 2BI</p>
+                </div>
+                <button onClick={() => setShowTransModal(false)} className="text-white/50 hover:text-white"><X size={20} /></button>
+              </div>
+              <form onSubmit={handleTransSubmit} className="p-8 space-y-4 font-medium">
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, type: 'income' })}
+                    className={`py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${form.type === 'income' ? 'bg-green-50 border-green-600 text-green-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                  >
+                    <ArrowUpRight size={20} /> Receita
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, type: 'expense' })}
+                    className={`py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${form.type === 'expense' ? 'bg-red-50 border-red-600 text-red-600' : 'bg-[var(--bg-primary)] border-[var(--border-primary)] text-slate-400'}`}
+                  >
+                    <ArrowDownLeft size={20} /> Despesa
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Valor</label>
+                    <input type="number" step="0.01" required value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-lg font-black" placeholder="R$ 0,00" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Descrição</label>
+                    <input type="text" required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold" placeholder="Ex: Investimento Ativo" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Categoria</label>
+                      <select required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold">
+                        <option value="">Selecionar</option>
+                        {categories.filter(c => c.type === form.type).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Conta Destino</label>
+                      <select required value={form.account_id} onChange={e => setForm({ ...form, account_id: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold">
+                        <option value="">Selecionar</option>
+                        {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Data da Operação</label>
+                    <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30 mt-4">Confirmar Lançamento</button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </SystemLayout>
+  );
+};
+
+export default FinanceManagement;
