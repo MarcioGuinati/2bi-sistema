@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const routes = require('./routes');
 const { sequelize } = require('./models');
@@ -7,10 +9,26 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
+// Security Hardening
+app.use(helmet());
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Muitas requisições deste IP, por favor tente novamente após 15 minutos'
+});
+
+// App Settings
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://2bi.orionchat.cloud'] 
+    : true,
+  credentials: true
+}));
+app.use(express.json());
+app.use(morgan('combined'));
+
+app.use('/api', limiter); // Apply rate limiting to all api routes
 app.use('/api', routes);
 
 const PORT = process.env.PORT || 5000;
@@ -20,9 +38,11 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log('Connected to PostgreSQL database.');
     
-    // Sync models
-    await sequelize.sync({ alter: true });
-    console.log('Database synced with schema updates.');
+    // Sync models - ONLY IN DEVELOPMENT
+    if (process.env.NODE_ENV !== 'production') {
+      await sequelize.sync({ alter: true });
+      console.log('Database synced with schema updates.');
+    }
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: 2bi-backend
+    restart: always
+    env_file: ./backend/.env
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=https://2bi.orionchat.cloud/api
+    container_name: 2bi-frontend
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - "3000:80"
+
+networks:
+  app-network:
+    external: true
