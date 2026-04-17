@@ -184,63 +184,128 @@ const AdminDashboard = () => {
   const generateContractPDF = (contract) => {
     const doc = new jsPDF();
     const client = selectedClient;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
-    // Header
-    doc.setFontSize(22);
-    doc.setTextColor(1, 22, 56); // Navy
-    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 20, 30);
+    // 1. Background / Watermark
+    doc.setTextColor(240, 240, 240);
+    doc.setFontSize(60);
+    doc.setFont('helvetica', 'bold');
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.1 }));
+    doc.text('2BI PLANEJAMENTO', pageWidth / 2, pageHeight / 2, { align: 'center', angle: 45 });
+    doc.restoreGraphicsState();
 
-    doc.setFontSize(10);
-    doc.setTextColor(191, 155, 48); // Gold
-    doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINANCEIRO', 20, 38);
+    // 2. Premium Header Bar
+    doc.setFillColor(10, 25, 47); // Navy 900
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 20, 25);
+    
+    doc.setTextColor(197, 160, 89); // Gold
+    doc.setFontSize(8);
+    doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 20, 32);
 
-    // Body
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
+    // 3. Document ID / Date
+    doc.setTextColor(100, 116, 139); // Slate 400
+    doc.setFontSize(7);
+    const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
+    doc.text(docId, pageWidth - 20, 25, { align: 'right' });
+    doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 30, { align: 'right' });
+
     let y = 60;
 
-    const lines = [
-      `CONTRATADA: 2BI Planejamento Estratégico, inscrita no CNPJ sob o nº XX.XXX.XXX/0001-XX.`,
-      `CONTRATANTE: ${client.name}, portador do CPF nº ${client.cpf || 'NÃO INFORMADO'}.`,
-      '',
-      `OBJETO`,
-      `O presente instrumento tem por objeto a prestação de serviços de ${contract.title}.`,
-      '',
-      `VALOR E CONDIÇÕES`,
-      `Pela prestação dos serviços, o CONTRATANTE pagará à CONTRATADA o valor de R$ ${Number(contract.value).toLocaleString('pt-BR')}, com ciclo de cobrança ${contract.billingCycle === 'monthly' ? 'MENSAL' : contract.billingCycle === 'annual' ? 'ANUAL' : 'ÚNICO'}.`,
-      '',
-      `VIGÊNCIA`,
-      `O contrato entra em vigor na data de ${new Date(contract.startDate).toLocaleDateString('pt-BR')}.`,
-      '',
-      `CLÁUSULAS GERAIS`,
-      `Este contrato possui validade jurídica e estabelece as responsabilidades entre as partes, garantindo transparência, segurança e compromisso na execução dos serviços contratados.`,
-      '',
-      `As partes declaram estar de pleno acordo com todos os termos aqui descritos.`,
-      '',
-      '',
-      '__________________________________________',
-      'Assinatura do Contratante',
-      '',
-      '__________________________________________',
-      'Assinatura 2BI Planejamento'
-    ];
+    // 4. Section: PARTES
+    doc.setDrawColor(197, 160, 89); // Gold
+    doc.setLineWidth(0.5);
+    doc.line(20, y, 40, y);
+    
+    doc.setTextColor(10, 25, 47);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('I. DAS PARTES', 20, y + 8);
+    
+    y += 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(51, 65, 85);
+    
+    doc.text('CONTRATADA:', 20, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text('2BI PLANEJAMENTO ESTRATÉGICO LTDA', 50, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text('CNPJ: XX.XXX.XXX/0001-XX | Sede: Maringá - PR', 50, y + 5);
+    
+    y += 15;
+    doc.text('CONTRATANTE:', 20, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(client.name.toUpperCase(), 50, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`CPF: ${client.cpf || 'NÃO INFORMADO'} | E-mail: ${client.email}`, 50, y + 5);
 
-    const contractStyle = {
-      primaryColor: '#c5a059',
-      fontTitle: 'Helvetica-Bold',
-      fontBody: 'Helvetica',
-      watermark: '2BI PLANEJAMENTO',
-      modernLayout: true,
-      roundedSections: true,
-      elegantSpacing: true,
-      premiumVisual: true
-    };
+    // 5. Section: OBJETO
+    y += 25;
+    doc.line(20, y, 40, y);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(10, 25, 47);
+    doc.text('II. DO OBJETO', 20, y + 8);
+    
+    y += 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(51, 65, 85);
+    const objetoText = `O presente instrumento tem por objeto a prestação de serviços especializados de ${contract.title.toUpperCase()}, visando a otimização de fluxos, organização de ativos e o alinhamento estratégico reportado nas sessões de mentoria.`;
+    const objectLines = doc.splitTextToSize(objetoText, pageWidth - 40);
+    doc.text(objectLines, 20, y);
 
+    // 6. Section: VALORES
+    y += 30;
+    doc.line(20, y, 40, y);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(10, 25, 47);
+    doc.text('III. VALORES E CONDIÇÕES', 20, y + 8);
+    
+    y += 18;
+    doc.setFillColor(248, 250, 252); // Slate 50
+    doc.roundedRect(20, y - 5, pageWidth - 40, 25, 3, 3, 'F');
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text('Investimento acordado:', 30, y + 5);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(197, 160, 89);
+    doc.text(`R$ ${Number(contract.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 30, y + 13);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(10, 25, 47);
+    doc.text('CICLO:', 120, y + 5);
+    doc.text(contract.billingCycle === 'monthly' ? 'MENSAL' : contract.billingCycle === 'annual' ? 'ANUAL' : 'PAGAMENTO ÚNICO', 120, y + 13);
 
-    lines.forEach(line => {
-      doc.text(line, 20, y);
-      y += 10;
-    });
+    // 7. Signatures
+    y = pageHeight - 60;
+    doc.setDrawColor(226, 232, 240); // Slate 200
+    doc.line(20, y, 90, y);
+    doc.line(120, y, pageWidth - 20, y);
+    
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(client.name, 55, y + 5, { align: 'center' });
+    doc.text('Contratante', 55, y + 10, { align: 'center' });
+    
+    doc.text('2BI PLANEJAMENTO', 155, y + 5, { align: 'center' });
+    doc.text('Contratada', 155, y + 10, { align: 'center' });
+
+    // 8. Footer
+    doc.setFillColor(10, 25, 47);
+    doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(7);
+    doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINACEIRO - WWW.2BI.ORIONCHAT.CLOUD', pageWidth / 2, pageHeight - 7, { align: 'center' });
 
     return doc;
   };
