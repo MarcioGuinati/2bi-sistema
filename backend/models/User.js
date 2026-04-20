@@ -43,6 +43,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    customFields: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: []
+    },
     asaasId: {
       type: DataTypes.STRING,
       allowNull: true

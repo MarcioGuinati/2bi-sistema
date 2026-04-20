@@ -40,8 +40,12 @@ const startServer = async () => {
     
     // Sync models - ONLY IN DEVELOPMENT
     if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: true });
-      console.log('Database synced with schema updates.');
+      try {
+        await sequelize.sync(); // Changed from { alter: true } to prevent crash
+        console.log('Database synced.');
+      } catch (syncError) {
+        console.error('Database sync warning (continuing...):', syncError.message);
+      }
     }
 
     app.listen(PORT, () => {

@@ -32,7 +32,7 @@ class AuthController {
       return res.status(403).json({ error: 'Only admins can register clients' });
     }
 
-    const { name, email, password, phone, cpf, income, occupation, financialGoal } = req.body;
+    const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
 
@@ -51,7 +51,8 @@ class AuthController {
       cpf,
       income,
       occupation,
-      financialGoal
+      financialGoal,
+      customFields: customFields || []
     });
 
     return res.json(user);
@@ -64,7 +65,7 @@ class AuthController {
 
     const clients = await User.findAll({
       where: { role: 'client' },
-      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'created_at'],
+      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'created_at'],
       order: [['created_at', 'DESC']]
     });
 
@@ -77,7 +78,7 @@ class AuthController {
     }
 
     const { id } = req.params;
-    const { name, email, password, phone, cpf, income, occupation, financialGoal } = req.body;
+    const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields } = req.body;
 
     const user = await User.findByPk(id);
 
@@ -85,13 +86,18 @@ class AuthController {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const updateData = { name, email, phone, cpf, income, occupation, financialGoal };
+    const updateData = { name, email, phone, cpf, income, occupation, financialGoal, customFields };
 
     if (password && password.trim() !== '') {
       updateData.password = await bcrypt.hash(password, 8);
     }
 
-    await user.update(updateData);
+    // Use set and save for more robust JSONB updates
+    user.set(updateData);
+    if (customFields) {
+      user.changed('customFields', true);
+    }
+    await user.save();
 
     return res.json(user);
   }

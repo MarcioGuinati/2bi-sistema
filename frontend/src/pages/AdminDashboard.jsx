@@ -48,7 +48,8 @@ const AdminDashboard = () => {
   const [clientForm, setClientForm] = useState({
     name: '', email: '', password: '',
     phone: '', cpf: '', income: '',
-    occupation: '', financialGoal: ''
+    occupation: '', financialGoal: '',
+    customFields: []
   });
 
   // Client Detail State (CRM)
@@ -81,7 +82,7 @@ const AdminDashboard = () => {
 
   const handleOpenRegister = () => {
     setEditingClient(null);
-    setClientForm({ name: '', email: '', password: '', phone: '', cpf: '', income: '', occupation: '', financialGoal: '' });
+    setClientForm({ name: '', email: '', password: '', phone: '', cpf: '', income: '', occupation: '', financialGoal: '', customFields: [] });
     setShowRegModal(true);
   };
 
@@ -95,7 +96,8 @@ const AdminDashboard = () => {
       cpf: client.cpf || '',
       income: client.income || '',
       occupation: client.occupation || '',
-      financialGoal: client.financialGoal || ''
+      financialGoal: client.financialGoal || '',
+      customFields: client.customFields || []
     });
     setShowRegModal(true);
   };
@@ -514,6 +516,67 @@ const AdminDashboard = () => {
                   <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Principais Objetivos Estratégicos</label>
                   <textarea rows="3" value={clientForm.financialGoal} onChange={e => setClientForm({ ...clientForm, financialGoal: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all resize-none text-[var(--text-primary)]" />
                 </div>
+
+                {/* Custom Fields Section */}
+                <div className="space-y-4 pt-4 border-t border-[var(--border-primary)]">
+                  <div className="flex justify-between items-center px-2">
+                    <h4 className="text-xs font-black uppercase text-slate-400 tracking-widest">Campos Personalizados</h4>
+                    <button 
+                      type="button" 
+                      onClick={() => setClientForm({ ...clientForm, customFields: [...clientForm.customFields, { name: '', value: '' }] })}
+                      className="text-[10px] bg-gold/10 text-gold px-3 py-1.5 rounded-lg font-black uppercase tracking-widest hover:bg-gold hover:text-white transition-all flex items-center gap-2"
+                    >
+                      <Plus size={12} /> Adicionar
+                    </button>
+                  </div>
+                  {clientForm.customFields.map((field, index) => (
+                    <div key={index} className="flex gap-4 items-end animate-in fade-in slide-in-from-left-2 duration-300">
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[8px] uppercase font-black text-slate-400 ml-2">Nome do Campo</label>
+                        <input 
+                          type="text" 
+                          placeholder="Ex: Endereço" 
+                          value={field.name} 
+                          onChange={e => {
+                            const newFields = [...clientForm.customFields];
+                            newFields[index].name = e.target.value;
+                            setClientForm({ ...clientForm, customFields: newFields });
+                          }} 
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-3 rounded-xl outline-none focus:border-gold transition-all text-xs" 
+                        />
+                      </div>
+                      <div className="flex-[2] space-y-1">
+                        <label className="text-[8px] uppercase font-black text-slate-400 ml-2">Valor</label>
+                        <input 
+                          type="text" 
+                          placeholder="Ex: Rua das Flores, 123" 
+                          value={field.value} 
+                          onChange={e => {
+                            const newFields = [...clientForm.customFields];
+                            newFields[index].value = e.target.value;
+                            setClientForm({ ...clientForm, customFields: newFields });
+                          }} 
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-3 rounded-xl outline-none focus:border-gold transition-all text-xs" 
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newFields = clientForm.customFields.filter((_, i) => i !== index);
+                          setClientForm({ ...clientForm, customFields: newFields });
+                        }}
+                        className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  {clientForm.customFields.length === 0 && (
+                    <div className="text-center py-4 border-2 border-dashed border-slate-100 rounded-2xl text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      Nenhum campo extra adicionado.
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Senha de Acesso</label>
                   <input type="password" placeholder={editingClient ? 'Deixe em branco para manter' : 'Crie uma senha segura'} required={!editingClient} value={clientForm.password} onChange={e => setClientForm({ ...clientForm, password: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all" />
@@ -525,216 +588,292 @@ const AdminDashboard = () => {
         )}
 
         {selectedClient && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 lg:p-10">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[var(--bg-secondary)]/80 backdrop-blur-2xl rounded-[1.5rem] md:rounded-[3rem] w-full max-w-6xl h-full lg:h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row border border-white/40">
-              {/* Left Column: Profile */}
-              <div className="w-full md:w-80 bg-navy-900/5 p-8 border-r border-navy-900/10 overflow-y-auto flex flex-col">
-                <button onClick={() => setSelectedClient(null)} className="mb-8 flex items-center gap-3 text-slate-400 hover:text-[var(--text-primary)] font-black text-[10px] uppercase tracking-widest transition-all">
-                  <div className="w-8 h-8 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center shadow-sm"><X size={14} /></div> Voltar
-                </button>
-                <div className="text-center mb-10">
-                  <div className="w-32 h-32 bg-gradient-to-tr from-gold to-yellow-300 rounded-[3rem] mx-auto mb-6 flex items-center justify-center text-white text-5xl font-black shadow-2xl shadow-gold/30">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-50 flex items-center justify-center p-0 md:p-4 lg:p-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95 }} 
+              className="bg-[var(--bg-secondary)]/90 backdrop-blur-2xl rounded-none md:rounded-[3rem] w-full max-w-6xl h-full lg:h-[90vh] overflow-hidden shadow-2xl flex flex-col border-none md:border border-white/40"
+            >
+              {/* Premium Header - Replicating Adjust Profile Style */}
+              <div className="bg-gradient-to-r from-navy-900 to-navy-800 p-6 md:p-10 text-white flex justify-between items-center relative overflow-hidden shrink-0">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+                <div className="relative z-10 flex items-center gap-4 md:gap-8">
+                  <div className="hidden md:flex w-20 h-20 bg-gradient-to-tr from-gold to-yellow-300 rounded-3xl items-center justify-center text-white text-3xl font-black shadow-2xl shadow-gold/30 shrink-0">
                     {selectedClient.name.charAt(0)}
                   </div>
-                  <h3 className="font-black font-heading text-2xl tracking-tight">{selectedClient.name}</h3>
-                  <p className="text-[10px] text-gold font-black uppercase tracking-[0.3em] mt-2 inline-block px-4 py-1 bg-gold/10 rounded-full italic">Sócio Estratégico</p>
-                </div>
-                <div className="space-y-4 flex-1">
-                  <div className="bg-[var(--bg-secondary)]/50 p-6 rounded-[2rem] border border-[var(--border-primary)] shadow-sm">
-                    <p className="text-[10px] uppercase font-black text-slate-400 mb-1">Patrimônio / Renda</p>
-                    <p className="text-2xl font-black text-[var(--text-primary)]">R$ {Number(selectedClient.income || 0).toLocaleString('pt-BR')}</p>
-                  </div>
-                  <div className="bg-navy-900 p-6 rounded-[2rem] text-white shadow-xl shadow-navy-900/20">
-                    <p className="text-[10px] uppercase font-black text-white/30 mb-2">Contato</p>
-                    <p className="text-xs font-bold truncate">{selectedClient.email}</p>
-                    <p className="text-xs font-bold mt-1 text-gold">{selectedClient.phone}</p>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl md:text-3xl font-black font-heading tracking-tight italic leading-none">{selectedClient.name}</h3>
+                      <span className="hidden md:inline-block px-3 py-1 bg-gold/20 text-gold text-[8px] font-black uppercase tracking-widest rounded-full border border-gold/30">Sócio Estratégico</span>
+                    </div>
+                    <p className="text-gold/60 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Gestão Estratégica e CRM 2BI</p>
                   </div>
                 </div>
+                <button 
+                  onClick={() => setSelectedClient(null)} 
+                  className="bg-white/10 hover:bg-white/20 p-3 rounded-2xl transition-all relative z-10"
+                >
+                  <X size={24} />
+                </button>
               </div>
-              {/* Right Column: CRM & Billing */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Tabs Header */}
-                <div className="flex bg-[var(--bg-secondary)]/50 border-b border-[var(--border-primary)] backdrop-blur-sm sticky top-0 z-10">
-                  <button
-                    onClick={() => setActiveTab('crm')}
-                    className={`flex-1 px-8 py-6 font-black text-[10px] uppercase tracking-[0.3em] transition-all relative ${activeTab === 'crm' ? 'text-[var(--text-primary)]' : 'text-slate-400 hover:text-[var(--text-primary)]'}`}
-                  >
-                    CRM & Notas
-                    {activeTab === 'crm' && <motion.div layoutId="tab-line" className="absolute bottom-0 left-0 right-0 h-1 bg-gold" />}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('billing')}
-                    className={`flex-1 px-8 py-6 font-black text-[10px] uppercase tracking-[0.3em] transition-all relative ${activeTab === 'billing' ? 'text-[var(--text-primary)]' : 'text-slate-400 hover:text-[var(--text-primary)]'}`}
-                  >
-                    Faturamento & Contratos
-                    {activeTab === 'billing' && <motion.div layoutId="tab-line" className="absolute bottom-0 left-0 right-0 h-1 bg-gold" />}
-                  </button>
+
+              <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                {/* Left Column: Essential Info - Responsive behavior */}
+                <div className="w-full md:w-80 bg-navy-900/5 p-6 md:p-8 border-r border-navy-900/10 overflow-y-auto hidden md:flex flex-col gap-6">
+                  <div className="space-y-4">
+                    <div className="bg-[var(--bg-secondary)] p-6 rounded-[2rem] border border-[var(--border-primary)] shadow-sm">
+                      <p className="text-[10px] uppercase font-black text-slate-400 mb-1">Patrimônio / Renda</p>
+                      <p className="text-2xl font-black text-[var(--text-primary)]">R$ {Number(selectedClient.income || 0).toLocaleString('pt-BR')}</p>
+                    </div>
+                  {/* Custom Fields in Details View */}
+                  {selectedClient.customFields && selectedClient.customFields.length > 0 && (
+                    <div className="space-y-3">
+                      {selectedClient.customFields.map((field, idx) => (
+                        <div key={idx} className="bg-white/40 backdrop-blur-sm p-4 rounded-2xl border border-white/60 shadow-sm">
+                          <p className="text-[8px] uppercase font-black text-slate-400 mb-1">{field.name}</p>
+                          <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{field.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                    <div className="bg-navy-900 p-6 rounded-[2rem] text-white shadow-xl shadow-navy-900/20">
+                      <p className="text-[10px] uppercase font-black text-white/30 mb-2">Contato Direto</p>
+                      <p className="text-xs font-bold truncate opacity-80">{selectedClient.email}</p>
+                      <p className="text-sm font-black mt-2 text-gold tracking-tight">{selectedClient.phone || '(No Phone)'}</p>
+                    </div>
+                    <div className="bg-gold/5 p-6 rounded-[2rem] border border-gold/10">
+                      <p className="text-[10px] uppercase font-black text-gold/60 mb-2">Objetivos</p>
+                      <p className="text-xs font-semibold text-[var(--text-secondary)] leading-relaxed italic line-clamp-4">
+                        {selectedClient.financialGoal || "Duração de objetivos estratégicos não definidos."}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex-1 p-10 overflow-y-auto custom-scrollbar">
-                  {activeTab === 'crm' ? (
-                    <div className="grid grid-cols-1 gap-10">
-                      <div className="space-y-8">
-                        <h3 className="text-2xl font-black text-[var(--text-primary)] font-heading flex items-center gap-3">
-                          <MessageSquare className="text-gold" size={24} /> Histórico Estratégico
-                        </h3>
-                        <form onSubmit={handleAddNote} className="space-y-3">
-                          <textarea 
-                            placeholder="Anotar próximo passo..." 
-                            value={newNote} 
-                            onChange={e => setNewNote(e.target.value)} 
-                            className="w-full p-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl outline-none focus:border-gold text-sm h-32 text-[var(--text-primary)]" 
-                          />
-                          <div className="flex gap-2">
-                             <button type="submit" className="flex-1 btn-primary py-3 font-bold text-xs uppercase tracking-widest">
-                               {editingNote ? 'Atualizar Nota' : 'Registrar Contato'}
-                             </button>
-                             {editingNote && (
-                               <button 
-                                 type="button" 
-                                 onClick={() => { setEditingNote(null); setNewNote(''); }}
-                                 className="px-6 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-xl text-[10px] uppercase font-black tracking-widest"
-                               >
-                                 Cancelar
-                               </button>
-                             )}
+                {/* Right Column: CRM & Billing */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Tabs Header - More Premium Style */}
+                  <div className="flex bg-[var(--bg-secondary)]/80 border-b border-[var(--border-primary)] backdrop-blur-md sticky top-0 z-10 p-2 gap-2">
+                    <button
+                      onClick={() => setActiveTab('crm')}
+                      className={`flex-1 px-4 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative ${activeTab === 'crm' ? 'bg-navy-900 text-white shadow-lg shadow-navy-900/20' : 'text-slate-400 hover:bg-slate-100'}`}
+                    >
+                      CRM & Notas
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('billing')}
+                      className={`flex-1 px-4 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all relative ${activeTab === 'billing' ? 'bg-navy-900 text-white shadow-lg shadow-navy-900/20' : 'text-slate-400 hover:bg-slate-100'}`}
+                    >
+                      Faturamento & Contratos
+                    </button>
+                  </div>
+
+                  <div className="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar bg-gradient-to-b from-transparent to-slate-50/50">
+                    {activeTab === 'crm' ? (
+                      <div className="max-w-4xl mx-auto space-y-10">
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-xl md:text-2xl font-black text-[var(--text-primary)] font-heading flex items-center gap-3">
+                              <MessageSquare className="text-gold" size={24} /> Histórico Estratégico
+                            </h3>
+                            <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{notes.length} Registros</span>
                           </div>
-                        </form>
-                        <div className="space-y-4">
-                          {notes.map(n => (
-                            <div key={n.id} className="p-6 bg-[var(--bg-secondary)]/40 border border-[var(--border-primary)] rounded-[2rem] shadow-sm backdrop-blur-sm group hover:border-gold/30 transition-all">
-                              <div className="flex justify-between items-start mb-3">
-                                <p className="text-sm text-[var(--text-secondary)] leading-relaxed font-semibold italic">"{n.content}"</p>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                   <button 
-                                     onClick={() => { setEditingNote(n); setNewNote(n.content); }}
-                                     className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
-                                   >
-                                     <Edit2 size={12} />
-                                   </button>
-                                   <button 
-                                     onClick={() => handleDeleteNote(n.id)}
-                                     className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                                   >
-                                     <Trash2 size={12} />
-                                   </button>
+                          
+                          <form onSubmit={handleAddNote} className="bg-[var(--bg-secondary)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl shadow-slate-200/50 space-y-4">
+                            <textarea 
+                              placeholder="Descreva o próximo passo ou detalhe do contato..." 
+                              value={newNote} 
+                              onChange={e => setNewNote(e.target.value)} 
+                              className="w-full p-6 bg-slate-50 border border-slate-100 rounded-3xl outline-none focus:border-gold/50 transition-all text-sm h-32 text-[var(--text-primary)] resize-none" 
+                            />
+                            <div className="flex gap-3">
+                               <button type="submit" className="flex-1 btn-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em]">
+                                 {editingNote ? 'Atualizar Evolução' : 'Registrar Interação'}
+                               </button>
+                               {editingNote && (
+                                 <button 
+                                   type="button" 
+                                   onClick={() => { setEditingNote(null); setNewNote(''); }}
+                                   className="px-8 bg-slate-100 border border-slate-200 rounded-2xl text-[10px] uppercase font-black tracking-widest hover:bg-slate-200 transition-colors"
+                                 >
+                                   Cancelar
+                                 </button>
+                               )}
+                            </div>
+                          </form>
+
+                          <div className="space-y-6 relative before:absolute before:left-8 before:top-0 before:bottom-0 before:w-px before:bg-gradient-to-b before:from-gold/50 before:to-transparent">
+                            {notes.map((n, idx) => (
+                              <motion.div 
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                key={n.id} 
+                                className="pl-16 relative group"
+                              >
+                                <div className="absolute left-6 top-6 w-4 h-4 bg-white border-2 border-gold rounded-full z-10 group-hover:scale-125 transition-transform"></div>
+                                <div className="p-6 bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-[2rem] shadow-sm group-hover:shadow-md group-hover:border-gold/30 transition-all">
+                                  <div className="flex justify-between items-start mb-4">
+                                    <p className="text-sm md:text-base text-[var(--text-primary)] leading-relaxed font-medium">"{n.content}"</p>
+                                    <div className="flex gap-2">
+                                       <button 
+                                         onClick={() => { setEditingNote(n); setNewNote(n.content); }}
+                                         className="p-3 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                       >
+                                         <Edit2 size={14} />
+                                       </button>
+                                       <button 
+                                         onClick={() => handleDeleteNote(n.id)}
+                                         className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                       >
+                                         <Trash2 size={14} />
+                                       </button>
+                                    </div>
+                                  </div>
+                                  <div className="pt-4 border-t border-slate-50 flex flex-wrap justify-between items-center gap-4">
+                                    <span className="flex items-center gap-2 text-[10px] font-black uppercase text-gold tracking-widest">
+                                      <Calendar size={12} /> {new Date(n.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 bg-navy-900 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                                        {n.Admin?.name?.charAt(0) || 'A'}
+                                      </div>
+                                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Responsável: {n.Admin?.name || 'Administrador'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="max-w-5xl mx-auto space-y-10">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                          <h3 className="text-2xl font-black text-[var(--text-primary)] font-heading flex items-center gap-3">
+                            <Briefcase className="text-gold" size={24} /> Planos Contratados
+                          </h3>
+                          <button
+                            onClick={() => setShowContractModal(true)}
+                            className="w-full md:w-auto btn-primary py-4 px-8 text-[10px] uppercase font-black tracking-widest flex items-center justify-center gap-3 rounded-2xl shadow-xl shadow-gold/20"
+                          >
+                            <Plus size={18} /> Novo Contrato
+                          </button>
+                        </div>
+  
+                        {/* Active Contracts Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {clientContracts.map(c => (
+                            <div key={c.id} className="bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-sm hover:shadow-xl hover:border-gold/20 transition-all group">
+                              <div className="flex justify-between items-start mb-6">
+                                <div>
+                                  <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em] px-3 py-1 bg-gold/10 rounded-full">{c.billingCycle === 'monthly' ? 'Mensalidade' : 'Anuidade'}</span>
+                                  <h4 className="font-black text-[var(--text-primary)] text-xl mt-2 tracking-tight group-hover:text-gold transition-colors">{c.title}</h4>
+                                </div>
+                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button 
+                                    onClick={() => {
+                                      setEditingBillingContract(c);
+                                      setContractForm({
+                                        title: c.title,
+                                        value: c.value,
+                                        billingCycle: c.billingCycle,
+                                        startDate: c.startDate.split('T')[0]
+                                      });
+                                      setShowContractModal(true);
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                                  >
+                                    <Edit2 size={16} />
+                                  </button>
+                                  <button onClick={() => handleDeleteContract(c.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                    <Trash2 size={16} />
+                                  </button>
                                 </div>
                               </div>
-                              <div className="pt-4 border-t border-[var(--border-primary)] text-[10px] font-black uppercase text-gold tracking-widest flex justify-between items-center">
-                                <span className="flex items-center gap-2"><Calendar size={12} /> {new Date(n.createdAt).toLocaleString()}</span>
-                                <div className="bg-navy-900 text-white px-3 py-1 rounded-lg text-[8px] tracking-[0.2em]">Consultor: {n.Admin?.name}</div>
+                              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                                <div>
+                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor do Acordo</p>
+                                  <div className="text-3xl font-black text-[var(--text-primary)]">R$ {Number(c.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                </div>
+                                <div className="flex gap-3 w-full md:w-auto">
+                                  <button
+                                    onClick={() => handlePreviewContract(c)}
+                                    className="flex-1 md:flex-none p-4 bg-slate-50 text-[var(--text-primary)] rounded-2xl hover:bg-navy-900 hover:text-white transition-all shadow-sm border border-slate-100 flex items-center justify-center gap-2"
+                                    title="Visualizar Contrato"
+                                  >
+                                    <Eye size={18} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDownloadContract(c)}
+                                    className="flex-1 md:flex-none p-4 bg-slate-50 text-[var(--text-primary)] rounded-2xl hover:bg-gold hover:text-white transition-all shadow-sm border border-slate-100 flex items-center justify-center gap-2"
+                                    title="Baixar PDF"
+                                  >
+                                    <FileText size={18} />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-10">
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-2xl font-black text-[var(--text-primary)] font-heading flex items-center gap-3">
-                          <Briefcase className="text-gold" size={24} /> Planos Contratados
-                        </h3>
-                        <button
-                          onClick={() => setShowContractModal(true)}
-                          className="btn-primary py-3 px-6 text-xs flex items-center gap-2"
-                        >
-                          <Plus size={16} /> Vincular Produto
-                        </button>
-                      </div>
-
-                      {/* Active Contracts */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {clientContracts.map(c => (
-                          <div key={c.id} className="card-premium p-6 space-y-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-black text-[var(--text-primary)] text-lg uppercase tracking-tight">{c.title}</h4>
-                                <p className="text-[10px] font-black text-gold uppercase tracking-widest">{c.billingCycle === 'monthly' ? 'Mensal' : 'Anual'}</p>
-                              </div>
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={() => {
-                                    setEditingBillingContract(c);
-                                    setContractForm({
-                                      title: c.title,
-                                      value: c.value,
-                                      billingCycle: c.billingCycle,
-                                      startDate: c.startDate.split('T')[0]
-                                    });
-                                    setShowContractModal(true);
-                                  }}
-                                  className="text-slate-400 hover:text-blue-500 transition-colors"
-                                >
-                                  <Edit2 size={16} />
-                                </button>
-                                <button onClick={() => handleDeleteContract(c.id)} className="text-slate-400 hover:text-red-500 transition-colors">
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
+                          {clientContracts.length === 0 && (
+                            <div className="md:col-span-2 py-20 text-center border-2 border-dashed border-slate-200 rounded-[3rem]">
+                              <p className="text-slate-400 font-bold">Nenhum contrato ativo para este parceiro.</p>
                             </div>
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                              <div className="text-2xl font-black text-[var(--text-primary)]">R$ {Number(c.value).toLocaleString('pt-BR')}</div>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handlePreviewContract(c)}
-                                  className="p-3 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-xl hover:bg-gold transition-all shadow-sm border border-[var(--border-primary)]"
-                                  title="Visualizar Contrato"
-                                >
-                                  <Eye size={18} />
-                                </button>
-                                <button
-                                  onClick={() => handleDownloadContract(c)}
-                                  className="p-3 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-xl hover:bg-gold transition-all shadow-sm border border-[var(--border-primary)]"
-                                  title="Baixar PDF"
-                                >
-                                  <FileText size={18} />
-                                </button>
-                              </div>
+                          )}
+                        </div>
+
+                        {/* Billing History */}
+                        <div className="space-y-6">
+                          <h3 className="text-xl font-black text-[var(--text-primary)] font-heading flex items-center gap-3">
+                            <CreditCard className="text-gold" size={24} /> Histórico de Debitos
+                          </h3>
+                          <div className="bg-[var(--bg-secondary)] rounded-[2.5rem] border border-[var(--border-primary)] shadow-sm overflow-hidden">
+                            <div className="table-responsive">
+                              <table className="w-full text-left">
+                                <thead>
+                                  <tr className="bg-slate-50/50 text-[10px] font-black uppercase text-slate-400">
+                                    <th className="px-8 py-6 tracking-[0.2em]">Vencimento</th>
+                                    <th className="px-8 py-6 tracking-[0.2em]">Descrição</th>
+                                    <th className="px-8 py-6 tracking-[0.2em]">Valor</th>
+                                    <th className="px-8 py-6 tracking-[0.2em]">Status</th>
+                                    <th className="px-8 py-6 text-right tracking-[0.2em]">Ação</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                  {clientPayments.map(p => (
+                                    <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
+                                      <td className="px-8 py-6 text-xs font-black text-navy-900">{new Date(p.dueDate).toLocaleDateString('pt-BR')}</td>
+                                      <td className="px-8 py-6">
+                                        <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-tight">{p.description}</div>
+                                        <div className="text-[8px] text-slate-400 font-medium">REF: {p.id.toString().slice(-6)}</div>
+                                      </td>
+                                      <td className="px-8 py-6 text-sm font-black text-navy-900">R$ {Number(p.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                      <td className="px-8 py-6">
+                                        <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-full border shadow-sm ${p.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20 animate-pulse'}`}>
+                                          {p.status === 'paid' ? 'Liquidado' : 'Aguardando'}
+                                        </span>
+                                      </td>
+                                      <td className="px-8 py-6 text-right">
+                                        {p.status === 'pending' && (
+                                          <button 
+                                            onClick={() => handlePayDebt(p.id)} 
+                                            className="px-6 py-3 bg-navy-900 text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold transition-all shadow-lg shadow-navy-900/10"
+                                          >
+                                            Dar Baixa
+                                          </button>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                      {/* Billing History */}
-                      <div className="space-y-6">
-                        <h3 className="text-xl font-black text-[var(--text-primary)] font-heading flex items-center gap-3">
-                          <CreditCard className="text-gold" size={24} /> Histórico de Debitos
-                        </h3>
-                        <div className="card-premium overflow-hidden">
-                          <table className="w-full text-left">
-                            <thead className="bg-[var(--bg-primary)] text-[10px] font-black uppercase text-slate-400">
-                              <tr>
-                                <th className="px-8 py-6 tracking-[0.2em]">Vencimento</th>
-                                <th className="px-8 py-6 tracking-[0.2em]">Descrição</th>
-                                <th className="px-8 py-6 tracking-[0.2em]">Valor</th>
-                                <th className="px-8 py-6 tracking-[0.2em]">Status</th>
-                                <th className="px-8 py-6 text-right tracking-[0.2em]">Fluxo</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--border-primary)]">
-                              {clientPayments.map(p => (
-                                <tr key={p.id} className="hover:bg-gold/5 transition-colors">
-                                  <td className="px-8 py-6 text-xs font-black italic">{new Date(p.dueDate).toLocaleDateString('pt-BR')}</td>
-                                  <td className="px-8 py-6 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-tight">{p.description}</td>
-                                  <td className="px-8 py-6 text-sm font-black underline decoration-gold/30">R$ {Number(p.amount).toLocaleString('pt-BR')}</td>
-                                  <td className="px-8 py-6">
-                                    <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-full border shadow-sm ${p.status === 'paid' ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20 animate-pulse'}`}>
-                                      {p.status === 'paid' ? 'Liquidado' : 'Em Aberto'}
-                                    </span>
-                                  </td>
-                                  <td className="px-8 py-6 text-right">
-                                    {p.status === 'pending' && (
-                                      <button onClick={() => handlePayDebt(p.id)} className="btn-primary py-2 px-4 text-[8px] uppercase tracking-widest shadow-lg shadow-gold/20">Regularizar</button>
-                                    )}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
