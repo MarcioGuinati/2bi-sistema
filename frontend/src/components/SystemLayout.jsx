@@ -33,7 +33,7 @@ const SystemLayout = ({ children }) => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto mt-16 lg:mt-0">
+      <main className="flex-1 overflow-y-auto mt-16 lg:mt-0 lg:pl-72">
         <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
           {children}
         </div>

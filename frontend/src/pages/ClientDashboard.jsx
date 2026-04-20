@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusCircle,
@@ -12,7 +13,9 @@ import {
   ChevronRight,
   X,
   CreditCard,
-  Plus
+  Plus,
+  Quote,
+  ChevronLeft
 } from 'lucide-react';
 import {
   BarChart,
@@ -22,21 +25,31 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Legend
 } from 'recharts';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 
 const ClientDashboard = () => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const { success, error } = useNotification();
   const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
+  const [dashboardData, setDashboardData] = useState({ monthlyData: [], categoryData: [] });
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'dashboard' ? 'dashboard' : 'overview');
 
   // Modals
   const [showGoalModal, setShowGoalModal] = useState(false);
@@ -45,16 +58,18 @@ const ClientDashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, transRes, catsRes, goalsRes] = await Promise.all([
+      const [statsRes, transRes, catsRes, goalsRes, dashRes] = await Promise.all([
         api.get('/transactions/stats'),
         api.get('/transactions?limit=5'),
         api.get('/categories'),
-        api.get('/goals')
+        api.get('/goals'),
+        api.get('/transactions/dashboard-stats')
       ]);
       setStats(statsRes.data);
       setTransactions(transRes.data.rows);
       setCategories(catsRes.data);
       setGoals(goalsRes.data);
+      setDashboardData(dashRes.data);
     } catch (err) {
       console.error('Error fetching data');
     } finally {
@@ -66,6 +81,11 @@ const ClientDashboard = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    setActiveTab(tab === 'dashboard' ? 'dashboard' : 'overview');
+  }, [searchParams]);
+
   const handleGoalSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -76,6 +96,23 @@ const ClientDashboard = () => {
       fetchData();
     } catch (err) { error('Falha ao registrar orçamento'); }
   };
+
+  // Motivational Quotes
+  const quotes = [
+    { text: "O sucesso financeiro não é sobre quanto você ganha, mas sobre quanto você mantém.", author: "Estratégia 2BI" },
+    { text: "A disciplina é a ponte entre seus objetivos e suas conquistas financeiras.", author: "Mentalidade Próspera" },
+    { text: "Seu patrimônio é o reflexo das suas escolhas de hoje. Planeje com inteligência.", author: "2BI Planejamento" },
+    { text: "Invista em você e no seu futuro. Pequenos passos geram grandes destinos.", author: "Foco no Longo Prazo" }
+  ];
+
+  const [currentQuote, setCurrentQuote] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentQuote((prev) => (prev + 1) % quotes.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, []);
 
   const data = [
     { name: 'Receitas', value: stats.income, color: '#00F5A0' },
@@ -107,8 +144,71 @@ const ClientDashboard = () => {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Tab Navigation */}
+        <div className="flex gap-4 border-b border-[var(--border-primary)] pb-4">
+          <button 
+            onClick={() => setActiveTab('overview')}
+            className={`text-xs font-black uppercase tracking-widest px-6 py-2 rounded-xl transition-all ${activeTab === 'overview' ? 'bg-gold text-white shadow-lg shadow-gold/20' : 'text-slate-400 hover:bg-[var(--bg-primary)]'}`}
+          >
+            Visão Geral
+          </button>
+          <button 
+            onClick={() => setActiveTab('dashboard')}
+            className={`text-xs font-black uppercase tracking-widest px-6 py-2 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-gold text-white shadow-lg shadow-gold/20' : 'text-slate-400 hover:bg-[var(--bg-primary)]'}`}
+          >
+            Dashboard Estratégico
+          </button>
+        </div>
+
+        {activeTab === 'overview' ? (
+          <>
+            {/* Motivational Banner */}
+            <div className={`relative overflow-hidden rounded-[2.5rem] border p-8 md:p-12 shadow-2xl group transition-all duration-300 ${
+              theme === 'dark' 
+                ? 'bg-navy-900 border-white/5 text-white shadow-navy-900/20' 
+                : 'bg-white border-slate-100 text-navy-900 shadow-gold/5'
+            }`}>
+              <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gold/10 dark:from-gold/20 to-transparent pointer-events-none" />
+              <div className="absolute -bottom-10 -right-10 opacity-5 dark:opacity-10">
+                <Quote size={200} className="text-gold" />
+              </div>
+              
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentQuote}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.8, ease: "circOut" }}
+                  className="relative z-10 flex flex-col md:flex-row items-center gap-8"
+                >
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gold/10 dark:bg-gold/20 rounded-3xl flex items-center justify-center border border-gold/20 flex-shrink-0">
+                    <TrendingUp size={40} className="text-gold" />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <h2 className="text-xl md:text-3xl font-black italic mb-3 leading-tight tracking-tight">
+                      "{quotes[currentQuote].text}"
+                    </h2>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.3em] font-bold">
+                      {quotes[currentQuote].author}
+                    </p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Progress Indicators */}
+              <div className="flex gap-2 mt-8 justify-center md:justify-start relative z-10">
+                {quotes.map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`h-1 rounded-full transition-all duration-1000 ${i === currentQuote ? 'w-8 bg-gold' : 'w-2 bg-slate-300 dark:bg-white/20'}`} 
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <motion.div
             whileHover={{ y: -5 }}
             className="card-premium p-8 flex items-center gap-6"
@@ -137,17 +237,17 @@ const ClientDashboard = () => {
 
           <motion.div
             whileHover={{ y: -5 }}
-            className="bg-navy-900 p-8 rounded-[2rem] shadow-2xl shadow-navy-900/20 flex items-center gap-6 relative overflow-hidden"
+            className="bg-[var(--bg-secondary)] p-8 rounded-[2rem] shadow-xl shadow-gold/5 border border-gold/10 flex items-center gap-6 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 p-4 opacity-10 font-medium">
+            <div className="absolute top-0 right-0 p-4 opacity-5 font-medium">
               <TrendingUp size={80} className="text-gold" />
             </div>
-            <div className="w-16 h-16 bg-gold/20 text-gold rounded-3xl flex items-center justify-center border border-gold/10">
+            <div className="w-16 h-16 bg-gold/10 text-gold rounded-3xl flex items-center justify-center border border-gold/20">
               <Wallet size={32} />
             </div>
             <div className="relative z-10">
               <p className="text-[10px] uppercase font-black text-gold tracking-widest mb-1">Saldo Atual</p>
-              <h3 className="text-2xl font-black text-white italic">R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-2xl font-black text-[var(--text-primary)] italic">R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
           </motion.div>
         </div>
@@ -184,7 +284,7 @@ const ClientDashboard = () => {
           </div>
 
           {/* Goals / Budgets */}
-          <div className="bg-navy-900 p-8 rounded-[2.5rem] text-white shadow-xl flex flex-col justify-between">
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 rounded-[2.5rem] text-[var(--text-primary)] shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-8">
                 <h3 className="text-xl font-bold font-heading">Orçamentário</h3>
@@ -200,33 +300,33 @@ const ClientDashboard = () => {
                       <div className="flex justify-between items-end text-xs font-bold">
                         <div className="flex flex-col">
                           <span className="text-gold uppercase tracking-widest">{goal.title}</span>
-                          <span className="text-[8px] text-white/30 uppercase tracking-tighter">
+                          <span className="text-[8px] text-[var(--text-secondary)] uppercase tracking-tighter">
                             {goal.Category?.name ? `Cat: ${goal.Category.name}` : 'Meta Geral'}
                           </span>
                         </div>
-                        <span className={`${isExceeded ? 'text-red-500' : 'text-white/40'}`}>{percentage}%</span>
+                        <span className={`${isExceeded ? 'text-red-500' : 'text-[var(--text-secondary)]'}`}>{percentage}%</span>
                       </div>
-                      <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                      <div className="h-3 bg-[var(--bg-primary)] rounded-full overflow-hidden border border-[var(--border-primary)]">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${Math.min(percentage, 100)}%` }}
                           className={`h-full shadow-lg ${isExceeded ? 'bg-red-500 shadow-red-500/20' : 'bg-gradient-to-r from-gold to-yellow-500 shadow-gold/20'}`}
                         />
                       </div>
-                      <div className="text-[10px] text-white/30 font-bold flex justify-between">
+                      <div className="text-[10px] text-[var(--text-secondary)] font-bold flex justify-between">
                         <span>Gasto: R$ {Number(goal.currentAmount).toLocaleString()}</span>
                         <span>Limite: R$ {Number(goal.targetAmount).toLocaleString()}</span>
                       </div>
                     </div>
                   );
                 }) : (
-                  <div className="text-center py-10 text-white/20 italic text-sm">Nenhum orçamento definido.</div>
+                  <div className="text-center py-10 text-[var(--text-secondary)] italic text-sm">Nenhum orçamento definido.</div>
                 )}
               </div>
             </div>
             <button
               onClick={() => setShowGoalModal(true)}
-              className="w-full mt-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gold hover:bg-white/10 transition-all"
+              className="w-full mt-8 py-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-gold hover:bg-gold hover:text-white transition-all shadow-sm"
             >
               Configurar Novo Limite
             </button>
@@ -274,7 +374,125 @@ const ClientDashboard = () => {
               </tbody>
             </table>
           </div>
-        </div>
+            </div>
+          </>
+        ) : (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+            {/* Row 1: Provisionamento Anual */}
+            <div className="card-premium p-8">
+              <div className="flex justify-between items-center mb-10">
+                <div>
+                  <h3 className="text-xl font-bold font-heading">Provisionamento Anual</h3>
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Fluxo projetado de Receitas vs Despesas</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-400" /> Receitas
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-400" /> Despesas
+                  </div>
+                </div>
+              </div>
+              <div className="h-96 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={dashboardData.monthlyData}>
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#4ADE80" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#4ADE80" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#F87171" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#F87171" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} tickFormatter={(val) => `R$ ${val}`} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
+                      itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                    />
+                    <Area type="monotone" dataKey="receita" stroke="#4ADE80" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
+                    <Area type="monotone" dataKey="despesa" stroke="#F87171" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Pie Chart: Distribution */}
+              <div className="card-premium p-8">
+                <h3 className="text-xl font-bold font-heading mb-6">Distribuição por Categoria</h3>
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={dashboardData.categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {dashboardData.categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={['#1e293b', '#EAB308', '#dc2626', '#16a34a', '#2563eb'][index % 5]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend verticalAlign="bottom" height={36} content={({ payload }) => (
+                        <div className="flex flex-wrap justify-center gap-4 mt-6">
+                          {payload.map((entry, index) => (
+                            <div key={`item-${index}`} className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                              <span className="text-[10px] font-black uppercase text-slate-500">{entry.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Performance / Balanced Chart */}
+              <div className="card-premium p-8">
+                <h3 className="text-xl font-bold font-heading mb-2">Evolução de Saldo</h3>
+                <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-10">Acumulado mensal do patrimônio</p>
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dashboardData.monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} />
+                      <Tooltip 
+                         cursor={{ fill: 'transparent' }}
+                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      />
+                      <Bar dataKey="saldo" radius={[8, 8, 0, 0]}>
+                        {dashboardData.monthlyData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.saldo >= 0 ? '#4ADE80' : '#F87171'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+            
+            {/* Visual Quote / Placeholder for better design */}
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-12 rounded-[3rem] text-center relative overflow-hidden shadow-sm">
+               <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+               <TrendingUp className="text-gold mx-auto mb-6" size={48} />
+               <h4 className="text-2xl font-black text-[var(--text-primary)] italic max-w-2xl mx-auto leading-tight">
+                 "O planejamento financeiro estratégico é a bússola que transforma objetivos em realidades tangíveis."
+               </h4>
+               <p className="text-gold text-xs font-black uppercase tracking-[0.3em] mt-6 font-bold">Inteligência Financeira 2BI</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Category Budget Modal */}

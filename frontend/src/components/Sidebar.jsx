@@ -26,6 +26,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const clientLinks = [
     { name: 'Visão Geral', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Dashboard Estratégico', path: '/dashboard?tab=dashboard', icon: PieChart },
     { name: 'Extrato Financeiro', path: '/finance', icon: Wallet },
     { name: 'Contas Bancárias', path: '/accounts', icon: CreditCard },
     { name: 'Categorias', path: '/categories', icon: Layers },
@@ -43,7 +44,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <div className={`
-      fixed lg:static inset-y-0 left-0 w-72 bg-navy-900 flex flex-col border-r border-white/5 z-50 shadow-2xl transition-transform duration-300 ease-in-out
+      fixed inset-y-0 left-0 w-72 bg-navy-900 flex flex-col border-r border-white/5 z-50 shadow-2xl transition-transform duration-300 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     `}>
       {/* Brand */}
@@ -79,10 +80,17 @@ const Sidebar = ({ isOpen, onClose }) => {
               to={link.path}
               end
               onClick={onClose}
-              className={({ isActive }) => `
-                flex items-center gap-4 px-6 py-4 rounded-2xl transition-all group font-bold font-medium
-                ${isActive ? 'bg-gold text-navy-900 shadow-xl shadow-gold/10' : 'text-white/40 hover:text-white hover:bg-white/5'}
-              `}
+              className={() => {
+                const isActive = location.pathname === link.path.split('?')[0] && 
+                                (link.path.includes('?') 
+                                  ? location.search === link.path.split('?')[1] || location.search === '?' + link.path.split('?')[1]
+                                  : location.search === '' || location.search === '?');
+
+                return `
+                  flex items-center gap-4 px-6 py-4 rounded-2xl transition-all group font-bold font-medium
+                  ${isActive ? 'bg-gold text-navy-900 shadow-xl shadow-gold/20' : 'text-white/40 hover:text-white hover:bg-white/5'}
+                `;
+              }}
             >
               <link.icon size={20} className="group-hover:scale-110 transition-transform" />
               <span className="text-sm">{link.name}</span>
@@ -106,12 +114,12 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="flex gap-2 mb-4">
             <button 
                 onClick={toggleTheme}
-                className="flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-gold hover:border-gold/50 transition-all font-bold text-[10px] uppercase tracking-widest"
+                className="flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-gold hover:border-gold/50 transition-all font-bold text-[10px] uppercase tracking-widest shadow-sm"
             >
                 {theme === 'light' ? (
-                    <><Moon size={14} /> Modo Escuro</>
+                    <><Moon size={14} className="text-gold" /> Mudar para Escuro</>
                 ) : (
-                    <><Sun size={14} /> Modo Claro</>
+                    <><Sun size={14} className="text-gold" /> Mudar para Claro</>
                 )}
             </button>
         </div>

@@ -127,6 +127,80 @@ class TransactionController {
       balance: income - expense
     });
   }
+
+  async dashboardStats(req, res) {
+    const userId = req.userId;
+    const currentYear = new Date().getFullYear();
+
+    try {
+      // 1. Monthly Stats for the current year
+      const monthlyData = [];
+      const months = [
+        'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      ];
+
+      for (let i = 0; i < 12; i++) {
+        const startDate = new Date(currentYear, i, 1);
+        const endDate = new Date(currentYear, i + 1, 0);
+
+        const monthTransactions = await Transaction.findAll({
+          where: {
+            user_id: userId,
+            date: {
+              [Op.between]: [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]
+            }
+          }
+        });
+
+        const income = monthTransactions
+          .filter(t => t.type === 'income')
+          .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+        const expense = monthTransactions
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+        monthlyData.push({
+          month: months[i],
+          receita: income,
+          despesa: expense,
+          saldo: income - expense
+        });
+      }
+
+      // 2. Category Breakdown (Expenses only)
+      const categoryData = await Transaction.findAll({
+        where: {
+          user_id: userId,
+          type: 'expense'
+        },
+        include: [{
+          model: Category,
+          attributes: ['name']
+        }]
+      });
+
+      const categoryTotals = {};
+      categoryData.forEach(t => {
+        const catName = t.Category?.name || 'Outros';
+        categoryTotals[catName] = (categoryTotals[catName] || 0) + parseFloat(t.amount || 0);
+      });
+
+      const categories = Object.entries(categoryTotals).map(([name, value]) => ({
+        name,
+        value
+      })).sort((a, b) => b.value - a.value);
+
+      return res.json({
+        monthlyData,
+        categoryData: categories
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 }
 
 module.exports = new TransactionController();
