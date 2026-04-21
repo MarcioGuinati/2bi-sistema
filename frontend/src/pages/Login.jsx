@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
-import { Shield, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import heroImage from '../assets/login-hero.png';
 
 const Login = () => {
@@ -10,6 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -127,13 +128,20 @@ const Login = () => {
                     <div className="relative group">
                         <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={20} />
                         <input 
-                            type="password" 
+                            type={showPassword ? "text" : "password"} 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-3xl pl-14 pr-6 py-5 focus:border-gold outline-none transition-all shadow-sm font-semibold text-[var(--text-primary)]"
+                            className="w-full bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-3xl pl-14 pr-14 py-5 focus:border-gold outline-none transition-all shadow-sm font-semibold text-[var(--text-primary)]"
                             placeholder="••••••••"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold transition-colors focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
                     </div>
                 </div>
 
