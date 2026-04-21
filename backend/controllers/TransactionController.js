@@ -64,19 +64,88 @@ class TransactionController {
   }
 
   async store(req, res) {
-    const { amount, description, type, category_id, account_id, date } = req.body;
+    const { 
+      amount, 
+      description, 
+      type, 
+      category_id, 
+      account_id, 
+      date,
+      recurrenceType,
+      installmentsCount,
+      repeatUntil
+    } = req.body;
 
-    const transaction = await Transaction.create({
-      amount,
-      description,
-      type,
-      category_id,
-      account_id,
-      user_id: req.userId,
-      date
-    });
+    const t = await sequelize.transaction();
 
-    return res.json(transaction);
+    try {
+      let transactions = [];
+
+      if (recurrenceType === 'installments' && installmentsCount > 1) {
+        const totalAmount = parseFloat(amount);
+        const installmentAmount = Math.floor((totalAmount / installmentsCount) * 100) / 100;
+        const remainder = parseFloat((totalAmount - (installmentAmount * installmentsCount)).toFixed(2));
+
+        for (let i = 0; i < installmentsCount; i++) {
+          const currentAmount = i === installmentsCount - 1 
+            ? (installmentAmount + remainder).toFixed(2) 
+            : installmentAmount.toFixed(2);
+
+          const currentMonth = new Date(date + 'T00:00:00');
+          currentMonth.setMonth(currentMonth.getMonth() + i);
+
+          transactions.push({
+            amount: currentAmount,
+            description: `${description} (Parcela ${i + 1}/${installmentsCount})`,
+            type,
+            category_id,
+            account_id,
+            user_id: req.userId,
+            date: currentMonth.toISOString().split('T')[0]
+          });
+        }
+      } else if (recurrenceType === 'fixed' && repeatUntil) {
+        const startDate = new Date(date + 'T00:00:00');
+        const endDate = new Date(repeatUntil + 'T00:00:00');
+        
+        let currentMonth = new Date(startDate);
+        while (currentMonth <= endDate) {
+          transactions.push({
+            amount,
+            description,
+            type,
+            category_id,
+            account_id,
+            user_id: req.userId,
+            date: currentMonth.toISOString().split('T')[0]
+          });
+          currentMonth.setMonth(currentMonth.getMonth() + 1);
+        }
+      } else {
+        transactions.push({
+          amount,
+          description,
+          type,
+          category_id,
+          account_id,
+          user_id: req.userId,
+          date
+        });
+      }
+
+      if (transactions.length === 0) {
+        throw new Error('Nenhuma transação gerada');
+      }
+
+      const createdTransactions = await Transaction.bulkCreate(transactions, { transaction: t });
+      await t.commit();
+
+      return res.json(createdTransactions[0]);
+    } catch (error) {
+      await t.rollback();
+      console.error('Error creating transactions:', error);
+      return res.status(500).json({ error: 'Erro ao criar transações' });
+    }
   }
 
   async update(req, res) {

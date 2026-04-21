@@ -60,7 +60,10 @@ const FinanceManagement = () => {
     type: 'expense',
     category_id: '',
     account_id: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    recurrenceType: 'none',
+    installmentsCount: 1,
+    repeatUntil: ''
   });
 
   const fetchData = async () => {
@@ -132,7 +135,10 @@ const FinanceManagement = () => {
       type: t.type,
       category_id: t.category_id,
       account_id: t.account_id,
-      date: t.date
+      date: t.date,
+      recurrenceType: 'none',
+      installmentsCount: 1,
+      repeatUntil: ''
     });
     setShowTransModal(true);
   };
@@ -160,7 +166,18 @@ const FinanceManagement = () => {
           </div>
           <div className="flex gap-4">
             <button
-              onClick={() => { setEditingTrans(null); setForm({ ...form, amount: '', description: '' }); setShowTransModal(true); }}
+              onClick={() => { 
+                setEditingTrans(null); 
+                setForm({ 
+                  ...form, 
+                  amount: '', 
+                  description: '', 
+                  recurrenceType: 'none',
+                  installmentsCount: 1,
+                  repeatUntil: ''
+                }); 
+                setShowTransModal(true); 
+              }}
               className="btn-primary flex items-center gap-2"
             >
               <Plus size={20} /> Novo Lançamento
@@ -380,6 +397,56 @@ const FinanceManagement = () => {
                     <label className="text-[10px] uppercase font-black text-slate-400">Data da Operação</label>
                     <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="input-premium font-bold" />
                   </div>
+
+                  {!editingTrans && (
+                    <div className="space-y-4 pt-4 border-t border-[var(--border-primary)]">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Tipo de Repetição</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'none', label: 'Único' },
+                          { id: 'fixed', label: 'Fixo' },
+                          { id: 'installments', label: 'Parcelado' }
+                        ].map((mode) => (
+                          <button
+                            key={mode.id}
+                            type="button"
+                            onClick={() => setForm({ ...form, recurrenceType: mode.id })}
+                            className={`py-3 rounded-xl text-xs font-bold border-2 transition-all ${form.recurrenceType === mode.id ? 'border-gold bg-gold/10 text-gold' : 'border-[var(--border-primary)] text-slate-400'}`}
+                          >
+                            {mode.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {form.recurrenceType === 'fixed' && (
+                        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                          <label className="text-[10px] uppercase font-black text-slate-400">Repetir Até (Opcional)</label>
+                          <input 
+                            type="date" 
+                            value={form.repeatUntil} 
+                            onChange={e => setForm({ ...form, repeatUntil: e.target.value })} 
+                            className="input-premium font-bold" 
+                          />
+                        </div>
+                      )}
+
+                      {form.recurrenceType === 'installments' && (
+                        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                          <label className="text-[10px] uppercase font-black text-slate-400">Número de Parcelas</label>
+                          <input 
+                            type="number" 
+                            min="2" 
+                            required
+                            value={form.installmentsCount} 
+                            onChange={e => setForm({ ...form, installmentsCount: e.target.value })} 
+                            className="input-premium font-bold" 
+                            placeholder="Ex: 12"
+                          />
+                          <p className="text-[10px] text-gold font-bold italic mt-1">O valor informado será dividido entre as parcelas.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30 mt-4">Confirmar Lançamento</button>
               </form>
