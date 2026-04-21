@@ -63,7 +63,8 @@ const FinanceManagement = () => {
     date: new Date().toISOString().split('T')[0],
     recurrenceType: 'none',
     installmentsCount: 1,
-    repeatUntil: ''
+    repeatUntil: '',
+    is_paid: false
   });
 
   const fetchData = async () => {
@@ -143,7 +144,8 @@ const FinanceManagement = () => {
       date: t.date,
       recurrenceType: 'none',
       installmentsCount: 1,
-      repeatUntil: ''
+      repeatUntil: '',
+      is_paid: t.is_paid
     });
     setShowTransModal(true);
   };
@@ -179,7 +181,8 @@ const FinanceManagement = () => {
                   description: '', 
                   recurrenceType: 'none',
                   installmentsCount: 1,
-                  repeatUntil: ''
+                  repeatUntil: '',
+                  is_paid: form.type === 'income' // Default true for income
                 }); 
                 setShowTransModal(true); 
               }}
@@ -311,7 +314,7 @@ const FinanceManagement = () => {
               </thead>
               <tbody className="divide-y divide-[var(--border-primary)]">
                 {transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/20 group">
+                  <tr key={t.id} className={`hover:bg-slate-50/20 group transition-all duration-300 ${!t.is_paid ? 'opacity-60 grayscale-[0.4]' : ''}`}>
                     <td className="px-8 py-5">
                       <div className="text-sm font-bold text-navy-900">{new Date(t.date).toLocaleDateString('pt-BR')}</div>
                     </td>
@@ -328,6 +331,23 @@ const FinanceManagement = () => {
                       {t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-5 flex justify-end gap-2">
+                       <button
+                         onClick={async () => {
+                           try {
+                             await api.put(`/transactions/${t.id}`, { ...t, is_paid: !t.is_paid });
+                             success(t.is_paid ? 'Marcado como pendente' : 'Confirmado como pago!');
+                             fetchData();
+                           } catch (err) { error('Falha ao atualizar status'); }
+                         }}
+                         title={t.is_paid ? 'Marcar como Pendente' : 'Marcar como Pago'}
+                         className={`p-2 rounded-lg border transition-all ${
+                           t.is_paid 
+                             ? 'bg-green-50 text-green-600 border-green-200' 
+                             : 'bg-amber-50 text-amber-600 border-amber-200'
+                         }`}
+                       >
+                         <CreditCard size={16} />
+                       </button>
                       <button onClick={() => handleOpenEdit(t)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
                       <button onClick={() => handleDeleteTrans(t.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
                     </td>
@@ -401,6 +421,20 @@ const FinanceManagement = () => {
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400">Data da Operação</label>
                     <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="input-premium font-bold" />
+                  </div>
+
+                  <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between">
+                    <div>
+                      <label className="text-[10px] uppercase font-black text-slate-400 block mb-1">Status de Pagamento</label>
+                      <p className="text-[10px] text-slate-400 italic">Marque se esta transação já foi liquidada.</p>
+                    </div>
+                    <button
+                       type="button"
+                       onClick={() => setForm({ ...form, is_paid: !form.is_paid })}
+                       className={`w-14 h-8 rounded-full relative transition-all duration-300 ${form.is_paid ? 'bg-green-500' : 'bg-slate-300'}`}
+                    >
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-sm ${form.is_paid ? 'translate-x-6' : 'translate-x-0'}`} />
+                    </button>
                   </div>
 
                   {!editingTrans && (

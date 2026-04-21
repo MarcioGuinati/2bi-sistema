@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       allowNull: false,
       defaultValue: DataTypes.NOW
+    },
+    is_paid: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   });
 

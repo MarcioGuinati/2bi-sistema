@@ -65,15 +65,16 @@ class TransactionController {
 
   async store(req, res) {
     const { 
-      amount, 
-      description, 
-      type, 
-      category_id, 
-      account_id, 
+      amount,
+      description,
+      type,
+      category_id,
+      account_id,
       date,
       recurrenceType,
       installmentsCount,
-      repeatUntil
+      repeatUntil,
+      is_paid
     } = req.body;
 
     const t = await sequelize.transaction();
@@ -101,7 +102,8 @@ class TransactionController {
             category_id,
             account_id,
             user_id: req.userId,
-            date: currentMonth.toISOString().split('T')[0]
+            date: currentMonth.toISOString().split('T')[0],
+            is_paid: i === 0 ? is_paid : false
           });
         }
       } else if (recurrenceType === 'fixed' && repeatUntil) {
@@ -117,7 +119,8 @@ class TransactionController {
             category_id,
             account_id,
             user_id: req.userId,
-            date: currentMonth.toISOString().split('T')[0]
+            date: currentMonth.toISOString().split('T')[0],
+            is_paid: transactions.length === 0 ? is_paid : false
           });
           currentMonth.setMonth(currentMonth.getMonth() + 1);
         }
@@ -129,7 +132,8 @@ class TransactionController {
           category_id,
           account_id,
           user_id: req.userId,
-          date
+          date,
+          is_paid
         });
       }
 
@@ -150,7 +154,7 @@ class TransactionController {
 
   async update(req, res) {
     const { id } = req.params;
-    const { amount, description, type, category_id, account_id, date } = req.body;
+    const { amount, description, type, category_id, account_id, date, is_paid } = req.body;
 
     const transaction = await Transaction.findByPk(id);
 
@@ -158,7 +162,7 @@ class TransactionController {
       return res.status(404).json({ error: 'Transaction not found' });
     }
 
-    await transaction.update({ amount, description, type, category_id, account_id, date });
+    await transaction.update({ amount, description, type, category_id, account_id, date, is_paid });
 
     return res.json(transaction);
   }

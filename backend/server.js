@@ -43,8 +43,8 @@ const startServer = async () => {
     // Sync models - ONLY IN DEVELOPMENT
     if (process.env.NODE_ENV !== 'production') {
       try {
-        await sequelize.sync(); // Changed from { alter: true } to prevent crash
-        console.log('Database synced.');
+        await sequelize.sync({ alter: true }); // Temporarily enabled to add new columns
+        console.log('Database synced with alter: true.');
       } catch (syncError) {
         console.error('Database sync warning (continuing...):', syncError.message);
       }
