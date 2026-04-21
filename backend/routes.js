@@ -22,6 +22,7 @@ routes.post('/register-client', AuthController.registerClient);
 routes.get('/clients', AuthController.listClients);
 routes.put('/clients/:id', AuthController.updateClient);
 routes.delete('/clients/:id', AuthController.deleteClient);
+routes.post('/admin/impersonate/:id', AuthController.impersonate);
 
 // Accounts
 routes.get('/accounts', AccountController.index);

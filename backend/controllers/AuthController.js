@@ -119,6 +119,33 @@ class AuthController {
 
     return res.send();
   }
+
+  async impersonate(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can impersonate users' });
+    }
+
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    if (user.role !== 'client') {
+      return res.status(400).json({ error: 'Only clients can be impersonated' });
+    }
+
+    const { name, email, role } = user;
+
+    return res.json({
+      user: { id: user.id, name, email, role },
+      token: jwt.sign({ id: user.id, role }, process.env.JWT_SECRET, {
+        expiresIn: '7d',
+      }),
+    });
+  }
 }
 
 module.exports = new AuthController();

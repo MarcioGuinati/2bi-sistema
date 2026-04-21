@@ -34,11 +34,57 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('@2BI:token');
     localStorage.removeItem('@2BI:user');
+    sessionStorage.removeItem('@2BI:admin_backup_token');
+    sessionStorage.removeItem('@2BI:admin_backup_user');
     setUser(null);
   };
 
+  const impersonate = async (clientId) => {
+    const response = await api.post(`/admin/impersonate/${clientId}`);
+    const { user: clientData, token: clientToken } = response.data;
+
+    // Save current admin to session storage
+    const currentToken = localStorage.getItem('@2BI:token');
+    const currentUser = localStorage.getItem('@2BI:user');
+    
+    sessionStorage.setItem('@2BI:admin_backup_token', currentToken);
+    sessionStorage.setItem('@2BI:admin_backup_user', currentUser);
+
+    // Swap to client in local storage
+    localStorage.setItem('@2BI:token', clientToken);
+    localStorage.setItem('@2BI:user', JSON.stringify(clientData));
+
+    setUser(clientData);
+  };
+
+  const stopImpersonating = () => {
+    const adminToken = sessionStorage.getItem('@2BI:admin_backup_token');
+    const adminUser = sessionStorage.getItem('@2BI:admin_backup_user');
+
+    if (adminToken && adminUser) {
+      localStorage.setItem('@2BI:token', adminToken);
+      localStorage.setItem('@2BI:user', adminUser);
+
+      sessionStorage.removeItem('@2BI:admin_backup_token');
+      sessionStorage.removeItem('@2BI:admin_backup_user');
+
+      setUser(JSON.parse(adminUser));
+    }
+  };
+
+  const isImpersonating = !!sessionStorage.getItem('@2BI:admin_backup_token');
+
   return (
-    <AuthContext.Provider value={{ signed: !!user, user, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      signed: !!user, 
+      user, 
+      login, 
+      logout, 
+      impersonate, 
+      stopImpersonating,
+      isImpersonating,
+      loading 
+    }}>
       {children}
     </AuthContext.Provider>
   );

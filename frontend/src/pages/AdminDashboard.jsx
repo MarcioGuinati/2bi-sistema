@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
@@ -27,7 +28,8 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 const AdminDashboard = () => {
-  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const { logout, impersonate } = useAuth();
   const { success, error, confirm } = useNotification();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -455,7 +457,17 @@ const AdminDashboard = () => {
                       {new Date(c.created_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="px-8 py-5">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2 text-right">
+                        <button 
+                          onClick={async () => {
+                            await impersonate(c.id);
+                            navigate('/dashboard');
+                          }} 
+                          title="Monitorar Sistema"
+                          className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
+                        >
+                          <Eye size={16} />
+                        </button>
                         <button onClick={() => handleSelectClient(c)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><MessageSquare size={16} /></button>
                         <button onClick={() => handleOpenEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
                         <button onClick={() => handleDeleteClient(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
