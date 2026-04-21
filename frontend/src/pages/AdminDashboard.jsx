@@ -623,7 +623,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-3">
-                      <h3 className="text-xl md:text-3xl font-black font-heading tracking-tight italic leading-none">{selectedClient.name}</h3>
+                      <h3 className="text-xl md:text-3xl font-black font-heading tracking-tight italic leading-none text-white">{selectedClient.name}</h3>
                       <span className="hidden md:inline-block px-3 py-1 bg-gold/20 text-gold text-[8px] font-black uppercase tracking-widest rounded-full border border-gold/30">Sócio Estratégico</span>
                     </div>
                     <p className="text-gold/60 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Gestão Estratégica e CRM 2BI</p>
@@ -704,7 +704,7 @@ const AdminDashboard = () => {
                               placeholder="Descreva o próximo passo ou detalhe do contato..." 
                               value={newNote} 
                               onChange={e => setNewNote(e.target.value)} 
-                              className="w-full p-6 bg-slate-50 border border-slate-100 rounded-3xl outline-none focus:border-gold/50 transition-all text-sm h-32 text-[var(--text-primary)] resize-none" 
+                              className="w-full p-6 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-3xl outline-none focus:border-gold/50 transition-all text-sm h-32 text-[var(--text-primary)] resize-none" 
                             />
                             <div className="flex gap-3">
                                <button type="submit" className="flex-1 btn-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em]">
@@ -714,7 +714,7 @@ const AdminDashboard = () => {
                                  <button 
                                    type="button" 
                                    onClick={() => { setEditingNote(null); setNewNote(''); }}
-                                   className="px-8 bg-slate-100 border border-slate-200 rounded-2xl text-[10px] uppercase font-black tracking-widest hover:bg-slate-200 transition-colors"
+                                   className="px-8 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] uppercase font-black tracking-widest hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]"
                                  >
                                    Cancelar
                                  </button>
@@ -819,14 +819,14 @@ const AdminDashboard = () => {
                                 <div className="flex gap-3 w-full md:w-auto">
                                   <button
                                     onClick={() => handlePreviewContract(c)}
-                                    className="flex-1 md:flex-none p-4 bg-slate-50 text-[var(--text-primary)] rounded-2xl hover:bg-navy-900 hover:text-white transition-all shadow-sm border border-slate-100 flex items-center justify-center gap-2"
+                                    className="flex-1 md:flex-none p-4 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl hover:bg-navy-900 hover:text-white transition-all shadow-sm border border-[var(--border-primary)] flex items-center justify-center gap-2"
                                     title="Visualizar Contrato"
                                   >
                                     <Eye size={18} />
                                   </button>
                                   <button
                                     onClick={() => handleDownloadContract(c)}
-                                    className="flex-1 md:flex-none p-4 bg-slate-50 text-[var(--text-primary)] rounded-2xl hover:bg-gold hover:text-white transition-all shadow-sm border border-slate-100 flex items-center justify-center gap-2"
+                                    className="flex-1 md:flex-none p-4 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl hover:bg-gold hover:text-white transition-all shadow-sm border border-[var(--border-primary)] flex items-center justify-center gap-2"
                                     title="Baixar PDF"
                                   >
                                     <FileText size={18} />
@@ -851,7 +851,7 @@ const AdminDashboard = () => {
                             <div className="table-responsive">
                               <table className="w-full text-left">
                                 <thead>
-                                  <tr className="bg-slate-50/50 text-[10px] font-black uppercase text-slate-400">
+                                  <tr className="bg-[var(--bg-primary)] text-[10px] font-black uppercase text-slate-400">
                                     <th className="px-8 py-6 tracking-[0.2em]">Vencimento</th>
                                     <th className="px-8 py-6 tracking-[0.2em]">Descrição</th>
                                     <th className="px-8 py-6 tracking-[0.2em]">Valor</th>
@@ -859,15 +859,15 @@ const AdminDashboard = () => {
                                     <th className="px-8 py-6 text-right tracking-[0.2em]">Ação</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-[var(--border-primary)]">
                                   {clientPayments.map(p => (
-                                    <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
-                                      <td className="px-8 py-6 text-xs font-black text-navy-900">{new Date(p.dueDate).toLocaleDateString('pt-BR')}</td>
+                                    <tr key={p.id} className="hover:bg-[var(--bg-primary)]/50 transition-colors group">
+                                      <td className="px-8 py-6 text-xs font-black text-[var(--text-primary)]">{new Date(p.dueDate).toLocaleDateString('pt-BR')}</td>
                                       <td className="px-8 py-6">
                                         <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-tight">{p.description}</div>
                                         <div className="text-[8px] text-slate-400 font-medium">REF: {p.id.toString().slice(-6)}</div>
                                       </td>
-                                      <td className="px-8 py-6 text-sm font-black text-navy-900">R$ {Number(p.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                      <td className="px-8 py-6 text-sm font-black text-[var(--text-primary)]">R$ {Number(p.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                       <td className="px-8 py-6">
                                         <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-full border shadow-sm ${p.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20 animate-pulse'}`}>
                                           {p.status === 'paid' ? 'Liquidado' : 'Aguardando'}
@@ -877,7 +877,7 @@ const AdminDashboard = () => {
                                         {p.status === 'pending' && (
                                           <button 
                                             onClick={() => handlePayDebt(p.id)} 
-                                            className="px-6 py-3 bg-navy-900 text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold transition-all shadow-lg shadow-navy-900/10"
+                                            className="px-6 py-3 bg-gold text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold-500 transition-all shadow-lg shadow-gold/20"
                                           >
                                             Dar Baixa
                                           </button>

@@ -330,7 +330,7 @@ const FinanceManagement = () => {
               >
                 <ChevronLeft size={20} />
               </button>
-              <span className="text-sm font-bold text-navy-900">Página {page} de {totalPages}</span>
+              <span className="text-sm font-bold text-[var(--text-primary)]">Página {page} de {totalPages}</span>
               <button
                 disabled={page === totalPages}
                 onClick={() => setPage(p => p + 1)}
@@ -371,7 +371,7 @@ const FinanceManagement = () => {
                       />
                     </td>
                     <td className="px-8 py-5">
-                      <div className="text-sm font-bold text-navy-900">{new Date(t.date).toLocaleDateString('pt-BR')}</div>
+                      <div className="text-sm font-bold text-[var(--text-primary)]">{new Date(t.date).toLocaleDateString('pt-BR')}</div>
                     </td>
                     <td className="px-8 py-5">
                       <div className="text-sm font-bold tracking-tight">{t.description}</div>
