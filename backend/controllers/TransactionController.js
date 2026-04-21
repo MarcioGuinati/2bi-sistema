@@ -295,6 +295,28 @@ class TransactionController {
       return res.status(500).json({ error: 'Internal server error' });
     }
   }
+
+  async bulkDelete(req, res) {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'IDs must be a non-empty array' });
+    }
+
+    try {
+      await Transaction.destroy({
+        where: {
+          id: ids,
+          user_id: req.userId
+        }
+      });
+
+      return res.status(204).send();
+    } catch (error) {
+      console.error('Error in bulk delete:', error);
+      return res.status(500).json({ error: 'Erro ao excluir transações em lote' });
+    }
+  }
 }
 
 module.exports = new TransactionController();

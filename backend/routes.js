@@ -41,6 +41,7 @@ routes.get('/transactions', TransactionController.index);
 routes.post('/transactions', TransactionController.store);
 routes.put('/transactions/:id', TransactionController.update);
 routes.delete('/transactions/:id', TransactionController.delete);
+routes.post('/transactions/bulk-delete', TransactionController.bulkDelete);
 routes.get('/transactions/stats', TransactionController.stats);
 routes.get('/transactions/dashboard-stats', TransactionController.dashboardStats);
 

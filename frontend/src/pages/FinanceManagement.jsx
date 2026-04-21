@@ -53,6 +53,7 @@ const FinanceManagement = () => {
 
   const [showTransModal, setShowTransModal] = useState(false);
   const [editingTrans, setEditingTrans] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const [form, setForm] = useState({
     amount: '',
@@ -133,6 +134,36 @@ const FinanceManagement = () => {
     });
   };
 
+  const handleBulkDelete = () => {
+    confirm({
+      title: 'Excluir em Lote',
+      message: `Tem certeza que deseja excluir as ${selectedIds.length} transações selecionadas? Esta ação não pode ser desfeita.`,
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.post('/transactions/bulk-delete', { ids: selectedIds });
+          success(`${selectedIds.length} transações excluídas com sucesso`);
+          setSelectedIds([]);
+          fetchData();
+        } catch (err) { error('Erro ao excluir transações em lote'); }
+      }
+    });
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === transactions.length && transactions.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(transactions.map(t => t.id));
+    }
+  };
+
   const handleOpenEdit = (t) => {
     setEditingTrans(t);
     setForm({
@@ -190,6 +221,14 @@ const FinanceManagement = () => {
             >
               <Plus size={20} /> Novo Lançamento
             </button>
+            {selectedIds.length > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                className="bg-red-50 text-red-600 border border-red-100 flex items-center gap-2 px-6 py-3 rounded-2xl font-bold hover:bg-red-100 transition-all shadow-sm"
+              >
+                <Trash2 size={18} /> Excluir ({selectedIds.length})
+              </button>
+            )}
           </div>
         </div>
 
@@ -305,6 +344,14 @@ const FinanceManagement = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-[var(--bg-primary)] text-slate-400 text-[10px] uppercase tracking-widest font-bold">
+                  <th className="px-8 py-5 w-4">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-[var(--border-primary)] text-gold focus:ring-gold"
+                      checked={selectedIds.length === transactions.length && transactions.length > 0}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
                   <th className="px-8 py-5">Data</th>
                   <th className="px-8 py-5">Descrição / Origem</th>
                   <th className="px-8 py-5">Categoria</th>
@@ -314,7 +361,15 @@ const FinanceManagement = () => {
               </thead>
               <tbody className="divide-y divide-[var(--border-primary)]">
                 {transactions.map((t) => (
-                  <tr key={t.id} className={`hover:bg-slate-50/20 group transition-all duration-300 ${!t.is_paid ? 'opacity-60 grayscale-[0.4]' : ''}`}>
+                  <tr key={t.id} className={`hover:bg-slate-50/20 group transition-all duration-300 ${!t.is_paid ? 'opacity-60 grayscale-[0.4]' : ''} ${selectedIds.includes(t.id) ? 'bg-gold/5' : ''}`}>
+                    <td className="px-8 py-5">
+                      <input 
+                        type="checkbox" 
+                        className="w-4 h-4 rounded border-[var(--border-primary)] text-gold focus:ring-gold"
+                        checked={selectedIds.includes(t.id)}
+                        onChange={() => toggleSelect(t.id)}
+                      />
+                    </td>
                     <td className="px-8 py-5">
                       <div className="text-sm font-bold text-navy-900">{new Date(t.date).toLocaleDateString('pt-BR')}</div>
                     </td>
@@ -355,7 +410,7 @@ const FinanceManagement = () => {
                 ))}
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="px-8 py-20 text-center text-slate-400 italic">Nenhuma transação encontrada no período.</td>
+                    <td colSpan="6" className="px-8 py-20 text-center text-slate-400 italic">Nenhuma transação encontrada no período.</td>
                   </tr>
                 )}
               </tbody>
