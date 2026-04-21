@@ -14,8 +14,10 @@ app.use(helmet());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Muitas requisições deste IP, por favor tente novamente após 15 minutos'
+  max: process.env.NODE_ENV === 'production' ? 500 : 10000, // Limit each IP to 10000 requests in dev, 500 in prod
+  message: 'Muitas requisições deste IP, por favor tente novamente após 15 minutos',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 // App Settings
