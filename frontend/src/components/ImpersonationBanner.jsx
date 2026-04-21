@@ -19,7 +19,7 @@ const ImpersonationBanner = () => {
         <motion.div 
             initial={{ y: 100 }}
             animate={{ y: 0 }}
-            className="fixed bottom-0 sm:bottom-auto sm:top-0 left-0 lg:left-72 right-0 z-[100] px-4 py-3 sm:py-2 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center lg:text-left shadow-2xl"
+            className="fixed bottom-0 sm:bottom-auto sm:top-0 left-0 lg:left-72 right-0 z-[80] px-4 py-3 sm:py-2 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center lg:text-left shadow-2xl"
         >
             {/* Glassmorphism Background layer */}
             <div className="absolute inset-0 bg-gold/95 backdrop-blur-md shadow-[0_-4px_30px_rgba(0,0,0,0.1)] sm:shadow-[0_4px_30px_rgba(0,0,0,0.1)] border-t sm:border-t-0 sm:border-b border-navy-900/10" />

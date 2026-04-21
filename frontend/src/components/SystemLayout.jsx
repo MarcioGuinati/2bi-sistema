@@ -29,7 +29,7 @@ const SystemLayout = ({ children }) => {
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[45]"
+          className="lg:hidden fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[90]"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
