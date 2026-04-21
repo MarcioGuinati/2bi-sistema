@@ -50,6 +50,24 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'dashboard' ? 'dashboard' : 'overview');
+  
+  // Date Filtering State
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const months = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
+
+  const getDateRange = (month, year) => {
+    const start = new Date(year, month, 1).toISOString().split('T')[0];
+    const end = new Date(year, month + 1, 0).toISOString().split('T')[0];
+    return { start, end };
+  };
 
   // Modals
   const [showGoalModal, setShowGoalModal] = useState(false);
@@ -58,12 +76,13 @@ const ClientDashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      const { start, end } = getDateRange(selectedMonth, selectedYear);
       const [statsRes, transRes, catsRes, goalsRes, dashRes] = await Promise.all([
-        api.get('/transactions/stats'),
+        api.get(`/transactions/stats?startDate=${start}&endDate=${end}`),
         api.get('/transactions?limit=5'),
         api.get('/categories'),
         api.get('/goals'),
-        api.get('/transactions/dashboard-stats')
+        api.get(`/transactions/dashboard-stats?startDate=${start}&endDate=${end}`)
       ]);
       setStats(statsRes.data);
       setTransactions(transRes.data.rows);
@@ -79,7 +98,7 @@ const ClientDashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -128,7 +147,29 @@ const ClientDashboard = () => {
             <h1 className="text-3xl font-bold font-heading tracking-tight">Bem-vindo, {user?.name.split(' ')[0]}!</h1>
             <p className="text-[var(--text-secondary)] font-medium tracking-tight">Visão estratégica e orçamentária do seu patrimônio.</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col md:flex-row gap-3 items-center">
+            {/* Period Selector */}
+            <div className="flex items-center gap-2 bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-1.5 rounded-2xl shadow-sm mr-2">
+              <div className="flex items-center gap-2 pl-3 text-gold">
+                <Calendar size={16} />
+              </div>
+              <select 
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                className="bg-transparent border-none outline-none text-xs font-bold text-[var(--text-primary)] cursor-pointer pr-4"
+              >
+                {months.map((m, i) => <option key={m} value={i} className="bg-[var(--bg-secondary)]">{m}</option>)}
+              </select>
+              <div className="w-px h-4 bg-[var(--border-primary)]" />
+              <select 
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="bg-transparent border-none outline-none text-xs font-bold text-[var(--text-primary)] cursor-pointer"
+              >
+                {years.map(y => <option key={y} value={y} className="bg-[var(--bg-secondary)]">{y}</option>)}
+              </select>
+            </div>
+
             <button
               onClick={() => setShowGoalModal(true)}
               className="btn-primary flex items-center gap-2"

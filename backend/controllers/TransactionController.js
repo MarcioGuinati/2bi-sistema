@@ -178,9 +178,23 @@ class TransactionController {
   }
 
   async stats(req, res) {
-    const transactions = await Transaction.findAll({
-      where: { user_id: req.userId }
-    });
+    const { startDate, endDate } = req.query;
+    const where = { user_id: req.userId };
+
+    if (startDate && endDate) {
+      where.date = { [Op.between]: [startDate, endDate] };
+    } else if (!startDate && !endDate) {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      where.date = { [Op.between]: [firstDay, lastDay] };
+    } else if (startDate) {
+      where.date = { [Op.gte]: startDate };
+    } else if (endDate) {
+      where.date = { [Op.lte]: endDate };
+    }
+
+    const transactions = await Transaction.findAll({ where });
 
     const income = transactions
       .filter(t => t.type === 'income')
@@ -239,11 +253,18 @@ class TransactionController {
       }
 
       // 2. Category Breakdown (Expenses only)
+      const { startDate, endDate } = req.query;
+      const categoryWhere = {
+        user_id: userId,
+        type: 'expense'
+      };
+
+      if (startDate && endDate) {
+        categoryWhere.date = { [Op.between]: [startDate, endDate] };
+      }
+
       const categoryData = await Transaction.findAll({
-        where: {
-          user_id: userId,
-          type: 'expense'
-        },
+        where: categoryWhere,
         include: [{
           model: Category,
           attributes: ['name']

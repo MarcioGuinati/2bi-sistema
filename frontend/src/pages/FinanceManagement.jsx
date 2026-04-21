@@ -75,11 +75,16 @@ const FinanceManagement = () => {
         ...filters
       }).toString();
 
+      const statsParams = new URLSearchParams({
+        startDate: filters.startDate,
+        endDate: filters.endDate
+      }).toString();
+
       const [transRes, catsRes, accsRes, statsRes] = await Promise.all([
         api.get(`/transactions?${queryParams}`),
         api.get('/categories'),
         api.get('/accounts'),
-        api.get('/transactions/stats')
+        api.get(`/transactions/stats?${statsParams}`)
       ]);
 
       setTransactions(transRes.data.rows);
