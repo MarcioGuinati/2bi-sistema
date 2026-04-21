@@ -483,7 +483,7 @@ const AdminDashboard = () => {
 
       <AnimatePresence>
         {showRegModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[150] flex items-center justify-center p-4 pt-20 md:p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)]/90 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] w-full max-w-2xl overflow-hidden shadow-2xl border border-white/40">
               <div className="bg-gradient-to-r from-navy-900 to-navy-800 p-10 text-white flex justify-between items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
@@ -600,7 +600,7 @@ const AdminDashboard = () => {
         )}
 
         {selectedClient && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-50 flex items-center justify-center p-0 md:p-4 lg:p-10">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[150] flex items-center justify-center p-0 md:p-4 lg:p-10 pt-16 md:pt-4">
             <motion.div 
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
@@ -896,7 +896,7 @@ const AdminDashboard = () => {
       {/* NEW CONTRACT MODAL */}
       <AnimatePresence>
         {showContractModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)]/90 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] w-full max-w-lg overflow-hidden shadow-2xl border border-white/40">
               <div className="bg-gradient-to-r from-gold to-yellow-500 p-8 text-navy-900 flex justify-between items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
@@ -956,7 +956,7 @@ const AdminDashboard = () => {
       {/* CONTRACT PREVIEW MODAL */}
       <AnimatePresence>
         {previewUrl && (
-          <div className="fixed inset-0 bg-navy-900/80 backdrop-blur-md z-[70] flex items-center justify-center p-6">
+          <div className="fixed inset-0 bg-navy-900/80 backdrop-blur-md z-[210] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="bg-[var(--bg-secondary)] rounded-[3rem] w-full max-w-5xl h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-white/20">
               <div className="bg-navy-900 p-8 text-white flex justify-between items-center shadow-lg">
                 <div>
