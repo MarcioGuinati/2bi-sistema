@@ -224,7 +224,7 @@ const AdminFinances = () => {
                                     type="date"
                                     value={dates.start}
                                     onChange={e => setDates({ ...dates, start: e.target.value })}
-                                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold shadow-sm"
+                                    className="input-premium font-bold shadow-sm"
                                 />
                             </div>
                             <div className="space-y-1">
@@ -233,7 +233,7 @@ const AdminFinances = () => {
                                     type="date"
                                     value={dates.end}
                                     onChange={e => setDates({ ...dates, end: e.target.value })}
-                                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold shadow-sm"
+                                    className="input-premium font-bold shadow-sm"
                                 />
                             </div>
                         </div>
@@ -374,7 +374,7 @@ const AdminFinances = () => {
                                         <label className="text-[10px] uppercase font-bold text-slate-400 ml-1">Status</label>
                                         <select
                                             value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}
-                                            className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold"
+                                            className="select-premium font-bold"
                                         >
                                             <option value="pending">Aguardando</option>
                                             <option value="paid">Liquidado</option>
@@ -386,7 +386,7 @@ const AdminFinances = () => {
                                     <input
                                         type="date" required
                                         value={editForm.dueDate} onChange={e => setEditForm({ ...editForm, dueDate: e.target.value })}
-                                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold transition-all"
+                                        className="input-premium font-bold transition-all"
                                     />
                                 </div>
                                 <button type="submit" className="w-full btn-primary py-5 font-bold text-lg mt-4 shadow-xl shadow-gold/20">Salvar Alterações</button>

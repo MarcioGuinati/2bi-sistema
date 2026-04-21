@@ -135,7 +135,7 @@ const AccountManagement = () => {
                       R$ {Number(acc.initial_balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-5">
-                      <div className="flex flex-col md:flex-row justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex flex-col md:flex-row justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(acc)}
                           className="p-2 text-slate-400 hover:text-navy-900 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)]"
@@ -185,7 +185,7 @@ const AccountManagement = () => {
                     <select
                       value={form.type}
                       onChange={e => setForm({ ...form, type: e.target.value })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                      className="select-premium font-bold"
                     >
                       <option value="Corrente">Corrente</option>
                       <option value="Poupança">Poupança</option>

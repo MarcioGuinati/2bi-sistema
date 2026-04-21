@@ -455,7 +455,7 @@ const AdminDashboard = () => {
                       {new Date(c.created_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="px-8 py-5">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <button onClick={() => handleSelectClient(c)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><MessageSquare size={16} /></button>
                         <button onClick={() => handleOpenEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
                         <button onClick={() => handleDeleteClient(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
@@ -916,7 +916,7 @@ const AdminDashboard = () => {
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Recorrência</label>
                     <select
                       value={contractForm.billingCycle} onChange={e => setContractForm({ ...contractForm, billingCycle: e.target.value })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold transition-all"
+                      className="select-premium font-bold transition-all"
                     >
                       <option value="monthly">Mensal</option>
                       <option value="annual">Anual</option>
@@ -929,7 +929,7 @@ const AdminDashboard = () => {
                   <input
                     type="date" required
                     value={contractForm.startDate} onChange={e => setContractForm({ ...contractForm, startDate: e.target.value })}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold transition-all"
+                    className="input-premium w-full font-bold transition-all"
                   />
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg mt-4 shadow-xl shadow-gold/20">

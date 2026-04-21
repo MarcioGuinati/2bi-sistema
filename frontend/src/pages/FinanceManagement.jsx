@@ -211,7 +211,7 @@ const FinanceManagement = () => {
                 <select
                   value={filters.type}
                   onChange={e => setFilters({ ...filters, type: e.target.value })}
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+                  className="select-premium font-bold"
                 >
                   <option value="">Todos</option>
                   <option value="income">Receitas</option>
@@ -234,7 +234,7 @@ const FinanceManagement = () => {
               <select
                 value={filters.account_id}
                 onChange={e => setFilters({ ...filters, account_id: e.target.value })}
-                className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+                className="select-premium font-bold"
               >
                 <option value="">Todas as Contas</option>
                 {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
@@ -245,7 +245,7 @@ const FinanceManagement = () => {
               <select
                 value={filters.category_id}
                 onChange={e => setFilters({ ...filters, category_id: e.target.value })}
-                className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-sm outline-none focus:border-gold font-bold"
+                className="select-premium font-bold"
               >
                 <option value="">Todas as Categorias</option>
                 {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name} ({cat.type})</option>)}
@@ -305,7 +305,7 @@ const FinanceManagement = () => {
                     <td className={`px-8 py-5 font-black text-sm ${t.type === 'income' ? 'text-green-600' : 'text-[var(--text-primary)]'}`}>
                       {t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
-                    <td className="px-8 py-5 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-8 py-5 flex justify-end gap-2">
                       <button onClick={() => handleOpenEdit(t)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
                       <button onClick={() => handleDeleteTrans(t.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
                     </td>
@@ -363,14 +363,14 @@ const FinanceManagement = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400">Categoria</label>
-                      <select required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold">
+                      <select required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} className="select-premium font-bold">
                         <option value="">Selecionar</option>
                         {categories.filter(c => c.type === form.type).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400">Conta Destino</label>
-                      <select required value={form.account_id} onChange={e => setForm({ ...form, account_id: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold">
+                      <select required value={form.account_id} onChange={e => setForm({ ...form, account_id: e.target.value })} className="select-premium font-bold">
                         <option value="">Selecionar</option>
                         {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
                       </select>
@@ -378,7 +378,7 @@ const FinanceManagement = () => {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400">Data da Operação</label>
-                    <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold" />
+                    <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="input-premium font-bold" />
                   </div>
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30 mt-4">Confirmar Lançamento</button>

@@ -24,7 +24,7 @@ const Footer = () => {
               <li><a href="#about" className="hover:text-gold transition-colors">Sobre Nós</a></li>
               <li><a href="#services" className="hover:text-gold transition-colors">Serviços</a></li>
               <li><a href="#how-it-works" className="hover:text-gold transition-colors">Como Funciona</a></li>
-              <li><a href="#contact" className="hover:text-gold transition-colors">Agendamento</a></li>
+              <li><a href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Af9SGv5_3pZ4ZNYkwur4mbWBNFHIenWpyA3ntS0VuB8F-UzzKj2Wt3X0tk4NrJtHfwrQv7W2y?gv=true" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors">Agendamento</a></li>
             </ul>
           </div>
 
@@ -47,7 +47,7 @@ const Footer = () => {
               <a href="#" className="flex items-center gap-3 hover:text-gold transition-colors">
                 <span>LinkedIn</span>
               </a>
-              <a href="#" className="flex items-center gap-3 hover:text-gold transition-colors">
+              <a href="https://wa.me/5516992415924" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-gold transition-colors">
                 <span>WhatsApp</span>
               </a>
             </div>

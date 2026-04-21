@@ -537,7 +537,7 @@ const ClientDashboard = () => {
                        required
                        value={goalForm.category_id}
                        onChange={e => setGoalForm({ ...goalForm, category_id: e.target.value })}
-                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none"
+                       className="select-premium"
                      >
                        <option value="">Selecione...</option>
                        {categories.map(c => <option key={c.id} value={c.id}>{c.name} ({c.type})</option>)}

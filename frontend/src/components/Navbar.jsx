@@ -26,46 +26,49 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'glass py-3' : 'bg-transparent py-5 text-navy-900'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[var(--bg-secondary)]/80 backdrop-blur-xl border-b border-[var(--border-primary)] py-3 shadow-lg' : 'bg-transparent py-6'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center transition-all duration-300">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 group">
           <motion.div 
-            initial={{ rotate: -10, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            className="text-gold font-bold text-3xl"
+            animate={{ 
+              rotate: scrolled ? 360 : 0,
+              scale: scrolled ? 0.9 : 1
+            }}
+            className="text-gold font-bold text-3xl transition-transform group-hover:scale-110"
           >
             2BI
           </motion.div>
           <div className="flex flex-col leading-none">
-            <span className="text-navy-900 font-heading font-bold text-xl tracking-tight">Planejamento</span>
-            <span className="text-gold text-[10px] uppercase tracking-[0.2em] font-medium">Estratégia Financeira</span>
+            <span className={`font-heading font-bold text-xl tracking-tight transition-colors duration-300 ${scrolled ? 'text-[var(--text-primary)]' : 'text-white'}`}>Planejamento</span>
+            <span className="text-gold text-[10px] uppercase tracking-[0.2em] font-black italic">Estratégia Financeira</span>
           </div>
-        </div>
+        </Link>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a 
               key={link.name} 
               href={link.href} 
-              className="text-navy-800 font-medium text-sm hover:text-gold transition-colors"
+              className={`font-bold text-xs uppercase tracking-widest transition-all relative group py-2 ${scrolled ? 'text-slate-600 hover:text-navy-900' : 'text-white/80 hover:text-white'}`}
             >
               {link.name}
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gold transition-all duration-300 group-hover:w-full" />
             </a>
           ))}
           {signed ? (
-            <Link to="/panel" className="btn-primary py-2 px-5 text-sm">
+            <Link to="/panel" className="bg-navy-900 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold transition-all shadow-lg shadow-navy-900/10">
               Meu Painel
             </Link>
           ) : (
-            <Link to="/login" className="btn-primary py-2 px-5 text-sm">
+            <Link to="/login" className="bg-gold text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-navy-900 transition-all shadow-lg shadow-gold/20">
               Acesso Cliente
             </Link>
           )}
         </div>
 
         {/* Mobile Toggle */}
-        <button className="md:hidden text-navy-900" onClick={() => setIsOpen(!isOpen)}>
+        <button className={`md:hidden p-2 rounded-lg transition-colors ${scrolled ? 'text-navy-900' : 'text-white'}`} onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
@@ -74,31 +77,37 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 w-full glass md:hidden border-t border-navy-800/10"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="absolute top-full left-0 w-full bg-[var(--bg-secondary)] backdrop-blur-xl border-b border-[var(--border-primary)] overflow-hidden md:hidden"
           >
-            <div className="flex flex-col p-6 gap-4">
-              {navLinks.map((link) => (
-                <a 
+            <div className="flex flex-col p-8 gap-6">
+              {navLinks.map((link, idx) => (
+                <motion.a 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
                   key={link.name} 
                   href={link.href} 
-                  className="text-navy-900 font-medium text-lg border-b border-navy-800/5 pb-2"
+                  className="text-navy-900 font-black text-xs uppercase tracking-[0.2em] flex items-center justify-between group"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
-                </a>
+                  <Rocket size={14} className="text-gold opacity-0 group-hover:opacity-100 transition-all" />
+                </motion.a>
               ))}
-              {signed ? (
-                <Link to="/panel" className="btn-primary text-center mt-2" onClick={() => setIsOpen(false)}>
-                  Meu Painel
-                </Link>
-              ) : (
-                <Link to="/login" className="btn-primary text-center mt-2" onClick={() => setIsOpen(false)}>
-                  Acesso Cliente
-                </Link>
-              )}
+              <div className="pt-4 border-t border-[var(--border-primary)]">
+                {signed ? (
+                  <Link to="/panel" className="w-full btn-primary block text-center py-4 text-[10px] font-black uppercase tracking-widest" onClick={() => setIsOpen(false)}>
+                    Acessar Painel Estratégico
+                  </Link>
+                ) : (
+                  <Link to="/login" className="w-full btn-primary block text-center py-4 text-[10px] font-black uppercase tracking-widest" onClick={() => setIsOpen(false)}>
+                    Área Restrita (Cliente)
+                  </Link>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

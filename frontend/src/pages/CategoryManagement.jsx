@@ -150,7 +150,7 @@ const CategoryManagement = () => {
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(c)}
                           className="p-2 text-slate-400 hover:text-navy-900 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)]"

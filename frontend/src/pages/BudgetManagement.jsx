@@ -183,7 +183,7 @@ const BudgetManagement = () => {
                         R$ {Number(g.targetAmount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-8 py-5">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleOpenEdit(g)}
                             className="p-2 text-slate-400 hover:text-navy-900 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)]"
@@ -248,7 +248,7 @@ const BudgetManagement = () => {
                     <select
                       value={form.category_id}
                       onChange={e => setForm({ ...form, category_id: e.target.value })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold"
+                      className="select-premium font-bold"
                     >
                       <option value="">Nenhuma (Meta Geral)</option>
                       {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name} ({cat.type})</option>)}
@@ -273,7 +273,7 @@ const BudgetManagement = () => {
                     type="date"
                     value={form.deadline}
                     onChange={e => setForm({ ...form, deadline: e.target.value })}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none font-bold"
+                    className="input-premium font-bold"
                   />
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black mt-4 text-lg">Confirmar Estratégia</button>

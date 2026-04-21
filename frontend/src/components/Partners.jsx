@@ -47,7 +47,7 @@ const Partners = () => {
             <div className="w-20 h-20 bg-gold rounded-full mb-8 flex items-center justify-center text-navy-900">
               <User size={40} />
             </div>
-            <h4 className="text-3xl font-bold mb-2">Especialista em Pessoas</h4>
+            <h4 className="text-3xl font-bold mb-2 text-white">Especialista em Pessoas</h4>
             <p className="text-gold font-medium mb-6">Consultoria, Relacionamento e Estratégia</p>
             <p className="text-slate-400 leading-relaxed mb-6">
               Responsável por traduzir o caos financeiro em metas claras. Com foco no atendimento humano e na orientação personalizada, garante que cada cliente sinta segurança em cada decisão.
@@ -76,7 +76,7 @@ const Partners = () => {
             <div className="w-20 h-20 bg-gold rounded-full mb-8 flex items-center justify-center text-navy-900">
               <User size={40} />
             </div>
-            <h4 className="text-3xl font-bold mb-2">Arquiteto de Processos</h4>
+            <h4 className="text-3xl font-bold mb-2 text-white">Arquiteto de Processos</h4>
             <p className="text-gold font-medium mb-6">Sistemas, Estrutura Digital e Processos</p>
             <p className="text-slate-400 leading-relaxed mb-6">
               O cérebro por trás da eficiência. Responsável por garantir que a tecnologia trabalhe a favor do cliente, automatizando controles e criando uma estrutura digital robusta para o crescimento.

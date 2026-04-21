@@ -37,23 +37,26 @@ const Hero = () => {
               Planejamento financeiro com <span className="text-white font-medium">visão, estratégia e parceria</span> para transformar sua vida financeira e proteger seu legado.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
               <motion.a 
-                href="#contact"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn-primary flex items-center justify-center gap-2"
-              >
-                <Calendar size={20} />
-                Agendar Reunião
-              </motion.a>
-              <motion.a 
-                href="https://wa.me/seunumeroaqui"
+                href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Af9SGv5_3pZ4ZNYkwur4mbWBNFHIenWpyA3ntS0VuB8F-UzzKj2Wt3X0tk4NrJtHfwrQv7W2y?gv=true"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn-secondary flex items-center justify-center gap-2 bg-white/5 border-white/20 text-white"
+                className="btn-primary flex items-center justify-center gap-2 min-h-[56px] px-8"
+              >
+                <Calendar size={20} />
+                Agendar Reunião
+              </motion.a>
+
+              <motion.a 
+                href="https://wa.me/5516992415924"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="btn-secondary flex items-center justify-center gap-2 bg-white/5 border-white/20 text-white min-h-[56px] px-8"
               >
                 <MessageCircle size={20} className="text-gold" />
                 Falar no WhatsApp
