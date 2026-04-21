@@ -522,6 +522,39 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* Comparativo de Fluxo Anual */}
+            <div className="card-premium p-8">
+              <div className="flex justify-between items-center mb-10">
+                <div>
+                  <h3 className="text-xl font-bold font-heading">Comparativo de Fluxo Anual</h3>
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Receitas vs Despesas (Mensal)</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500" /> Receitas
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" /> Despesas
+                  </div>
+                </div>
+              </div>
+              <div className="h-96 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dashboardData.monthlyData} barGap={10}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} tickFormatter={(val) => `R$ ${val}`} />
+                    <Tooltip 
+                      cursor={{ fill: '#F1F5F9' }}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
+                    />
+                    <Bar dataKey="receita" name="Receita" fill="#4ADE80" radius={[6, 6, 0, 0]} barSize={25} />
+                    <Bar dataKey="despesa" name="Despesa" fill="#F87171" radius={[6, 6, 0, 0]} barSize={25} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
             
             {/* Visual Quote / Placeholder for better design */}
             <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-12 rounded-[3rem] text-center relative overflow-hidden shadow-sm">
