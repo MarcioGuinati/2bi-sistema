@@ -188,6 +188,7 @@ const AccountManagement = () => {
                       className="select-premium font-bold"
                     >
                       <option value="Corrente">Corrente</option>
+                      <option value="Cartão de Crédito">Cartão de Crédito</option>
                       <option value="Poupança">Poupança</option>
                       <option value="Carteira">Carteira</option>
                       <option value="Investimento">Investimento</option>
