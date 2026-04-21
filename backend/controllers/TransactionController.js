@@ -182,7 +182,15 @@ class TransactionController {
   }
 
   async stats(req, res) {
-    const { startDate, endDate } = req.query;
+    const { 
+      startDate, 
+      endDate, 
+      category_id, 
+      account_id, 
+      description,
+      type
+    } = req.query;
+
     const where = { user_id: req.userId };
 
     if (startDate && endDate) {
@@ -196,6 +204,14 @@ class TransactionController {
       where.date = { [Op.gte]: startDate };
     } else if (endDate) {
       where.date = { [Op.lte]: endDate };
+    }
+
+    // Apply additional filters
+    if (category_id) where.category_id = category_id;
+    if (account_id) where.account_id = account_id;
+    if (type) where.type = type;
+    if (description) {
+      where.description = { [Op.iLike]: `%${description}%` };
     }
 
     const transactions = await Transaction.findAll({ where });

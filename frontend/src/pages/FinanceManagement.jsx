@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -68,6 +68,13 @@ const FinanceManagement = () => {
     is_paid: false
   });
 
+  const selectionStats = useMemo(() => {
+    const selected = transactions.filter(t => selectedIds.includes(t.id));
+    const income = selected.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0);
+    const expense = selected.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0);
+    return { income, expense, balance: income - expense };
+  }, [selectedIds, transactions]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -78,8 +85,7 @@ const FinanceManagement = () => {
       }).toString();
 
       const statsParams = new URLSearchParams({
-        startDate: filters.startDate,
-        endDate: filters.endDate
+        ...filters
       }).toString();
 
       const [transRes, catsRes, accsRes, statsRes] = await Promise.all([
@@ -317,6 +323,80 @@ const FinanceManagement = () => {
             </div>
           </div>
         </div>
+
+        {/* Statistics Bar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="card-premium p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/5 border-green-100 flex items-center justify-between relative overflow-hidden group">
+            <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform duration-500">
+              <ArrowUpRight size={80} className="text-green-600" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase font-black text-green-600 tracking-widest mb-1">Total Receitas (Filtrado)</p>
+              <h3 className="text-2xl font-black text-green-600">R$ {stats.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            </div>
+            <div className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-green-200 relative z-10">
+              <ArrowUpRight size={24} />
+            </div>
+          </div>
+
+          <div className="card-premium p-6 bg-gradient-to-br from-red-500/10 to-rose-500/5 border-red-100 flex items-center justify-between relative overflow-hidden group">
+            <div className="absolute -right-2 -bottom-2 opacity-5 group-hover:scale-110 transition-transform duration-500">
+              <ArrowDownLeft size={80} className="text-red-600" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase font-black text-red-600 tracking-widest mb-1">Total Despesas (Filtrado)</p>
+              <h3 className="text-2xl font-black text-red-600">R$ {stats.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            </div>
+            <div className="w-12 h-12 bg-red-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-200 relative z-10">
+              <ArrowDownLeft size={24} />
+            </div>
+          </div>
+
+          <div className="card-premium p-6 bg-navy-900 border-navy-800 flex items-center justify-between relative overflow-hidden group">
+            <div className="absolute -right-2 -bottom-2 opacity-10 group-hover:scale-110 transition-transform duration-500">
+              <TrendingUp size={80} className="text-gold" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-[10px] uppercase font-black text-gold tracking-widest mb-1">Saldo do Período</p>
+              <h3 className="text-2xl font-black text-white">R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            </div>
+            <div className="w-12 h-12 bg-gold text-white rounded-2xl flex items-center justify-center shadow-lg shadow-gold/20 relative z-10">
+              <TrendingUp size={24} />
+            </div>
+          </div>
+        </div>
+
+        {/* Selection Summary */}
+        <AnimatePresence>
+          {selectedIds.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-gold/10 border border-gold/20 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="flex items-center gap-6">
+                  <div className="w-14 h-14 bg-gold text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-gold/20">
+                    {selectedIds.length}
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-black text-gold tracking-widest">Transações Selecionadas</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">Resumo financeiro dos itens marcados.</p>
+                  </div>
+                </div>
+                <div className="flex gap-10">
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Líquido Selecionado</p>
+                    <p className={`text-2xl font-black transition-colors ${selectionStats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      R$ {selectionStats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Transactions list */}
         <div className="card-premium overflow-hidden">
