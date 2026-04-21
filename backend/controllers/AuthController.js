@@ -5,26 +5,34 @@ require('dotenv').config();
 
 class AuthController {
   async login(req, res) {
-    const { email, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email } });
 
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
+      if (!user) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+
+      if (!(await bcrypt.compare(password, user.password))) {
+        return res.status(401).json({ error: 'Password does not match' });
+      }
+
+      const { id, name, role } = user;
+
+      return res.json({
+        user: { id, name, email, role },
+        token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
+          expiresIn: '7d',
+        }),
+      });
+    } catch (err) {
+      console.error('Error in login:', err);
+      return res.status(500).json({ 
+        error: 'Error in login', 
+        details: err.message 
+      });
     }
-
-    if (!(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Password does not match' });
-    }
-
-    const { id, name, role } = user;
-
-    return res.json({
-      user: { id, name, email, role },
-      token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
-        expiresIn: '7d',
-      }),
-    });
   }
 
   async registerClient(req, res) {

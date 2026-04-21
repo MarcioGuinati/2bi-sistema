@@ -3,35 +3,29 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
-  Target, 
   Shield, 
   Briefcase, 
   CreditCard, 
-  TrendingUp, 
   ChevronRight, 
   ChevronLeft, 
   Save, 
   CheckCircle2,
-  Calendar,
   DollarSign,
   PieChart,
   Plus,
-  Trash2,
-  Menu,
-  X,
-  FileText
+  Trash2
 } from 'lucide-react';
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 
 const steps = [
-  { id: 1, title: 'Identificação & Objetivos', icon: User },
-  { id: 2, title: 'Planejamento & Proteções', icon: Shield },
-  { id: 3, title: 'Aposentadoria & Investimentos', icon: Briefcase },
-  { id: 4, title: 'Cartões & Canais de Renda', icon: CreditCard },
-  { id: 5, title: 'Fluxo de Caixa (Gastos)', icon: DollarSign },
-  { id: 6, title: 'Review & Realidade', icon: PieChart },
+  { id: 1, title: 'Identificação', icon: User },
+  { id: 2, title: 'Proteções', icon: Shield },
+  { id: 3, title: 'Investimentos', icon: Briefcase },
+  { id: 4, title: 'Renda', icon: CreditCard },
+  { id: 5, title: 'Fluxo/Gastos', icon: DollarSign },
+  { id: 6, title: 'Review', icon: PieChart },
 ];
 
 const ClientOnboarding = () => {
@@ -136,7 +130,7 @@ const ClientOnboarding = () => {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Nome Completo</label>
+                <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] ml-2">Nome Completo</label>
                 <input 
                   type="text" 
                   value={data.personal.name} 
@@ -146,7 +140,7 @@ const ClientOnboarding = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Data de Nascimento</label>
+                <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] ml-2">Data de Nascimento</label>
                 <input 
                   type="date" 
                   value={data.personal.birthDate} 
@@ -172,7 +166,7 @@ const ClientOnboarding = () => {
                         }}
                         className="w-5 h-5 rounded-lg border-2 border-slate-300 text-gold focus:ring-gold"
                       />
-                      <span className="font-bold text-sm tracking-tight">{obj.label}</span>
+                      <span className="font-bold text-sm tracking-tight text-[var(--text-primary)]">{obj.label}</span>
                     </div>
                     {obj.selected && (
                       <textarea 
@@ -183,7 +177,7 @@ const ClientOnboarding = () => {
                           newObjs[idx].why = e.target.value;
                           setData({...data, objectives: newObjs});
                         }}
-                        className="w-full bg-white/50 border border-gold/20 rounded-2xl p-4 text-xs outline-none focus:border-gold/50 h-20 resize-none"
+                        className="w-full bg-[var(--bg-secondary)] border border-gold/20 rounded-2xl p-4 text-xs outline-none focus:border-gold/50 h-20 resize-none text-[var(--text-primary)]"
                       />
                     )}
                   </div>
@@ -199,16 +193,16 @@ const ClientOnboarding = () => {
               <label className="text-xs font-black uppercase text-gold tracking-widest px-2">Planejamento Financeiro</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Quanto investe mensalmente?</span>
+                  <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Quanto investe mensalmente?</span>
                   <input type="text" value={data.planning.monthlyInvest} onChange={e => setData({...data, planning: {...data.planning, monthlyInvest: e.target.value}})} className="input-premium" placeholder="Ex: Cliente não poupa" />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Mudança prevista (próximos meses)?</span>
+                  <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Mudança prevista (próximos meses)?</span>
                   <input type="text" value={data.planning.futureChanges} onChange={e => setData({...data, planning: {...data.planning, futureChanges: e.target.value}})} className="input-premium" placeholder="Ex: Aumento de salário" />
                 </div>
               </div>
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400">Patrimônio Atual (Estimado)</span>
+                <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Patrimônio Atual (Estimado)</span>
                 <textarea value={data.planning.currentAssets} onChange={e => setData({...data, planning: {...data.planning, currentAssets: e.target.value}})} className="input-premium h-24" placeholder="Ex: Carro - FOX 2011 - 20.000,00" />
               </div>
             </div>
@@ -225,7 +219,7 @@ const ClientOnboarding = () => {
                     key={prot.key}
                     type="button"
                     onClick={() => setData({...data, protections: {...data.protections, [prot.key]: !data.protections[prot.key]}})}
-                    className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all ${data.protections[prot.key] ? 'border-green-500 bg-green-50/50 text-green-700' : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-slate-400'}`}
+                    className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all ${data.protections[prot.key] ? 'border-green-500 bg-green-50/50 text-green-700' : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)]'}`}
                   >
                     <span className="font-bold text-xs">{prot.label}</span>
                     <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${data.protections[prot.key] ? 'border-green-500 bg-green-600' : 'border-slate-300'}`}>
@@ -278,11 +272,11 @@ const ClientOnboarding = () => {
               <label className="text-xs font-black uppercase text-gold tracking-widest px-2">Investimentos Atuais</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1">
-                   <label className="text-[10px] uppercase font-bold text-slate-400">Tipos de investimentos</label>
+                   <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Tipos de investimentos</label>
                    <input type="text" value={data.investments.types} onChange={e => setData({...data, investments: {...data.investments, types: e.target.value}})} className="input-premium text-sm" placeholder="Ex: CDB, Ações, FIIs" />
                 </div>
                 <div className="space-y-1">
-                   <label className="text-[10px] uppercase font-bold text-slate-400">Perfil de risco</label>
+                   <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Perfil de risco</label>
                    <input type="text" value={data.investments.riskProfile} onChange={e => setData({...data, investments: {...data.investments, riskProfile: e.target.value}})} className="input-premium text-sm" placeholder="Ex: Moderado / Agressivo" />
                 </div>
               </div>
@@ -304,7 +298,7 @@ const ClientOnboarding = () => {
              </div>
              <div className="space-y-4">
                 {data.cards.list.map((card, idx) => (
-                  <div key={idx} className="card-premium p-6 relative group bg-white/50">
+                  <div key={idx} className="card-premium p-6 relative group bg-[var(--bg-secondary)] opacity-90">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                        <input value={card.bank} onChange={e => {
                          const newList = [...data.cards.list];
@@ -347,11 +341,11 @@ const ClientOnboarding = () => {
                <label className="text-xs font-black uppercase text-gold tracking-widest px-2">Renda e Fluxo Mensal</label>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-1">
-                   <label className="text-[10px] uppercase font-bold text-slate-400">Salário Líquido (Mensal)</label>
+                   <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Salário Líquido (Mensal)</label>
                    <input type="number" value={data.cashFlow.salaries} onChange={e => setData({...data, cashFlow: {...data.cashFlow, salaries: e.target.value}})} className="input-premium text-xl font-black text-green-600" placeholder="R$ 0,00" />
                  </div>
                  <div className="space-y-1">
-                   <label className="text-[10px] uppercase font-bold text-slate-400">Outras Rendas / Extras</label>
+                   <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Outras Rendas / Extras</label>
                    <input type="number" value={data.cashFlow.otherIncome} onChange={e => setData({...data, cashFlow: {...data.cashFlow, otherIncome: e.target.value}})} className="input-premium text-xl font-black text-green-500" placeholder="R$ 0,00" />
                  </div>
                </div>
@@ -365,13 +359,13 @@ const ClientOnboarding = () => {
               {/* FIXED EXPENSES */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b-2 border-gold/20 pb-4">
-                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black">1</div>
-                  <h4 className="text-sm font-black uppercase tracking-widest">Gastos Fixos Mensais</h4>
+                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black text-xs">1</div>
+                  <h4 className="text-sm font-black uppercase tracking-widest">Gastos Fixos</h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                    {['housing', 'food', 'transport', 'health', 'energy', 'water', 'internet'].map(field => (
                      <div key={field} className="space-y-1">
-                       <label className="text-[9px] uppercase font-bold text-slate-400 ml-1">{
+                       <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">{
                          field === 'housing' ? 'Moradia' : 
                          field === 'food' ? 'Alimentação' : 
                          field === 'transport' ? 'Transporte' : 
@@ -384,9 +378,9 @@ const ClientOnboarding = () => {
                    ))}
                 </div>
                 <div className="space-y-3">
-                   <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl">
-                      <span className="text-xs font-black uppercase text-slate-400">Outros Gastos Fixos</span>
-                      <button type="button" onClick={() => setData({...data, cashFlow: {...data.cashFlow, fixed: {...data.cashFlow.fixed, others: [...(data.cashFlow.fixed.others || []), { label: '', value: '' }]}}})} className="text-[10px] text-gold font-bold">Adicionar +</button>
+                   <div className="flex justify-between items-center bg-[var(--bg-primary)] p-4 rounded-2xl border border-[var(--border-primary)]">
+                      <span className="text-[9px] font-black uppercase text-[var(--text-secondary)]">Outros Fixos</span>
+                      <button type="button" onClick={() => setData({...data, cashFlow: {...data.cashFlow, fixed: {...data.cashFlow.fixed, others: [...(data.cashFlow.fixed.others || []), { label: '', value: '' }]}}})} className="text-[9px] text-gold font-bold uppercase">Adicionar +</button>
                    </div>
                    {(data.cashFlow.fixed.others || []).map((oth, idx) => (
                      <div key={idx} className="flex gap-2">
@@ -412,13 +406,13 @@ const ClientOnboarding = () => {
               {/* VARIABLE EXPENSES */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b-2 border-gold/20 pb-4">
-                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black">2</div>
-                  <h4 className="text-sm font-black uppercase tracking-widest">Gastos Variáveis / Lazer</h4>
+                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black text-xs">2</div>
+                  <h4 className="text-sm font-black uppercase tracking-widest">Gastos Variáveis</h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                    {['housing', 'food', 'transport', 'health'].map(field => (
                      <div key={field} className="space-y-1">
-                       <label className="text-[9px] uppercase font-bold text-slate-400 ml-1">{
+                       <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">{
                          field === 'housing' ? 'Moradia' : 
                          field === 'food' ? 'Alimentação' : 
                          field === 'transport' ? 'Transporte' : 'Saúde'
@@ -428,9 +422,9 @@ const ClientOnboarding = () => {
                    ))}
                 </div>
                 <div className="space-y-3">
-                   <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl">
-                      <span className="text-xs font-black uppercase text-slate-400">Outros Variáveis</span>
-                      <button type="button" onClick={() => setData({...data, cashFlow: {...data.cashFlow, variable: {...data.cashFlow.variable, others: [...(data.cashFlow.variable.others || []), { label: '', value: '' }]}}})} className="text-[10px] text-gold font-bold">Adicionar +</button>
+                   <div className="flex justify-between items-center bg-[var(--bg-primary)] p-4 rounded-2xl border border-[var(--border-primary)]">
+                      <span className="text-[9px] font-black uppercase text-[var(--text-secondary)]">Outros Variáveis</span>
+                      <button type="button" onClick={() => setData({...data, cashFlow: {...data.cashFlow, variable: {...data.cashFlow.variable, others: [...(data.cashFlow.variable.others || []), { label: '', value: '' }]}}})} className="text-[9px] text-gold font-bold uppercase">Adicionar +</button>
                    </div>
                    {(data.cashFlow.variable.others || []).map((oth, idx) => (
                      <div key={idx} className="flex gap-2">
@@ -460,29 +454,29 @@ const ClientOnboarding = () => {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* REALIDADE ATUAL */}
-                <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl space-y-6">
-                   <h4 className="text-lg font-black italic border-l-4 border-navy-900 pl-4 uppercase tracking-tighter text-navy-900">Realidade Atual</h4>
+                <div className="bg-[var(--bg-secondary)] rounded-[3rem] p-10 border border-[var(--border-primary)] shadow-xl space-y-6">
+                   <h4 className="text-lg font-black italic border-l-4 border-navy-900 dark:border-gold pl-4 uppercase tracking-tighter text-[var(--text-primary)]">Realidade Atual</h4>
                    <div className="space-y-4">
                       {[
                         { label: 'Receitas', val: calculatedTotals.incomeTotal, color: 'text-green-600', perc: 100 },
                         { label: 'Gastos Fixos', val: calculatedTotals.fixedTotal, color: 'text-red-600', perc: (calculatedTotals.fixedTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                         { label: 'Gastos Variáveis', val: calculatedTotals.variableTotal, color: 'text-orange-500', perc: (calculatedTotals.variableTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                         { label: 'Investimentos', val: 0, color: 'text-blue-500', perc: 0 },
-                        { label: 'Resultado', val: calculatedTotals.result, color: 'text-navy-900 bg-slate-50 p-4 rounded-xl', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                        { label: 'Resultado', val: calculatedTotals.result, color: 'text-[var(--text-primary)] bg-[var(--bg-primary)] p-4 rounded-xl', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                       ].map(item => (
-                        <div key={item.label} className={`flex justify-between items-center ${item.label === 'Resultado' ? '' : 'pb-2 border-b border-slate-50'}`}>
+                        <div key={item.label} className={`flex justify-between items-center ${item.label === 'Resultado' ? '' : 'pb-2 border-b border-[var(--border-primary)]'}`}>
                            <div>
-                              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</div>
-                              <div className={`text-lg font-black ${item.color.includes('text-') ? item.color.split(' ')[0] : 'text-navy-900'}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
+                              <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{item.label}</div>
+                              <div className={`text-lg font-black ${item.color.includes('text-') ? item.color.split(' ')[0] : 'text-[var(--text-primary)]'}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
                            </div>
-                           <div className="text-right text-xs font-bold text-slate-300 italic">{item.perc}%</div>
+                           <div className="text-right text-xs font-bold text-[var(--text-secondary)] italic">{item.perc}%</div>
                         </div>
                       ))}
                    </div>
                 </div>
 
                 {/* REALIDADE ESPERADA */}
-                <div className="bg-navy-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden space-y-6">
+                <div className="bg-navy-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden space-y-6 dark:border dark:border-gold/20">
                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl"></div>
                    <h4 className="text-lg font-black italic border-l-4 border-gold pl-4 uppercase tracking-tighter text-white">Projeção Estratégica</h4>
                    <div className="space-y-6">
@@ -514,32 +508,32 @@ const ClientOnboarding = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-navy-900 text-gold">Carregando perfil estratégico...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-navy-900 text-gold tracking-widest text-[10px] uppercase font-black">Carregando Perfil Comercial...</div>;
 
   return (
     <SystemLayout>
       <div className="max-w-7xl mx-auto pb-20 px-4 md:px-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 mt-6">
            <div>
-              <div onClick={() => navigate('/admin')} className="flex items-center gap-2 text-gold text-xs font-black uppercase tracking-[0.3em] mb-4 cursor-pointer hover:translate-x-[-10px] transition-transform">
-                <ChevronLeft size={16} /> Voltar ao Painel
+              <div onClick={() => navigate('/admin')} className="flex items-center gap-2 text-gold text-[10px] font-black uppercase tracking-[0.3em] mb-4 cursor-pointer hover:translate-x-[-10px] transition-transform">
+                <ChevronLeft size={14} /> Voltar
               </div>
-              <h1 className="text-4xl md:text-5xl font-black font-heading italic tracking-tighter text-navy-900 uppercase">
+              <h1 className="text-3xl md:text-5xl font-black font-heading italic tracking-tighter text-[var(--text-primary)] uppercase">
                 Mapeamento <span className="text-gold italic">360°</span>
               </h1>
-              <p className="text-slate-400 font-medium max-w-xl mt-2 tracking-tight">Análise profunda do ecossistema financeiro para o sócio <span className="text-navy-900 font-bold">{client?.name}</span>.</p>
+              <p className="text-[var(--text-secondary)] font-medium max-w-xl mt-2 tracking-tight text-xs">Análise profunda do ecossistema financeiro para o sócio <span className="text-[var(--text-primary)] font-bold">{client?.name}</span>.</p>
            </div>
            <button 
             type="button"
             onClick={handleSave}
-            className="btn-primary px-10 py-5 flex items-center gap-3 shadow-2xl shadow-gold/30 font-black text-lg transition-all active:scale-95"
+            className="btn-primary px-8 py-4 flex items-center gap-3 shadow-2xl shadow-gold/30 font-black text-sm transition-all active:scale-95"
            >
-             <Save size={24} /> Salvar Evolução
+             <Save size={20} /> Salvar
            </button>
         </div>
 
         {/* Stepper Navigation */}
-        <div className="flex flex-nowrap gap-4 mb-14 overflow-x-auto pb-6 scrollbar-hide">
+        <div className="flex flex-nowrap gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
            {steps.map((step) => {
              const Icon = step.icon;
              const active = currentStep === step.id;
@@ -548,51 +542,51 @@ const ClientOnboarding = () => {
                <div 
                 key={step.id} 
                 onClick={() => setCurrentStep(step.id)}
-                className={`flex-1 min-w-[200px] p-6 rounded-[2.5rem] flex items-center gap-4 cursor-pointer transition-all border-2 relative ${active ? 'bg-navy-900 text-white border-navy-900 scale-105 shadow-2xl' : completed ? 'bg-gold/10 text-gold border-gold/20' : 'bg-white text-slate-300 border-slate-50 opacity-60'}`}
+                className={`flex-1 min-w-[120px] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer transition-all border-2 relative ${active ? 'bg-navy-900 text-white border-navy-900 scale-105 shadow-xl' : completed ? 'bg-gold/10 text-gold border-gold/20' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-primary)] opacity-60'}`}
                >
-                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-2 ${active ? 'bg-gold border-gold text-navy-900' : 'bg-slate-50 border-transparent'}`}>
-                    {completed ? <CheckCircle2 size={24} className="text-green-600" /> : <Icon size={24} />}
+                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border-2 ${active ? 'bg-gold border-gold text-navy-900' : 'bg-[var(--bg-primary)] border-transparent'}`}>
+                    {completed ? <CheckCircle2 size={16} className="text-green-600" /> : <Icon size={16} />}
                  </div>
-                 <div className="block">
-                    <p className={`text-[8px] uppercase font-black tracking-widest ${active ? 'text-gold' : 'text-slate-400'}`}>Etapa 0{step.id}</p>
-                    <p className="text-xs font-black truncate leading-tight uppercase">{step.title}</p>
+                 <div className="text-center">
+                    <p className={`text-[7px] uppercase font-black tracking-widest ${active ? 'text-gold' : 'text-[var(--text-secondary)]'}`}>Passo 0{step.id}</p>
+                    <p className="text-[9px] font-black uppercase whitespace-nowrap">{step.title}</p>
                  </div>
-                 {active && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-navy-900 rotate-45"></div>}
+                 {active && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-navy-900 rotate-45"></div>}
                </div>
              );
            })}
         </div>
 
         {/* Form Content Area */}
-        <div className="card-premium p-6 md:p-14 min-h-[60vh] relative shadow-2xl overflow-visible bg-white/80 backdrop-blur-xl">
+        <div className="card-premium p-6 md:p-14 min-h-[50vh] relative shadow-2xl overflow-visible bg-[var(--bg-secondary)] backdrop-blur-xl">
            <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
            
            <AnimatePresence mode="wait">
               {renderStep()}
            </AnimatePresence>
 
-           <div className="mt-20 pt-10 border-t border-[var(--border-primary)] flex flex-col md:flex-row justify-between gap-6">
+           <div className="mt-14 pt-10 border-t border-[var(--border-primary)] flex flex-col md:flex-row justify-between gap-6">
               <button 
-                type="button"
+                type="button" 
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className="btn-secondary px-8 py-4 disabled:opacity-0 flex items-center gap-2"
+                className="btn-secondary px-6 py-3 disabled:opacity-0 flex items-center gap-2 text-xs"
               >
-                <ChevronLeft size={18} /> Etapa Anterior
+                <ChevronLeft size={16} /> Anterior
               </button>
               
               <div className="flex gap-4">
                 {currentStep < steps.length ? (
-                  <button type="button" onClick={nextStep} className="btn-primary px-10 py-5 flex items-center gap-3 text-[12px] uppercase font-black tracking-[0.3em] shadow-xl">
-                    Próxima Etapa <ChevronRight size={18} />
+                  <button type="button" onClick={nextStep} className="btn-primary px-10 py-4 flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] shadow-xl">
+                    Próximo <ChevronRight size={16} />
                   </button>
                 ) : (
                   <div className="flex gap-3">
-                    <button type="button" onClick={() => navigate('/admin')} className="btn-secondary px-8 py-5 text-[10px] uppercase font-black tracking-widest">
-                       Voltar ao Painel
+                    <button type="button" onClick={() => navigate('/admin')} className="btn-secondary px-6 py-4 text-[9px] uppercase font-black tracking-widest text-[var(--text-primary)]">
+                       Sair
                     </button>
-                    <button type="button" onClick={handleSave} className="bg-navy-900 text-white px-12 py-5 rounded-[2rem] flex items-center gap-3 text-[12px] uppercase font-black tracking-[0.3em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95">
-                      Finalizar Mapeamento <CheckCircle2 size={18} />
+                    <button type="button" onClick={handleSave} className="bg-navy-900 text-white px-10 py-4 rounded-xl flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95 dark:border dark:border-gold/30">
+                      Finalizar <CheckCircle2 size={16} />
                     </button>
                   </div>
                 )}
