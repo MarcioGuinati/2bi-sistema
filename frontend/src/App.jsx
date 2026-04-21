@@ -25,6 +25,7 @@ import CategoryManagement from './pages/CategoryManagement';
 import AccountManagement from './pages/AccountManagement';
 import BudgetManagement from './pages/BudgetManagement';
 import Mentoria from './pages/Mentoria';
+import ClientOnboarding from './pages/ClientOnboarding';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -133,6 +134,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardRedirect />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/clients/:id/onboarding" 
+            element={
+              <ProtectedRoute role="admin">
+                <ClientOnboarding />
               </ProtectedRoute>
             } 
           />

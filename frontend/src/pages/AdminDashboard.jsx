@@ -468,6 +468,13 @@ const AdminDashboard = () => {
                         >
                           <Eye size={16} />
                         </button>
+                        <button 
+                          onClick={() => navigate(`/admin/clients/${c.id}/onboarding`)} 
+                          title="Ficha de Onboarding"
+                          className="p-2 text-slate-400 hover:text-green-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
+                        >
+                          <FileText size={16} />
+                        </button>
                         <button onClick={() => handleSelectClient(c)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><MessageSquare size={16} /></button>
                         <button onClick={() => handleOpenEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
                         <button onClick={() => handleDeleteClient(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>

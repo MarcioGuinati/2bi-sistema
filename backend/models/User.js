@@ -51,6 +51,11 @@ module.exports = (sequelize, DataTypes) => {
     asaasId: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    onboardingData: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {}
     }
   });
 

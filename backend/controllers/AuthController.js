@@ -32,7 +32,7 @@ class AuthController {
       return res.status(403).json({ error: 'Only admins can register clients' });
     }
 
-    const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields } = req.body;
+    const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields, onboardingData } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
 
@@ -52,7 +52,8 @@ class AuthController {
       income,
       occupation,
       financialGoal,
-      customFields: customFields || []
+      customFields: customFields || [],
+      onboardingData: onboardingData || {}
     });
 
     return res.json(user);
@@ -65,7 +66,7 @@ class AuthController {
 
     const clients = await User.findAll({
       where: { role: 'client' },
-      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'created_at'],
+      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'onboardingData', 'created_at'],
       order: [['created_at', 'DESC']]
     });
 
@@ -77,29 +78,50 @@ class AuthController {
       return res.status(403).json({ error: 'Only admins can update clients' });
     }
 
-    const { id } = req.params;
-    const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields } = req.body;
+    try {
+      const { id } = req.params;
+      const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields, onboardingData } = req.body;
 
-    const user = await User.findByPk(id);
+      const user = await User.findByPk(id);
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Only update fields provided in the request body
+      const fields = { name, email, phone, cpf, income, occupation, financialGoal, customFields, onboardingData };
+      const updateData = {};
+      
+      Object.keys(fields).forEach(key => {
+        if (fields[key] !== undefined) {
+          updateData[key] = fields[key];
+        }
+      });
+
+      if (password && password.trim() !== '') {
+        updateData.password = await bcrypt.hash(password, 8);
+      }
+
+      user.set(updateData);
+      
+      if (customFields) {
+        user.changed('customFields', true);
+      }
+      if (onboardingData) {
+        user.changed('onboardingData', true);
+      }
+      
+      await user.save();
+
+      return res.json(user);
+    } catch (err) {
+      console.error('Error updating client:', err);
+      return res.status(500).json({ 
+        error: 'Error updating client', 
+        details: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      });
     }
-
-    const updateData = { name, email, phone, cpf, income, occupation, financialGoal, customFields };
-
-    if (password && password.trim() !== '') {
-      updateData.password = await bcrypt.hash(password, 8);
-    }
-
-    // Use set and save for more robust JSONB updates
-    user.set(updateData);
-    if (customFields) {
-      user.changed('customFields', true);
-    }
-    await user.save();
-
-    return res.json(user);
   }
 
   async deleteClient(req, res) {
