@@ -464,9 +464,9 @@ const ClientDashboard = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Pie Chart: Distribution */}
-              <div className="card-premium p-8">
+              <div className="card-premium p-8 flex flex-col">
                 <h3 className="text-xl font-bold font-heading mb-6">Distribuição por Categoria</h3>
-                <div className="h-80 w-full">
+                <div className="h-[420px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -482,17 +482,24 @@ const ClientDashboard = () => {
                           <Cell key={`cell-${index}`} fill={['#1e293b', '#EAB308', '#dc2626', '#16a34a', '#2563eb'][index % 5]} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend verticalAlign="bottom" height={36} content={({ payload }) => (
-                        <div className="flex flex-wrap justify-center gap-4 mt-6">
-                          {payload.map((entry, index) => (
-                            <div key={`item-${index}`} className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                              <span className="text-[10px] font-black uppercase text-slate-500">{entry.value}</span>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      />
+                      <Legend 
+                        verticalAlign="bottom" 
+                        content={({ payload }) => (
+                          <div className="max-h-28 overflow-y-auto custom-scrollbar mt-6 pr-2">
+                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+                              {payload.map((entry, index) => (
+                                <div key={`item-${index}`} className="flex items-center gap-2 min-w-[100px]">
+                                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                                  <span className="text-[9px] font-black uppercase text-slate-500 truncate" title={entry.value}>{entry.value}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      )} />
+                          </div>
+                        )} 
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
