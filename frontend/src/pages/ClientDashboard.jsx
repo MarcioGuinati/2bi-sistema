@@ -265,7 +265,7 @@ const ClientDashboard = () => {
 
           <motion.div
             whileHover={{ y: -5 }}
-            className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-6"
+            className="card-premium p-8 flex items-center gap-6"
           >
             <div className="w-16 h-16 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center shadow-inner">
               <ArrowDownLeft size={32} />
