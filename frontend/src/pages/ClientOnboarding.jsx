@@ -39,14 +39,14 @@ const ClientOnboarding = () => {
   const [data, setData] = useState({
     personal: { name: '', birthDate: '' },
     objectives: [
-      { id: 'house', label: 'Imóvel próprio', selected: false, why: '' },
-      { id: 'invest_property', label: 'Investimento imobiliário', selected: false, why: '' },
-      { id: 'trips', label: 'Viagens', selected: false, why: '' },
-      { id: 'retirement', label: 'Aposentadoria', selected: false, why: '' },
-      { id: 'organization', label: 'Organização financeira', selected: false, why: '' },
-      { id: 'educ_kids', label: 'Ajudar os filhos nos estudos', selected: false, why: '' },
-      { id: 'investments', label: 'Investimentos', selected: false, why: '' },
-      { id: 'car', label: 'Compra ou troca de carro', selected: false, why: '' },
+      { id: 'house', label: 'Imóvel próprio', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'invest_property', label: 'Investimento imobiliário', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'trips', label: 'Viagens', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'retirement', label: 'Aposentadoria', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'organization', label: 'Organização financeira', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'educ_kids', label: 'Ajudar os filhos nos estudos', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'investments', label: 'Investimentos', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
+      { id: 'car', label: 'Compra ou troca de carro', selected: false, why: '', when: '', value: '', saved: '', priority: '' },
     ],
     planning: { monthlyInvest: '', futureChanges: '', currentAssets: '' },
     protections: { lifeInsurance: false, profInsurance: false, healthPlan: false, insuranceNotes: '' },
@@ -66,6 +66,16 @@ const ClientOnboarding = () => {
       }
     }
   });
+
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    const cleanValue = value.toString().replace(/\D/g, '');
+    if (!cleanValue) return '';
+    const options = { style: 'currency', currency: 'BRL' };
+    return new Intl.NumberFormat('pt-BR', options).format(
+      parseFloat(cleanValue) / 100
+    );
+  };
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -169,16 +179,81 @@ const ClientOnboarding = () => {
                       <span className="font-bold text-sm tracking-tight text-[var(--text-primary)]">{obj.label}</span>
                     </div>
                     {obj.selected && (
-                      <textarea 
-                        placeholder="Por que este objetivo é importante agora?"
-                        value={obj.why}
-                        onChange={e => {
-                          const newObjs = [...data.objectives];
-                          newObjs[idx].why = e.target.value;
-                          setData({...data, objectives: newObjs});
-                        }}
-                        className="w-full bg-[var(--bg-secondary)] border border-gold/20 rounded-2xl p-4 text-xs outline-none focus:border-gold/50 h-20 resize-none text-[var(--text-primary)]"
-                      />
+                      <div className="mt-4 space-y-4">
+                        <textarea 
+                          placeholder="Por que este objetivo é importante agora?"
+                          value={obj.why}
+                          onChange={e => {
+                            const newObjs = [...data.objectives];
+                            newObjs[idx].why = e.target.value;
+                            setData({...data, objectives: newObjs});
+                          }}
+                          className="w-full bg-[var(--bg-secondary)] border border-gold/20 rounded-2xl p-4 text-xs outline-none focus:border-gold/50 h-20 resize-none text-[var(--text-primary)]"
+                        />
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">Para quando? (Meta)</label>
+                            <input 
+                              type="date" 
+                              value={obj.when || ''}
+                              onChange={e => {
+                                const newObjs = [...data.objectives];
+                                newObjs[idx].when = e.target.value;
+                                setData({...data, objectives: newObjs});
+                              }}
+                              className="input-premium px-3 py-2 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">Quanto?</label>
+                            <input 
+                              type="text" 
+                              placeholder="R$ 0,00"
+                              value={obj.value || ''}
+                              onChange={e => {
+                                const newObjs = [...data.objectives];
+                                newObjs[idx].value = formatCurrency(e.target.value);
+                                setData({...data, objectives: newObjs});
+                              }}
+                              className="input-premium px-3 py-2 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">Quanto já guardou?</label>
+                            <input 
+                              type="text" 
+                              placeholder="R$ 0,00"
+                              value={obj.saved || ''}
+                              onChange={e => {
+                                const newObjs = [...data.objectives];
+                                newObjs[idx].saved = formatCurrency(e.target.value);
+                                setData({...data, objectives: newObjs});
+                              }}
+                              className="input-premium px-3 py-2 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">Prioridade</label>
+                            <div className="flex flex-wrap gap-2">
+                              {['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°', '10°'].map(p => (
+                                <button
+                                  key={p}
+                                  type="button"
+                                  onClick={() => {
+                                    const newObjs = [...data.objectives];
+                                    newObjs[idx].priority = p;
+                                    setData({...data, objectives: newObjs});
+                                  }}
+                                  className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all ${obj.priority === p ? 'bg-gold text-navy-900 shadow-lg shadow-gold/20' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-primary)] hover:border-gold/50'}`}
+                                >
+                                  {p}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 ))}
