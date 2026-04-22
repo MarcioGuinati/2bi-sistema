@@ -71,9 +71,23 @@ class AuthController {
     try {
       const { name, email, phone, objective, message } = req.body;
  
+      // Basic Server-Side Validation
+      if (!name || name.length < 3) {
+        return res.status(400).json({ error: 'Nome muito curto ou inválido' });
+      }
+ 
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Formato de e-mail inválido' });
+      }
+ 
+      if (!phone || phone.length < 8) {
+        return res.status(400).json({ error: 'Telefone inválido' });
+      }
+ 
       const userExists = await User.findOne({ where: { email } });
       if (userExists) {
-        return res.status(400).json({ error: 'E-mail já cadastrado' });
+        return res.status(400).json({ error: 'Este e-mail já possui uma solicitação em andamento' });
       }
  
       // Generate a random placeholder password
@@ -81,21 +95,21 @@ class AuthController {
       const passwordHash = await bcrypt.hash(randomPass, 8);
  
       const user = await User.create({
-        name,
-        email,
+        name: name.substring(0, 255), // Truncate to prevent overflow
+        email: email.toLowerCase().trim(),
         password: passwordHash,
         role: 'client',
-        phone,
+        phone: phone.replace(/\D/g, ''), // Clean to keep only digits
         isLead: true,
         isActive: false,
         leadSource: 'site',
-        financialGoal: `Objetivo: ${objective}. Mensagem: ${message}`
+        financialGoal: `Objetivo: ${objective}. Mensagem: ${message.substring(0, 1000)}`
       });
  
       return res.json({ success: true, message: 'Solicitação enviada com sucesso' });
     } catch (err) {
       console.error('Error registering lead:', err);
-      return res.status(500).json({ error: 'Erro ao processar sua solicitaçã' });
+      return res.status(500).json({ error: 'Erro ao processar sua solicitação' });
     }
   }
 
