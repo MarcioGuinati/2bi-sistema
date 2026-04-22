@@ -4,9 +4,14 @@ class BillingController {
   async listContracts(req, res) {
     try {
       const { userId } = req.params;
+
+      if (req.userRole !== 'admin' && String(req.userId) !== String(userId)) {
+        return res.status(403).json({ error: 'Não autorizado' });
+      }
+
       const contracts = await Contract.findAll({
         where: { user_id: userId },
-        include: [{ model: Payment, order: [['dueDate', 'DESC']] }],
+        include: [{ model: Payment, order: [['dueDate', 'ASC']] }],
         order: [['createdAt', 'DESC']]
       });
       return res.json(contracts);
@@ -127,10 +132,15 @@ class BillingController {
   async listPayments(req, res) {
     try {
       const { userId } = req.params;
+
+      if (req.userRole !== 'admin' && String(req.userId) !== String(userId)) {
+        return res.status(403).json({ error: 'Não autorizado' });
+      }
+
       const payments = await Payment.findAll({
         where: { user_id: userId },
         include: [{ model: Contract }],
-        order: [['dueDate', 'DESC']]
+        order: [['dueDate', 'ASC']]
       });
       return res.json(payments);
     } catch (err) {
