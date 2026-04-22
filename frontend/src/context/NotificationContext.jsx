@@ -43,7 +43,7 @@ export const NotificationProvider = ({ children }) => {
       {children}
 
       {/* Toasts Container */}
-      <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+      <div className="fixed top-6 right-6 z-[1000] flex flex-col gap-3 pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -80,7 +80,7 @@ export const NotificationProvider = ({ children }) => {
       {/* Confirmation Modal */}
       <AnimatePresence>
         {confirmModal.isOpen && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-navy-900/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-navy-900/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
