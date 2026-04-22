@@ -40,10 +40,10 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log('Connected to PostgreSQL database.');
     
-    // Sync models - ONLY IN DEVELOPMENT
-    if (process.env.NODE_ENV !== 'production') {
+    // Sync models - In Dev or when DB_ALTER is set to true
+    if (process.env.NODE_ENV !== 'production' || process.env.DB_ALTER === 'true') {
       try {
-        await sequelize.sync({ alter: true }); // Temporarily enabled to add new columns
+        await sequelize.sync({ alter: true });
         console.log('Database synced with alter: true.');
       } catch (syncError) {
         console.error('Database sync warning (continuing...):', syncError.message);
