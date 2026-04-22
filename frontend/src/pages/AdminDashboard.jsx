@@ -529,7 +529,7 @@ const AdminDashboard = () => {
                         >
                           <FileText size={16} />
                         </button>
-                        <button onClick={() => handleSelectClient(c)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><MessageSquare size={16} /></button>
+                        <button onClick={() => handleSelectClient(c)} className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all" title="CRM e Mensagens"><MessageSquare size={16} /></button>
                         <button onClick={() => handleOpenEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
                         <button onClick={() => handleDeleteClient(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
                       </div>
@@ -974,7 +974,7 @@ const AdminDashboard = () => {
               <div className="bg-gradient-to-r from-gold to-yellow-500 p-8 text-navy-900 flex justify-between items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-black font-heading tracking-tight italic">{editingBillingContract ? 'Ajustar Plano' : 'Vincular Produto'}</h3>
+                  <h3 className="text-2xl font-black font-heading tracking-tight italic text-navy-900">{editingBillingContract ? 'Ajustar Plano' : 'Vincular Produto'}</h3>
                   <p className="text-navy-900/50 text-[10px] font-black uppercase tracking-[0.3em]">Acordo de Prestação 2BI</p>
                 </div>
                 <button onClick={() => setShowContractModal(false)} className="bg-navy-900/10 hover:bg-navy-900/20 p-2 rounded-xl transition-all"><X size={20} /></button>

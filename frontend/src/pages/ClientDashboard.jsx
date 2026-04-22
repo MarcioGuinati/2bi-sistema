@@ -610,7 +610,7 @@ const ClientDashboard = () => {
                       <div className="relative z-10 space-y-6">
                         <div>
                           <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em] px-3 py-1 bg-gold/10 rounded-full border border-gold/20">Seu Plano Ativo</span>
-                          <h3 className="text-2xl font-black italic mt-3 tracking-tighter">{c.title}</h3>
+                          <h3 className="text-2xl font-black italic mt-3 tracking-tighter text-white">{c.title}</h3>
                         </div>
                         
                         <div className="space-y-4">

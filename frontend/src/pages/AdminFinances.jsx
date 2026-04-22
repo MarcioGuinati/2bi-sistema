@@ -337,7 +337,7 @@ const AdminFinances = () => {
                                                             });
                                                             setShowEditModal(true);
                                                         }}
-                                                        className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-sm transition-all"
+                                                        className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-sm transition-all"
                                                         title="Editar"
                                                     >
                                                         <Edit2 size={16} />
@@ -373,7 +373,7 @@ const AdminFinances = () => {
                             <div className="bg-navy-900 p-8 text-white flex justify-between items-center relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                                 <div className="relative z-10">
-                                    <h3 className="text-2xl font-bold font-heading tracking-tight">Editar Fatura</h3>
+                                    <h3 className="text-2xl font-bold font-heading tracking-tight text-white">Editar Fatura</h3>
                                     <p className="text-gold text-[10px] font-bold uppercase tracking-widest">Ajuste de Registro Financeiro</p>
                                 </div>
                                 <button onClick={() => setShowEditModal(false)} className="bg-white/10 hover:bg-white/20 p-2 rounded-xl transition-all relative z-10"><X size={20} /></button>

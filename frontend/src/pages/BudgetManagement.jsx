@@ -186,7 +186,7 @@ const BudgetManagement = () => {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleOpenEdit(g)}
-                            className="p-2 text-slate-400 hover:text-navy-900 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)]"
+                            className="p-2 text-slate-400 hover:text-gold bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)] transition-all"
                           >
                             <Edit2 size={16} />
                           </button>

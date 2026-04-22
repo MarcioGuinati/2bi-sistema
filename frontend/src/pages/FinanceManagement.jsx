@@ -483,7 +483,7 @@ const FinanceManagement = () => {
                        >
                          <CreditCard size={16} />
                        </button>
-                      <button onClick={() => handleOpenEdit(t)} className="p-2 text-slate-400 hover:text-navy-900 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
+                      <button onClick={() => handleOpenEdit(t)} className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all" title="Editar"><Edit2 size={16} /></button>
                       <button onClick={() => handleDeleteTrans(t.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
                     </td>
                   </tr>
