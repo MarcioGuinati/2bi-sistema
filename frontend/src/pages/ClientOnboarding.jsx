@@ -13,8 +13,19 @@ import {
   DollarSign,
   PieChart,
   Plus,
-  Trash2
+  Trash2,
+  FileText,
+  TrendingUp,
+  AlertTriangle,
+  Activity,
+  ArrowRight,
+  X
 } from 'lucide-react';
+import { 
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
+} from 'recharts';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
@@ -26,6 +37,7 @@ const steps = [
   { id: 4, title: 'Renda', icon: CreditCard },
   { id: 5, title: 'Fluxo/Gastos', icon: DollarSign },
   { id: 6, title: 'Review', icon: PieChart },
+  { id: 7, title: 'Fechamento', icon: FileText },
 ];
 
 const ClientOnboarding = () => {
@@ -106,6 +118,7 @@ const ClientOnboarding = () => {
     try {
       await api.put(`/clients/${id}`, { onboardingData: data });
       success('Configuração salva estrategicamente!');
+      navigate('/admin');
     } catch (err) {
       error('Falha ao sincronizar dados');
     }
@@ -116,22 +129,65 @@ const ClientOnboarding = () => {
 
   // Calculations
   const calculatedTotals = useMemo(() => {
-    const incomeTotal = parseFloat(data.cashFlow.salaries || 0) + parseFloat(data.cashFlow.otherIncome || 0);
+    const parseCurrency = (val) => {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      return parseFloat(val.toString().replace(/\D/g, '') || 0) / 100;
+    };
+
+    const incomeTotal = parseCurrency(data.cashFlow.salaries) + parseCurrency(data.cashFlow.otherIncome);
     
     const fixedTotal = Object.entries(data.cashFlow.fixed)
       .filter(([key, v]) => key !== 'others' && (typeof v === 'string' || typeof v === 'number'))
-      .reduce((sum, [_, v]) => sum + parseFloat(v || 0), 0) +
-      (data.cashFlow.fixed.others?.reduce((sum, o) => sum + parseFloat(o.value || 0), 0) || 0);
+      .reduce((sum, [_, v]) => sum + parseCurrency(v), 0) +
+      (data.cashFlow.fixed.others?.reduce((sum, o) => sum + parseCurrency(o.value), 0) || 0);
 
     const variableTotal = Object.entries(data.cashFlow.variable)
       .filter(([key, v]) => key !== 'others' && (typeof v === 'string' || typeof v === 'number'))
-      .reduce((sum, [_, v]) => sum + parseFloat(v || 0), 0) +
-      (data.cashFlow.variable.others?.reduce((sum, o) => sum + parseFloat(o.value || 0), 0) || 0);
+      .reduce((sum, [_, v]) => sum + parseCurrency(v), 0) +
+      (data.cashFlow.variable.others?.reduce((sum, o) => sum + parseCurrency(o.value), 0) || 0);
 
     const result = incomeTotal - fixedTotal - variableTotal;
 
     return { incomeTotal, fixedTotal, variableTotal, result };
   }, [data]);
+
+  const generatePDF = async () => {
+    window.print();
+  };
+
+  const getGapAnalysis = () => {
+    const gaps = [];
+    if (!data.protections.lifeInsurance) gaps.push('Seguro de Vida (Proteção Familiar)');
+    if (!data.protections.profInsurance) gaps.push('Seguro Profissional (DIT)');
+    if (!data.protections.healthPlan) gaps.push('Plano de Saúde Adequado');
+    if (!data.retirement.alreadySaving) gaps.push('Plano de Aposentadoria Estruturado');
+    return gaps;
+  };
+
+  const getProjectionData = () => {
+    const rawSaving = data.planning.monthlyInvest || '0';
+    const monthlySaving = parseFloat(rawSaving.replace(/\D/g, '') || 0) / 100;
+    const years = 20;
+    const projection = [];
+    
+    for (let year = 0; year <= years; year++) {
+      const months = year * 12;
+      // Compound interest formula: FV = P * [((1 + r)^n - 1) / r]
+      const r8 = 0.08 / 12;
+      const r10 = 0.10 / 12;
+      
+      const v8 = monthlySaving * ((Math.pow(1 + r8, months) - 1) / r8);
+      const v10 = monthlySaving * ((Math.pow(1 + r10, months) - 1) / r10);
+      
+      projection.push({
+        year: `Ano ${year}`,
+        'Rentabilidade 8%': Math.round(v8),
+        'Rentabilidade 10%': Math.round(v10),
+      });
+    }
+    return projection;
+  };
 
   const renderStep = () => {
     switch(currentStep) {
@@ -417,11 +473,11 @@ const ClientOnboarding = () => {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-1">
                    <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Salário Líquido (Mensal)</label>
-                   <input type="number" value={data.cashFlow.salaries} onChange={e => setData({...data, cashFlow: {...data.cashFlow, salaries: e.target.value}})} className="input-premium text-xl font-black text-green-600" placeholder="R$ 0,00" />
+                   <input type="text" value={data.cashFlow.salaries} onChange={e => setData({...data, cashFlow: {...data.cashFlow, salaries: formatCurrency(e.target.value)}})} className="input-premium text-xl font-black text-green-600" placeholder="R$ 0,00" />
                  </div>
                  <div className="space-y-1">
                    <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Outras Rendas / Extras</label>
-                   <input type="number" value={data.cashFlow.otherIncome} onChange={e => setData({...data, cashFlow: {...data.cashFlow, otherIncome: e.target.value}})} className="input-premium text-xl font-black text-green-500" placeholder="R$ 0,00" />
+                   <input type="text" value={data.cashFlow.otherIncome} onChange={e => setData({...data, cashFlow: {...data.cashFlow, otherIncome: formatCurrency(e.target.value)}})} className="input-premium text-xl font-black text-green-500" placeholder="R$ 0,00" />
                  </div>
                </div>
              </div>
@@ -448,7 +504,7 @@ const ClientOnboarding = () => {
                          field === 'energy' ? 'Energia' :
                          field === 'water' ? 'Água' : 'Internet'
                        }</label>
-                       <input type="number" value={data.cashFlow.fixed[field]} onChange={e => setData({...data, cashFlow: {...data.cashFlow, fixed: {...data.cashFlow.fixed, [field]: e.target.value}}})} className="input-premium px-3 py-2 text-xs" />
+                       <input type="text" value={data.cashFlow.fixed[field]} onChange={e => setData({...data, cashFlow: {...data.cashFlow, fixed: {...data.cashFlow.fixed, [field]: formatCurrency(e.target.value)}}})} className="input-premium px-3 py-2 text-xs" />
                      </div>
                    ))}
                 </div>
@@ -464,9 +520,9 @@ const ClientOnboarding = () => {
                           newOthers[idx].label = e.target.value;
                           setData({...data, cashFlow: {...data.cashFlow, fixed: {...data.cashFlow.fixed, others: newOthers}}});
                         }} className="input-premium text-[10px] flex-1" placeholder="Ex: Celular" />
-                        <input type="number" value={oth.value} onChange={e => {
+                        <input type="text" value={oth.value} onChange={e => {
                           const newOthers = [...data.cashFlow.fixed.others];
-                          newOthers[idx].value = e.target.value;
+                          newOthers[idx].value = formatCurrency(e.target.value);
                           setData({...data, cashFlow: {...data.cashFlow, fixed: {...data.cashFlow.fixed, others: newOthers}}});
                         }} className="input-premium text-[10px] w-24" />
                         <button type="button" onClick={() => {
@@ -492,7 +548,7 @@ const ClientOnboarding = () => {
                          field === 'food' ? 'Alimentação' : 
                          field === 'transport' ? 'Transporte' : 'Saúde'
                        }</label>
-                       <input type="number" value={data.cashFlow.variable[field]} onChange={e => setData({...data, cashFlow: {...data.cashFlow, variable: {...data.cashFlow.variable, [field]: e.target.value}}})} className="input-premium px-3 py-2 text-xs" />
+                       <input type="text" value={data.cashFlow.variable[field]} onChange={e => setData({...data, cashFlow: {...data.cashFlow, variable: {...data.cashFlow.variable, [field]: formatCurrency(e.target.value)}}})} className="input-premium px-3 py-2 text-xs" />
                      </div>
                    ))}
                 </div>
@@ -508,9 +564,9 @@ const ClientOnboarding = () => {
                           newOthers[idx].label = e.target.value;
                           setData({...data, cashFlow: {...data.cashFlow, variable: {...data.cashFlow.variable, others: newOthers}}});
                         }} className="input-premium text-[10px] flex-1" placeholder="Ex: Spotify" />
-                        <input type="number" value={oth.value} onChange={e => {
+                        <input type="text" value={oth.value} onChange={e => {
                           const newOthers = [...data.cashFlow.variable.others];
-                          newOthers[idx].value = e.target.value;
+                          newOthers[idx].value = formatCurrency(e.target.value);
                           setData({...data, cashFlow: {...data.cashFlow, variable: {...data.cashFlow.variable, others: newOthers}}});
                         }} className="input-premium text-[10px] w-24" />
                         <button type="button" onClick={() => {
@@ -557,25 +613,167 @@ const ClientOnboarding = () => {
                    <div className="space-y-6">
                       <div className="space-y-1">
                         <label className="text-[9px] uppercase font-black text-white/30">Receita Esperada</label>
-                        <input type="number" value={data.cashFlow.expected.income} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, income: e.target.value}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
+                        <input type="text" value={data.cashFlow.expected.income} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, income: formatCurrency(e.target.value)}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-[9px] uppercase font-black text-white/30">Meta Fixa (R$)</label>
-                          <input type="number" value={data.cashFlow.expected.fixed} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, fixed: e.target.value}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
+                          <input type="text" value={data.cashFlow.expected.fixed} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, fixed: formatCurrency(e.target.value)}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
                         </div>
                         <div className="space-y-1">
                           <label className="text-[9px] uppercase font-black text-white/30">Meta Variável (R$)</label>
-                          <input type="number" value={data.cashFlow.expected.variable} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, variable: e.target.value}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
+                          <input type="text" value={data.cashFlow.expected.variable} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, variable: formatCurrency(e.target.value)}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
                         </div>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9px] uppercase font-black text-white/30">Meta Investimento (R$)</label>
-                        <input type="number" value={data.cashFlow.expected.investments} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, investments: e.target.value}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black text-gold text-center text-xl" />
+                        <input type="text" value={data.cashFlow.expected.investments} onChange={e => setData({...data, cashFlow: {...data.cashFlow, expected: {...data.cashFlow.expected, investments: formatCurrency(e.target.value)}}})} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black text-gold text-center text-xl" />
                       </div>
                    </div>
                 </div>
              </div>
+          </motion.div>
+        );
+      case 7:
+        const fee = calculatedTotals.incomeTotal * 12 * 0.02;
+        const gaps = getGapAnalysis();
+        const projectionData = getProjectionData();
+        const cashFlowData = [
+          { name: 'Fixos', value: calculatedTotals.fixedTotal, color: '#ef4444' },
+          { name: 'Variáveis', value: calculatedTotals.variableTotal, color: '#f97316' },
+          { name: 'Sobra', value: Math.max(0, calculatedTotals.result), color: '#c5a059' },
+        ];
+
+        return (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
+            <div id="strategic-proposal" className="bg-[var(--bg-primary)] p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-[var(--border-primary)] space-y-12 transition-colors">
+               {/* FEE HEADER */}
+               <div className="bg-navy-900 dark:bg-navy-800 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 text-center relative overflow-hidden shadow-2xl border border-gold/20">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+                  <h4 className="text-gold text-[10px] font-black uppercase tracking-[0.5em] mb-4">Investimento para Implementação</h4>
+                  <div className="text-4xl md:text-7xl font-black text-white italic tracking-tighter mb-4">
+                    R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <p className="text-white/40 text-[10px] md:text-xs font-medium max-w-sm mx-auto">Valor correspondente a 2% do faturamento anual declarado, para gestão estratégica 360°.</p>
+               </div>
+
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  {/* OBJECTIVES PROGRESS */}
+                  <div className="space-y-6">
+                    <h5 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-[var(--text-primary)]">
+                       <TrendingUp className="text-gold" size={18} /> Objetivos vs Realidade
+                    </h5>
+                    <div className="space-y-4">
+                       {data.objectives.filter(o => o.selected).map(obj => {
+                         const goal = parseFloat(obj.value.replace(/\D/g, '') || 1) / 100;
+                         const saved = parseFloat(obj.saved.replace(/\D/g, '') || 0) / 100;
+                         const missing = Math.max(0, goal - saved);
+                         const perc = Math.min(100, (saved / goal * 100)).toFixed(1);
+                         
+                         return (
+                           <div key={obj.id} className="bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-primary)] shadow-sm">
+                              <div className="flex justify-between items-center mb-3">
+                                 <span className="font-bold text-sm text-[var(--text-primary)]">{obj.label}</span>
+                                 <span className="text-[10px] font-black bg-gold/10 text-gold px-3 py-1 rounded-full">{perc}%</span>
+                              </div>
+                              <div className="w-full h-2 bg-[var(--bg-primary)] rounded-full overflow-hidden mb-3">
+                                 <div className="h-full bg-gold shadow-[0_0_10px_rgba(197,160,89,0.5)]" style={{ width: `${perc}%` }}></div>
+                              </div>
+                              <div className="flex justify-between text-[9px] font-black text-[var(--text-secondary)] uppercase">
+                                 <span>JÁ TEM: R$ {saved.toLocaleString()}</span>
+                                 <span className="text-red-500">FALTA: R$ {missing.toLocaleString()}</span>
+                              </div>
+                           </div>
+                         );
+                       })}
+                    </div>
+                  </div>
+
+                  {/* GAP ANALYSIS */}
+                  <div className="space-y-6">
+                    <h5 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-[var(--text-primary)]">
+                       <AlertTriangle className="text-red-500" size={18} /> Pontos Cegos (Riscos)
+                    </h5>
+                    <div className="bg-red-500/5 dark:bg-red-500/10 rounded-3xl p-6 border border-red-500/20 space-y-4">
+                       {gaps.length > 0 ? gaps.map((gap, i) => (
+                         <div key={i} className="flex gap-3 items-center text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-tight">
+                            <X className="text-red-600 bg-white dark:bg-navy-900 rounded-full p-1 shadow-sm border border-red-100 dark:border-red-900/40" size={20} /> {gap}
+                         </div>
+                       )) : (
+                         <div className="text-green-600 font-bold text-sm">Parabéns! Nenhuma vulnerabilidade crítica identificada.</div>
+                       )}
+                    </div>
+                    <div className="p-8 bg-navy-900 dark:bg-navy-800 rounded-3xl text-white shadow-xl relative overflow-hidden group">
+                       <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl group-hover:bg-gold/10 transition-all"></div>
+                       <p className="text-[10px] uppercase font-bold text-white/40 mb-3 tracking-widest">Observação Estratégica</p>
+                       <p className="text-sm leading-relaxed italic opacity-90 font-medium">"A falta de blindagem patrimonial coloca em risco não apenas o seu futuro, mas a estabilidade de toda a família. A implementação deve priorizar estes GAPs."</p>
+                    </div>
+                  </div>
+               </div>
+
+               {/* CHARTS SECTION */}
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 border-t border-[var(--border-primary)] pt-12">
+                  <div className="h-[350px] flex flex-col">
+                    <h5 className="text-sm font-black uppercase tracking-widest mb-8 flex items-center gap-2 text-[var(--text-primary)]">
+                       <Activity className="text-gold" size={18} /> Projeção de Acúmulo (20 Anos)
+                    </h5>
+                    <ResponsiveContainer width="100%" height="100%">
+                       <LineChart data={projectionData}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-primary)" />
+                          <XAxis dataKey="year" fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
+                          <YAxis fontSize={10} tickLine={false} axisLine={false} tickFormatter={v => `R$${v/1000}k`} stroke="var(--text-secondary)" />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'var(--bg-secondary)', 
+                              borderColor: 'var(--border-primary)',
+                              borderRadius: '16px',
+                              color: 'var(--text-primary)',
+                              fontSize: '12px'
+                            }} 
+                          />
+                          <Line type="monotone" dataKey="Rentabilidade 8%" stroke="#64748b" strokeWidth={3} dot={false} />
+                          <Line type="monotone" dataKey="Rentabilidade 10%" stroke="#c5a059" strokeWidth={4} dot={false} />
+                       </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="h-[350px] flex flex-col">
+                    <h5 className="text-sm font-black uppercase tracking-widest mb-8 flex items-center gap-2 text-[var(--text-primary)]">
+                       <PieChart className="text-orange-500" size={18} /> Fluxo de Caixa Atual
+                    </h5>
+                    <ResponsiveContainer width="100%" height="100%">
+                       <BarChart data={cashFlowData}>
+                          <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
+                          <YAxis fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
+                          <Tooltip 
+                            cursor={{ fill: 'rgba(197,160,89,0.05)' }}
+                            contentStyle={{ 
+                              backgroundColor: 'var(--bg-secondary)', 
+                              borderColor: 'var(--border-primary)',
+                              borderRadius: '16px',
+                              color: 'var(--text-primary)',
+                              fontSize: '12px'
+                            }}
+                          />
+                          <Bar dataKey="value" radius={[10, 10, 0, 0]}>
+                            {cashFlowData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Bar>
+                       </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+               </div>
+            </div>
+
+            <div className="flex justify-center pt-6">
+               <button 
+                onClick={generatePDF}
+                className="bg-navy-900 text-white px-12 py-5 rounded-2xl flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95"
+               >
+                 <FileText size={24} /> Imprimir Proposta Estratégica
+               </button>
+            </div>
           </motion.div>
         );
       default:
@@ -652,9 +850,20 @@ const ClientOnboarding = () => {
               
               <div className="flex gap-4">
                 {currentStep < steps.length ? (
-                  <button type="button" onClick={nextStep} className="btn-primary px-10 py-4 flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] shadow-xl">
-                    Próximo <ChevronRight size={16} />
-                  </button>
+                  <div className="flex gap-4">
+                    <button type="button" onClick={nextStep} className="btn-primary px-10 py-4 flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] shadow-xl">
+                      Próximo <ChevronRight size={16} />
+                    </button>
+                    {currentStep === 6 && (
+                      <button 
+                        type="button" 
+                        onClick={() => setCurrentStep(7)} 
+                        className="bg-gold text-navy-900 px-6 py-4 rounded-xl flex items-center gap-2 text-[10px] uppercase font-black tracking-[0.2em] hover:bg-gold/90 transition-all shadow-lg"
+                      >
+                        Ver Proposta <ChevronRight size={16} />
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <div className="flex gap-3">
                     <button type="button" onClick={() => navigate('/admin')} className="btn-secondary px-6 py-4 text-[9px] uppercase font-black tracking-widest text-[var(--text-primary)]">
