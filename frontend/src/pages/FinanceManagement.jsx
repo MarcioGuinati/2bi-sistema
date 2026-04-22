@@ -17,6 +17,7 @@ import {
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
+import { maskCurrency, sanitizeValue } from '../utils/masks';
 
 const FinanceManagement = () => {
   const { success, error, confirm } = useNotification();
@@ -56,7 +57,7 @@ const FinanceManagement = () => {
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [form, setForm] = useState({
-    amount: '',
+    amount: maskCurrency('0'),
     description: '',
     type: 'expense',
     category_id: '',
@@ -114,10 +115,14 @@ const FinanceManagement = () => {
   const handleTransSubmit = async (e) => {
     e.preventDefault();
     try {
+      const sanitizedForm = {
+        ...form,
+        amount: sanitizeValue(form.amount)
+      };
       if (editingTrans) {
-        await api.put(`/transactions/${editingTrans.id}`, form);
+        await api.put(`/transactions/${editingTrans.id}`, sanitizedForm);
       } else {
-        await api.post('/transactions', form);
+        await api.post('/transactions', sanitizedForm);
       }
       setShowTransModal(false);
       success(editingTrans ? 'Lançamento atualizado!' : 'Lançamento registrado com sucesso!');
@@ -173,7 +178,7 @@ const FinanceManagement = () => {
   const handleOpenEdit = (t) => {
     setEditingTrans(t);
     setForm({
-      amount: t.amount,
+      amount: maskCurrency(t.amount),
       description: t.description,
       type: t.type,
       category_id: t.category_id,
@@ -214,7 +219,7 @@ const FinanceManagement = () => {
                 setEditingTrans(null); 
                 setForm({ 
                   ...form, 
-                  amount: '', 
+                  amount: maskCurrency('0'), 
                   description: '', 
                   recurrenceType: 'none',
                   installmentsCount: 1,
@@ -531,7 +536,7 @@ const FinanceManagement = () => {
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400">Valor</label>
-                    <input type="number" step="0.01" required value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-lg font-black" placeholder="R$ 0,00" />
+                    <input type="text" required value={form.amount} onChange={e => setForm({ ...form, amount: maskCurrency(e.target.value) })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-lg font-black" placeholder="R$ 0,00" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400">Descrição</label>

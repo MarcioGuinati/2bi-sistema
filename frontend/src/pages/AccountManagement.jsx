@@ -13,6 +13,7 @@ import {
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
+import { maskCurrency, sanitizeValue } from '../utils/masks';
 
 const AccountManagement = () => {
   const { success, error, confirm } = useNotification();
@@ -20,7 +21,7 @@ const AccountManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingAcc, setEditingAcc] = useState(null);
-  const [form, setForm] = useState({ name: '', type: 'Corrente', initial_balance: 0 });
+  const [form, setForm] = useState({ name: '', type: 'Corrente', initial_balance: maskCurrency('0') });
 
   const fetchData = async () => {
     try {
@@ -42,13 +43,13 @@ const AccountManagement = () => {
     e.preventDefault();
     try {
       if (editingAcc) {
-        await api.put(`/accounts/${editingAcc.id}`, form);
+        await api.put(`/accounts/${editingAcc.id}`, { ...form, initial_balance: sanitizeValue(form.initial_balance) });
       } else {
-        await api.post('/accounts', form);
+        await api.post('/accounts', { ...form, initial_balance: sanitizeValue(form.initial_balance) });
       }
       setShowModal(false);
       setEditingAcc(null);
-      setForm({ name: '', type: 'Corrente', initial_balance: 0 });
+      setForm({ name: '', type: 'Corrente', initial_balance: maskCurrency('0') });
       success(editingAcc ? 'Conta atualizada!' : 'Nova conta bancária registrada!');
       fetchData();
     } catch (err) { error('Erro ao salvar conta'); }
@@ -71,7 +72,7 @@ const AccountManagement = () => {
 
   const handleOpenEdit = (acc) => {
     setEditingAcc(acc);
-    setForm({ name: acc.name, type: acc.type, initial_balance: acc.initial_balance });
+    setForm({ name: acc.name, type: acc.type, initial_balance: maskCurrency(acc.initial_balance) });
     setShowModal(true);
   };
 
@@ -85,7 +86,7 @@ const AccountManagement = () => {
             <p className="text-[var(--text-secondary)] font-medium tracking-tight">Gerencie seus ativos e disponibilidades financeiras.</p>
           </div>
           <button
-            onClick={() => { setEditingAcc(null); setForm({ name: '', type: 'Corrente', initial_balance: 0 }); setShowModal(true); }}
+            onClick={() => { setEditingAcc(null); setForm({ name: '', type: 'Corrente', initial_balance: maskCurrency('0') }); setShowModal(true); }}
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={20} /> Nova Conta
@@ -197,12 +198,11 @@ const AccountManagement = () => {
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400">Saldo Inicial</label>
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
                       required
                       value={form.initial_balance}
-                      onChange={e => setForm({ ...form, initial_balance: e.target.value })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
+                      onChange={e => setForm({ ...form, initial_balance: maskCurrency(e.target.value) })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
                     />
                   </div>
                 </div>

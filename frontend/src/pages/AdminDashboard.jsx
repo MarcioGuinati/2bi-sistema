@@ -27,36 +27,7 @@ import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-
-const maskCPF = (v) => {
-  v = v.replace(/\D/g, "");
-  if (v.length > 11) v = v.substring(0, 11);
-  v = v.replace(/(\d{3})(\d)/, "$1.$2");
-  v = v.replace(/(\d{3})(\d)/, "$1.$2");
-  v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-  return v;
-};
-
-const maskPhone = (v) => {
-  v = v.replace(/\D/g, "");
-  if (v.length > 11) v = v.substring(0, 11);
-  v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-  v = v.replace(/(\d{5})(\d)/, "$1-$2");
-  return v;
-};
-
-const maskCurrency = (v) => {
-  if (!v && v !== 0) return "";
-  let val = v.toString().replace(/\D/g, "");
-  if (!val) return "";
-  val = (Number(val) / 100).toFixed(2);
-  val = val.replace(".", ",");
-  val = val.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-  val = val.replace(/(\d)(\d{3}),/g, "$1.$2,");
-  return "R$ " + val;
-};
-
-const sanitizeValue = (v) => v.toString().replace(/\D/g, "");
+import { maskCPF, maskPhone, maskCurrency, sanitizeValue } from '../utils/masks';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
