@@ -17,30 +17,64 @@ class BillingController {
 
   async storeContract(req, res) {
     try {
-      const { user_id, title, value, billingCycle, startDate } = req.body;
+      const { user_id, title, setupValue = 0, monthlyValue = 0, billingCycle, startDate, recurrence = 1 } = req.body;
       
+      // Calculate total value for display (Setup + first month if any)
+      const totalValue = Number(setupValue) + Number(monthlyValue);
+
       const contract = await Contract.create({
         user_id,
         title,
-        value,
+        value: totalValue,
+        setupValue,
+        monthlyValue,
+        recurrence,
         billingCycle,
         startDate: startDate || new Date(),
         status: 'active'
       });
 
-      // Automatically generate the first payment
-      await Payment.create({
-        user_id,
-        contract_id: contract.id,
-        amount: value,
-        dueDate: startDate || new Date(),
-        status: 'pending',
-        description: `Parcela 1 - ${title}`
-      });
+      // Automatically generate the requested number of payments
+      const payments = [];
+      const start = startDate ? new Date(startDate) : new Date();
+
+      // 1. Setup Payment
+      if (Number(setupValue) > 0) {
+        payments.push({
+          user_id,
+          contract_id: contract.id,
+          amount: setupValue,
+          dueDate: start,
+          status: 'pending',
+          description: `Setup/Implementação - ${title}`
+        });
+      }
+
+      // 2. Monthly/Recurring Payments
+      if (Number(monthlyValue) > 0) {
+        for (let i = 0; i < recurrence; i++) {
+          const dueDate = new Date(start);
+          dueDate.setMonth(start.getMonth() + i);
+
+          payments.push({
+            user_id,
+            contract_id: contract.id,
+            amount: monthlyValue,
+            dueDate,
+            status: 'pending',
+            description: recurrence > 1 ? `${title} (Mensalidade ${i + 1}/${recurrence})` : `${title} (Mensalidade)`
+          });
+        }
+      }
+
+      if (payments.length > 0) {
+        await Payment.bulkCreate(payments);
+      }
 
       return res.json(contract);
     } catch (err) {
-      return res.status(400).json({ error: 'Erro ao criar contrato' });
+      console.error(err);
+      return res.status(400).json({ error: 'Erro ao criar contrato e faturamento unificado' });
     }
   }
 

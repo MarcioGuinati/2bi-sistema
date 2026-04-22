@@ -42,7 +42,14 @@ const AdminDashboard = () => {
   const [clientContracts, setClientContracts] = useState([]);
   const [clientPayments, setClientPayments] = useState([]);
   const [showContractModal, setShowContractModal] = useState(false);
-  const [contractForm, setContractForm] = useState({ title: '', value: '', billingCycle: 'monthly', startDate: new Date().toISOString().split('T')[0] });
+  const [contractForm, setContractForm] = useState({ 
+    title: '', 
+    setupValue: '0', 
+    monthlyValue: '0', 
+    billingCycle: 'monthly', 
+    startDate: new Date().toISOString().split('T')[0],
+    recurrence: 1 
+  });
   const [billingStats, setBillingStats] = useState({ totalActiveValue: 0, pendingAmount: 0, paidMonth: 0 });
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -219,6 +226,10 @@ const AdminDashboard = () => {
     const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
     doc.text(docId, pageWidth - 20, 25, { align: 'right' });
     doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 30, { align: 'right' });
+    
+    // Summary of Fees for the header logic
+    const hasSetup = Number(contract.setupValue) > 0;
+    const hasMonthly = Number(contract.monthlyValue) > 0;
 
     let y = 60;
 
@@ -275,20 +286,45 @@ const AdminDashboard = () => {
     doc.text('III. VALORES E CONDIÇÕES', 20, y + 8);
     
     y += 18;
-    doc.setFillColor(248, 250, 252); // Slate 50
-    doc.roundedRect(20, y - 5, pageWidth - 40, 25, 3, 3, 'F');
     
-    doc.setFont('helvetica', 'normal');
-    doc.text('Investimento acordado:', 30, y + 5);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(197, 160, 89);
-    doc.text(`R$ ${Number(contract.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 30, y + 13);
+    // Setup Box
+    if (hasSetup) {
+      doc.setFillColor(248, 250, 252); 
+      doc.roundedRect(20, y - 5, (pageWidth - 40) / (hasMonthly ? 2.1 : 1), 25, 3, 3, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text('Taxa de Implementação (Setup):', 30, y + 5);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(197, 160, 89);
+      doc.text(`R$ ${Number(contract.setupValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 30, y + 13);
+    } else {
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text('* Taxa de Implementação (Setup) Isenta', 20, y + 5);
+    }
     
-    doc.setFontSize(10);
-    doc.setTextColor(10, 25, 47);
-    doc.text('CICLO:', 120, y + 5);
-    doc.text(contract.billingCycle === 'monthly' ? 'MENSAL' : contract.billingCycle === 'annual' ? 'ANUAL' : 'PAGAMENTO ÚNICO', 120, y + 13);
+    // Monthly Box
+    if (hasMonthly) {
+      const startX = hasSetup ? (pageWidth / 2) + 5 : 20;
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(startX, y - 5, (pageWidth - 40) / (hasSetup ? 2.1 : 1), 25, 3, 3, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(10, 25, 47);
+      doc.text(`Mensalidade (${contract.recurrence} Meses):`, startX + 10, y + 5);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(197, 160, 89);
+      doc.text(`R$ ${Number(contract.monthlyValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, startX + 10, y + 13);
+    }
+    
+    y += 30;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'italic');
+    doc.text(`* Vigência iniciada em ${new Date(contract.startDate).toLocaleDateString('pt-BR')}.`, 20, y);
 
     // 7. Signatures
     y = pageHeight - 60;
@@ -333,7 +369,7 @@ const AdminDashboard = () => {
         success('Plano atualizado!');
       } else {
         await api.post('/contracts', { ...contractForm, user_id: selectedClient.id });
-        success('Contrato e cobrança vinculados!');
+        success(`Contrato unificado ativado para ${selectedClient.name}!`);
       }
       setShowContractModal(false);
       setEditingBillingContract(null);
@@ -813,8 +849,12 @@ const AdminDashboard = () => {
                               </div>
                               <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                                 <div>
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor do Acordo</p>
+                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Acordo Total (Setup+Mes)</p>
                                   <div className="text-3xl font-black text-[var(--text-primary)]">R$ {Number(c.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                  <div className="flex gap-2 mt-1">
+                                    {Number(c.setupValue) > 0 && <span className="text-[8px] font-bold text-gold uppercase tracking-tighter">Setup: R${Number(c.setupValue).toLocaleString()}</span>}
+                                    {Number(c.monthlyValue) > 0 && <span className="text-[8px] font-bold text-blue-400 uppercase tracking-tighter">Mensal: R${Number(c.monthlyValue).toLocaleString()}</span>}
+                                  </div>
                                 </div>
                                 <div className="flex gap-3 w-full md:w-auto">
                                   <button
@@ -913,7 +953,42 @@ const AdminDashboard = () => {
                 </div>
                 <button onClick={() => setShowContractModal(false)} className="bg-navy-900/10 hover:bg-navy-900/20 p-2 rounded-xl transition-all"><X size={20} /></button>
               </div>
-              <form onSubmit={handleBillingSubmit} className="p-8 space-y-6">
+
+              {/* Suggestions Section */}
+              {!editingBillingContract && selectedClient && (
+                <div className="px-8 pt-6 pb-2 grid grid-cols-2 gap-4">
+                  <div 
+                    onClick={() => setContractForm({ 
+                      ...contractForm, 
+                      title: 'Plano Estratégico 360 (Setup + Mensal)', 
+                      setupValue: (Number(selectedClient.income || 0) * 12 * 0.02).toFixed(2),
+                      monthlyValue: '49.90',
+                      billingCycle: 'monthly',
+                      recurrence: 12
+                    })}
+                    className="p-4 bg-navy-900 rounded-2xl border border-gold/20 cursor-pointer hover:bg-navy-800 transition-all flex flex-col items-center gap-1 group"
+                  >
+                    <span className="text-gold text-[8px] font-bold uppercase tracking-widest">Plano Completo (Setup + Mes)</span>
+                    <span className="text-white text-xs font-black italic">R$ {(Number(selectedClient.income || 0) * 12 * 0.02 + 49.9).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div 
+                    onClick={() => setContractForm({ 
+                      ...contractForm, 
+                      title: 'Mentoria Mensal (Setup Isento)', 
+                      setupValue: '0',
+                      monthlyValue: '49.90',
+                      billingCycle: 'monthly',
+                      recurrence: 12
+                    })}
+                    className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] cursor-pointer hover:border-gold/30 transition-all flex flex-col items-center gap-1 group"
+                  >
+                    <span className="text-[var(--text-secondary)] text-[8px] font-bold uppercase tracking-widest">Isentar Setup</span>
+                    <span className="text-[var(--text-primary)] text-sm font-black italic">R$ 49,90/mês</span>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleBillingSubmit} className="p-8 space-y-6 pt-4">
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Nome do Produto ou Serviço</label>
                   <input
@@ -922,34 +997,52 @@ const AdminDashboard = () => {
                     className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Valor do Contrato (R$)</label>
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Taxa Setup (R$)</label>
                     <input
                       type="number" required placeholder="0.00"
-                      value={contractForm.value} onChange={e => setContractForm({ ...contractForm, value: e.target.value })}
+                      value={contractForm.setupValue} onChange={e => setContractForm({ ...contractForm, setupValue: e.target.value })}
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
                     />
                   </div>
                   <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Mensalidade (R$)</label>
+                    <input
+                      type="number" required placeholder="0.00"
+                      value={contractForm.monthlyValue} onChange={e => setContractForm({ ...contractForm, monthlyValue: e.target.value })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1 col-span-2 lg:col-span-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Recorrência</label>
                     <select
                       value={contractForm.billingCycle} onChange={e => setContractForm({ ...contractForm, billingCycle: e.target.value })}
-                      className="select-premium font-bold transition-all"
+                      className="select-premium font-bold transition-all h-full"
                     >
                       <option value="monthly">Mensal</option>
                       <option value="annual">Anual</option>
-                      <option value="once">Único</option>
+                      <option value="once">Pagam. Único</option>
                     </select>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Início da Vigência / 1º Vencimento</label>
-                  <input
-                    type="date" required
-                    value={contractForm.startDate} onChange={e => setContractForm({ ...contractForm, startDate: e.target.value })}
-                    className="input-premium w-full font-bold transition-all"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Início da Vigência</label>
+                    <input
+                      type="date" required
+                      value={contractForm.startDate} onChange={e => setContractForm({ ...contractForm, startDate: e.target.value })}
+                      className="input-premium w-full font-bold transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Meses a Gerar (Mensalidade)</label>
+                    <input
+                      type="number" required min="1" max="60"
+                      value={contractForm.recurrence} onChange={e => setContractForm({ ...contractForm, recurrence: Number(e.target.value) })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
+                    />
+                  </div>
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg mt-4 shadow-xl shadow-gold/20">
                   {editingBillingContract ? 'Salvar Alterações' : 'Registrar e Ativar Plano'}

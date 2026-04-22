@@ -13,6 +13,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: true
     },
+    setupValue: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+      defaultValue: 0
+    },
+    monthlyValue: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+      defaultValue: 0
+    },
+    recurrence: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 1
+    },
     billingCycle: {
       type: DataTypes.ENUM('monthly', 'annual', 'once'),
       defaultValue: 'monthly'
