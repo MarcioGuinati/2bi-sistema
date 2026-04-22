@@ -101,9 +101,9 @@ const AdminDashboard = () => {
       name: client.name,
       email: client.email,
       password: '',
-      phone: client.phone || '',
-      cpf: client.cpf || '',
-      income: client.income || '',
+      phone: maskPhone(client.phone || ''),
+      cpf: maskCPF(client.cpf || ''),
+      income: maskCurrency(client.income || '0'),
       occupation: client.occupation || '',
       financialGoal: client.financialGoal || '',
       customFields: client.customFields || []
@@ -113,11 +113,18 @@ const AdminDashboard = () => {
 
   const handleSubmitClient = async (e) => {
     e.preventDefault();
+    const sanitizedForm = {
+      ...clientForm,
+      cpf: sanitizeValue(clientForm.cpf),
+      phone: sanitizeValue(clientForm.phone),
+      income: sanitizeValue(clientForm.income)
+    };
+
     try {
       if (editingClient) {
-        await api.put(`/clients/${editingClient.id}`, clientForm);
+        await api.put(`/clients/${editingClient.id}`, sanitizedForm);
       } else {
-        await api.post('/register-client', clientForm);
+        await api.post('/register-client', sanitizedForm);
       }
       setShowRegModal(false);
       success(editingClient ? 'Cliente atualizado!' : 'Novo parceiro registrado com sucesso!');
@@ -191,6 +198,36 @@ const AdminDashboard = () => {
       setClientPayments(paymentsRes.data);
     } catch (err) { console.error('Error fetching billing'); }
   };
+
+  const maskCPF = (v) => {
+    v = v.replace(/\D/g, "");
+    if (v.length > 11) v = v.substring(0, 11);
+    v = v.replace(/(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    return v;
+  };
+
+  const maskPhone = (v) => {
+    v = v.replace(/\D/g, "");
+    if (v.length > 11) v = v.substring(0, 11);
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d{5})(\d)/, "$1-$2");
+    return v;
+  };
+
+  const maskCurrency = (v) => {
+    if (!v && v !== 0) return "";
+    let val = v.toString().replace(/\D/g, "");
+    if (!val) return "";
+    val = (Number(val) / 100).toFixed(2);
+    val = val.replace(".", ",");
+    val = val.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+    val = val.replace(/(\d)(\d{3}),/g, "$1.$2,");
+    return "R$ " + val;
+  };
+
+  const sanitizeValue = (v) => v.toString().replace(/\D/g, "");
 
   const preloadImage = (url) => {
     return new Promise((resolve, reject) => {
@@ -586,28 +623,28 @@ const AdminDashboard = () => {
               <form onSubmit={handleSubmitClient} className="p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Nome Completo</label>
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Nome Completo <span className="text-red-500">*</span></label>
                     <input type="text" required value={clientForm.name} onChange={e => setClientForm({ ...clientForm, name: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">E-mail de Acesso</label>
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">E-mail de Acesso <span className="text-red-500">*</span></label>
                     <input type="email" required value={clientForm.email} onChange={e => setClientForm({ ...clientForm, email: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Documento (CPF)</label>
-                    <input type="text" value={clientForm.cpf} onChange={e => setClientForm({ ...clientForm, cpf: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" />
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Documento (CPF) <span className="text-red-500">*</span></label>
+                    <input type="text" required value={clientForm.cpf} onChange={e => setClientForm({ ...clientForm, cpf: maskCPF(e.target.value) })} placeholder="000.000.000-00" className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Telefone Whatsapp</label>
-                    <input type="text" value={clientForm.phone} onChange={e => setClientForm({ ...clientForm, phone: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" />
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Telefone Whatsapp <span className="text-red-500">*</span></label>
+                    <input type="text" required value={clientForm.phone} onChange={e => setClientForm({ ...clientForm, phone: maskPhone(e.target.value) })} placeholder="(00) 00000-0000" className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Renda Mensal Estimada</label>
-                    <input type="number" value={clientForm.income} onChange={e => setClientForm({ ...clientForm, income: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all font-black text-[var(--text-primary)]" />
+                    <input type="text" value={clientForm.income} onChange={e => setClientForm({ ...clientForm, income: maskCurrency(e.target.value) })} placeholder="R$ 0,00" className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all font-black text-[var(--text-primary)]" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Profissão / Cargo</label>
@@ -680,7 +717,7 @@ const AdminDashboard = () => {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Senha de Acesso</label>
+                  <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Senha de Acesso <span className="text-red-500">*</span></label>
                   <input type="password" placeholder={editingClient ? 'Deixe em branco para manter' : 'Crie uma senha segura'} required={!editingClient} value={clientForm.password} onChange={e => setClientForm({ ...clientForm, password: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all" />
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg mt-6 shadow-xl shadow-gold/20">Finalizar Configuração</button>
