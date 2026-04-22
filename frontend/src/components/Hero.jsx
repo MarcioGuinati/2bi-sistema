@@ -6,9 +6,9 @@ const Hero = () => {
     <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-navy-900">
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="/assets/hero-bg.png" 
-          alt="2BI Background" 
+        <img
+          src="/assets/hero-bg.png"
+          alt="2BI Background"
           className="w-full h-full object-cover opacity-30 grayscale-[50%]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-navy-900 via-navy-900/80 to-transparent" />
@@ -27,19 +27,19 @@ const Hero = () => {
                 Excelência em Planejamento
               </span>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-heading font-bold text-white mb-6 leading-[1.1]">
               Do Caos à <br />
               <span className="text-gold italic">Prosperidade</span> Consistente.
             </h1>
-            
+
             <p className="text-xl text-slate-300 mb-10 leading-relaxed font-light">
               Planejamento financeiro com <span className="text-white font-medium">visão, estratégia e parceria</span> para transformar sua vida financeira e proteger seu legado.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <motion.a 
-                href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Af9SGv5_3pZ4ZNYkwur4mbWBNFHIenWpyA3ntS0VuB8F-UzzKj2Wt3X0tk4NrJtHfwrQv7W2y?gv=true"
+              <motion.a
+                href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ2PFBenM3-k489mFpnu2V8rR8hcIK6glAaZmwjY24LA29NzI0sq0hGrSy2L7klFVPrqvUabg6Lo?gv=true"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
@@ -50,7 +50,7 @@ const Hero = () => {
                 Agendar Reunião
               </motion.a>
 
-              <motion.a 
+              <motion.a
                 href="https://wa.me/5516992415924"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -79,8 +79,8 @@ const Hero = () => {
       </div>
 
       {/* Floating Elements */}
-      <motion.div 
-        animate={{ 
+      <motion.div
+        animate={{
           y: [0, -20, 0],
           rotate: [0, 5, 0]
         }}
