@@ -18,7 +18,8 @@ import {
   Trash2,
   Plus,
   CreditCard,
-  Eye
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +27,36 @@ import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+
+const maskCPF = (v) => {
+  v = v.replace(/\D/g, "");
+  if (v.length > 11) v = v.substring(0, 11);
+  v = v.replace(/(\d{3})(\d)/, "$1.$2");
+  v = v.replace(/(\d{3})(\d)/, "$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  return v;
+};
+
+const maskPhone = (v) => {
+  v = v.replace(/\D/g, "");
+  if (v.length > 11) v = v.substring(0, 11);
+  v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+  v = v.replace(/(\d{5})(\d)/, "$1-$2");
+  return v;
+};
+
+const maskCurrency = (v) => {
+  if (!v && v !== 0) return "";
+  let val = v.toString().replace(/\D/g, "");
+  if (!val) return "";
+  val = (Number(val) / 100).toFixed(2);
+  val = val.replace(".", ",");
+  val = val.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+  val = val.replace(/(\d)(\d{3}),/g, "$1.$2,");
+  return "R$ " + val;
+};
+
+const sanitizeValue = (v) => v.toString().replace(/\D/g, "");
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -56,7 +87,7 @@ const AdminDashboard = () => {
   // New Client Form State
   const [clientForm, setClientForm] = useState({
     name: '', email: '', password: '',
-    phone: '', cpf: '', income: '',
+    phone: '', cpf: '', income: maskCurrency('0'),
     occupation: '', financialGoal: '',
     customFields: []
   });
@@ -68,6 +99,7 @@ const AdminDashboard = () => {
   const [editingNote, setEditingNote] = useState(null);
   const [editingBillingContract, setEditingBillingContract] = useState(null);
   const [newContract, setNewContract] = useState({ title: '', url: '' });
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -91,7 +123,7 @@ const AdminDashboard = () => {
 
   const handleOpenRegister = () => {
     setEditingClient(null);
-    setClientForm({ name: '', email: '', password: '', phone: '', cpf: '', income: '', occupation: '', financialGoal: '', customFields: [] });
+    setClientForm({ name: '', email: '', password: '', phone: '', cpf: '', income: maskCurrency('0'), occupation: '', financialGoal: '', customFields: [] });
     setShowRegModal(true);
   };
 
@@ -198,36 +230,6 @@ const AdminDashboard = () => {
       setClientPayments(paymentsRes.data);
     } catch (err) { console.error('Error fetching billing'); }
   };
-
-  const maskCPF = (v) => {
-    v = v.replace(/\D/g, "");
-    if (v.length > 11) v = v.substring(0, 11);
-    v = v.replace(/(\d{3})(\d)/, "$1.$2");
-    v = v.replace(/(\d{3})(\d)/, "$1.$2");
-    v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-    return v;
-  };
-
-  const maskPhone = (v) => {
-    v = v.replace(/\D/g, "");
-    if (v.length > 11) v = v.substring(0, 11);
-    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-    v = v.replace(/(\d{5})(\d)/, "$1-$2");
-    return v;
-  };
-
-  const maskCurrency = (v) => {
-    if (!v && v !== 0) return "";
-    let val = v.toString().replace(/\D/g, "");
-    if (!val) return "";
-    val = (Number(val) / 100).toFixed(2);
-    val = val.replace(".", ",");
-    val = val.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-    val = val.replace(/(\d)(\d{3}),/g, "$1.$2,");
-    return "R$ " + val;
-  };
-
-  const sanitizeValue = (v) => v.toString().replace(/\D/g, "");
 
   const preloadImage = (url) => {
     return new Promise((resolve, reject) => {
@@ -718,7 +720,23 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Senha de Acesso <span className="text-red-500">*</span></label>
-                  <input type="password" placeholder={editingClient ? 'Deixe em branco para manter' : 'Crie uma senha segura'} required={!editingClient} value={clientForm.password} onChange={e => setClientForm({ ...clientForm, password: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all" />
+                  <div className="relative">
+                    <input 
+                      type={showPassword ? 'text' : 'password'} 
+                      placeholder={editingClient ? 'Deixe em branco para manter' : 'Crie uma senha segura'} 
+                      required={!editingClient} 
+                      value={clientForm.password} 
+                      onChange={e => setClientForm({ ...clientForm, password: e.target.value })} 
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 pr-12 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-gold transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg mt-6 shadow-xl shadow-gold/20">Finalizar Configuração</button>
               </form>
