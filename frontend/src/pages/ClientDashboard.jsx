@@ -40,6 +40,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
+import AnnouncementPanel from '../components/AnnouncementPanel';
 
 const ClientDashboard = () => {
   const { user } = useAuth();
@@ -384,6 +385,8 @@ const ClientDashboard = () => {
             </a>
           </div>
         </div>
+
+        <AnnouncementPanel />
 
         {/* Tab Navigation */}
         <div className="flex gap-4 border-b border-[var(--border-primary)] pb-4 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4 md:mx-0 md:px-0">

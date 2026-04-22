@@ -10,6 +10,7 @@ const Note = require('./Note')(sequelize, DataTypes);
 const Contract = require('./Contract')(sequelize, DataTypes);
 const Account = require('./Account')(sequelize, DataTypes);
 const Payment = require('./Payment')(sequelize, DataTypes);
+const Announcement = require('./Announcement')(sequelize, DataTypes);
 
 // User & Category
 User.hasMany(Category, { foreignKey: 'user_id' });
@@ -73,5 +74,6 @@ module.exports = {
   Note,
   Contract,
   Account,
-  Payment
+  Payment,
+  Announcement
 };

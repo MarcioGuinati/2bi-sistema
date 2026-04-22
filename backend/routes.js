@@ -7,6 +7,7 @@ const NoteController = require('./controllers/NoteController');
 const ContractController = require('./controllers/ContractController');
 const AccountController = require('./controllers/AccountController');
 const BillingController = require('./controllers/BillingController');
+const AnnouncementController = require('./controllers/AnnouncementController');
 const authMiddleware = require('./middleware/auth');
 
 const routes = new Router();
@@ -69,5 +70,12 @@ routes.get('/notes/:userId', NoteController.index);
 routes.post('/notes/:userId', NoteController.store);
 routes.put('/notes/:id', NoteController.update);
 routes.delete('/notes/:id', NoteController.delete);
+
+// Announcements (Avisos)
+routes.get('/announcements', AnnouncementController.index);
+routes.get('/admin/announcements', AnnouncementController.index);
+routes.post('/admin/announcements', AnnouncementController.store);
+routes.put('/admin/announcements/:id', AnnouncementController.update);
+routes.delete('/admin/announcements/:id', AnnouncementController.delete);
 
 module.exports = routes;

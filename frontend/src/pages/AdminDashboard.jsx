@@ -19,7 +19,12 @@ import {
   Plus,
   CreditCard,
   Eye,
-  EyeOff
+  EyeOff,
+  Bell,
+  Megaphone,
+  Trophy,
+  Star,
+  Activity
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -72,6 +77,19 @@ const AdminDashboard = () => {
   const [newContract, setNewContract] = useState({ title: '', url: '' });
   const [showPassword, setShowPassword] = useState(false);
 
+  // Announcements State
+  const [announcements, setAnnouncements] = useState([]);
+  const [showAnnModal, setShowAnnModal] = useState(false);
+  const [editingAnn, setEditingAnn] = useState(null);
+  const [annForm, setAnnForm] = useState({
+    title: '',
+    content: '',
+    type: 'info',
+    priority: false,
+    active: true,
+    link: ''
+  });
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -90,7 +108,15 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchData();
+    fetchAnnouncements();
   }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      const res = await api.get('/admin/announcements');
+      setAnnouncements(res.data);
+    } catch (err) { console.error('Error fetching announcements'); }
+  };
 
   const handleOpenRegister = () => {
     setEditingClient(null);
@@ -441,6 +467,49 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleAnnSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingAnn) {
+        await api.put(`/admin/announcements/${editingAnn.id}`, annForm);
+        success('Aviso atualizado!');
+      } else {
+        await api.post('/admin/announcements', annForm);
+        success('Novo aviso publicado aos parceiros!');
+      }
+      setShowAnnModal(false);
+      fetchAnnouncements();
+    } catch (err) { error('Erro ao salvar aviso'); }
+  };
+
+  const handleDeleteAnn = (id) => {
+    confirm({
+      title: 'Excluir Aviso',
+      message: 'Esta informação deixará de aparecer para os clientes. Confirmar exclusão?',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/announcements/${id}`);
+          success('Aviso removido');
+          fetchAnnouncements();
+        } catch (err) { error('Erro ao excluir aviso'); }
+      }
+    });
+  };
+
+  const handleOpenAnnEdit = (ann) => {
+    setEditingAnn(ann);
+    setAnnForm({
+      title: ann.title,
+      content: ann.content,
+      type: ann.type,
+      priority: ann.priority,
+      active: ann.active,
+      link: ann.link || ''
+    });
+    setShowAnnModal(true);
+  };
+
   const handleDeleteContract = (id) => {
     confirm({
       title: 'Cancelar Contrato',
@@ -466,6 +535,16 @@ const AdminDashboard = () => {
             <p className="text-slate-400 font-medium tracking-tight">Gestão estratégica de parcerias e CRM.</p>
           </div>
           <div className="flex gap-4">
+            <button
+              onClick={() => {
+                setEditingAnn(null);
+                setAnnForm({ title: '', content: '', type: 'info', priority: false, active: true, link: '' });
+                setShowAnnModal(true);
+              }}
+              className="bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-[var(--bg-primary)] transition-all shadow-sm"
+            >
+              <Megaphone size={20} className="text-gold" /> Gerenciar Avisos
+            </button>
             <button
               onClick={handleOpenRegister}
               className="btn-primary flex items-center gap-2"
@@ -1152,6 +1231,136 @@ const AdminDashboard = () => {
               </div>
               <div className="flex-1 bg-slate-800 p-4">
                 <iframe src={previewUrl} className="w-full h-full rounded-2xl shadow-inner bg-white" title="Contract Preview" />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showAnnModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[150] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-white/20 flex flex-col md:flex-row h-[90vh]">
+              {/* Left Column: Management */}
+              <div className="flex-1 p-8 border-r border-[var(--border-primary)] overflow-y-auto custom-scrollbar">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-black font-heading italic">{editingAnn ? 'Editar Comunicado' : 'Novo Comunicado'}</h3>
+                  {!editingAnn && (
+                    <div className="bg-gold/10 text-gold text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest">Canal 2BI</div>
+                  )}
+                </div>
+
+                <form onSubmit={handleAnnSubmit} className="space-y-6">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Título do Aviso</label>
+                    <input type="text" required value={annForm.title} onChange={e => setAnnForm({ ...annForm, title: e.target.value })} className="input-premium" placeholder="Ex: Sistema Atualizado v2.0" />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Tipo de Comunicado</label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { id: 'info', label: 'Informativo', icon: Bell },
+                        { id: 'update', label: 'Atualização', icon: Activity },
+                        { id: 'promo', label: 'Promoção', icon: Megaphone },
+                        { id: 'contest', label: 'Sorteio', icon: Trophy }
+                      ].map(type => (
+                        <button
+                          key={type.id}
+                          type="button"
+                          onClick={() => setAnnForm({ ...annForm, type: type.id })}
+                          className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${annForm.type === type.id ? 'border-gold bg-gold/10 text-gold' : 'border-[var(--border-primary)] text-slate-400 hover:border-slate-300'}`}
+                        >
+                          <type.icon size={20} />
+                          <span className="text-[10px] font-black uppercase">{type.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Conteúdo do Aviso</label>
+                    <textarea required value={annForm.content} onChange={e => setAnnForm({ ...annForm, content: e.target.value })} className="input-premium h-32 resize-none" placeholder="O que você deseja comunicar aos seus clientes?" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Link Externo / Saiba Mais (Opcional)</label>
+                    <input type="url" value={annForm.link} onChange={e => setAnnForm({ ...annForm, link: e.target.value })} className="input-premium" placeholder="https://..." />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${annForm.priority ? 'bg-gold text-white' : 'bg-slate-100 text-slate-400'}`}>
+                        <Star size={20} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">Prioridade Máxima</div>
+                        <div className="text-[10px] text-slate-400">Exibir em destaque no topo do dashboard.</div>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setAnnForm({ ...annForm, priority: !annForm.priority })} className={`w-14 h-8 rounded-full relative transition-all ${annForm.priority ? 'bg-gold' : 'bg-slate-300'}`}>
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${annForm.priority ? 'translate-x-6' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${annForm.active ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                        <Activity size={20} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">Publicação Ativa</div>
+                        <div className="text-[10px] text-slate-400">Controla se o aviso está visível para os clientes.</div>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setAnnForm({ ...annForm, active: !annForm.active })} className={`w-14 h-8 rounded-full relative transition-all ${annForm.active ? 'bg-green-500' : 'bg-slate-300'}`}>
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${annForm.active ? 'translate-x-6' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button type="submit" className="flex-1 btn-primary py-4 font-black">{editingAnn ? 'Salvar Alterações' : 'Publicar Agora'}</button>
+                    {editingAnn && (
+                      <button type="button" onClick={() => handleDeleteAnn(editingAnn.id)} className="p-4 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-all">
+                        <Trash2 size={20} />
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+              {/* Right Column: Existing List & Preview */}
+              <div className="w-full md:w-80 bg-[var(--bg-primary)] p-8 overflow-y-auto custom-scrollbar flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                  <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">Todos os Comunicados</h4>
+                  <button onClick={() => setShowAnnModal(false)} className="text-slate-400"><X size={20} /></button>
+                </div>
+
+                <div className="space-y-4">
+                  {announcements.map(ann => (
+                    <div key={ann.id} onClick={() => handleOpenAnnEdit(ann)} className={`p-4 rounded-2xl border cursor-pointer transition-all ${editingAnn?.id === ann.id ? 'border-gold bg-white shadow-lg' : 'border-[var(--border-primary)] bg-[var(--bg-secondary)] hover:border-gold'}`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${ann.active ? (ann.type === 'update' ? 'bg-blue-100 text-blue-600' : ann.type === 'promo' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600') : 'bg-slate-100 text-slate-400'}`}>
+                          {ann.type === 'update' ? <Activity size={14} /> : ann.type === 'promo' ? <Megaphone size={14} /> : <Bell size={14} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-black truncate">{ann.title}</div>
+                          <div className={`text-[8px] font-black uppercase tracking-widest ${ann.active ? 'text-green-500' : 'text-slate-400'}`}>
+                            {ann.active ? 'Publicado' : 'Inativo'}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-[10px] text-slate-400 line-clamp-2">{ann.content}</div>
+                    </div>
+                  ))}
+                  {announcements.length === 0 && (
+                    <div className="text-center py-10">
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
+                        <Activity size={24} />
+                      </div>
+                      <p className="text-[10px] text-slate-400 uppercase font-black">Nenhum aviso ativo</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>
