@@ -13,6 +13,7 @@ import Services from './components/Services';
 import HowItWorks from './components/HowItWorks';
 import Stats from './components/Stats';
 import Contact from './components/Contact';
+import AppShowcase from './components/AppShowcase';
 import Footer from './components/Footer';
 
 // System Pages
@@ -35,6 +36,7 @@ const Institutional = () => (
       <About />
       <Partners />
       <Services />
+      <AppShowcase />
       <Stats />
       <HowItWorks />
       <Contact />
