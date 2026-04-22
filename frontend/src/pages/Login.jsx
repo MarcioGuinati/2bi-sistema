@@ -149,7 +149,7 @@ const Login = () => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-navy-900 text-white py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-gold hover:text-navy-900 transition-all shadow-xl shadow-navy-900/10 active:scale-[0.98]"
+                    className="w-full bg-navy-900 dark:bg-gold text-white dark:text-navy-900 py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-gold hover:text-navy-900 dark:hover:bg-white transition-all shadow-xl shadow-navy-900/10 active:scale-[0.98]"
                 >
                     {loading ? 'Validando Acesso...' : 'Autenticar com Segurança'}
                     {!loading && <ArrowRight size={20} />}
