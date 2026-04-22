@@ -651,10 +651,17 @@ const ClientOnboarding = () => {
                <div className="bg-navy-900 dark:bg-navy-800 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 text-center relative overflow-hidden shadow-2xl border border-gold/20">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
                   <h4 className="text-gold text-[10px] font-black uppercase tracking-[0.5em] mb-4">Investimento para Implementação</h4>
-                  <div className="text-4xl md:text-7xl font-black text-white italic tracking-tighter mb-4">
+                  <div className="text-4xl md:text-7xl font-black text-white italic tracking-tighter mb-2">
                     R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
-                  <p className="text-white/40 text-[10px] md:text-xs font-medium max-w-sm mx-auto">Valor correspondente a 2% do faturamento anual declarado, para gestão estratégica 360°.</p>
+                  <div className="flex flex-col items-center gap-1 mb-6">
+                    <p className="text-white/40 text-[10px] md:text-xs font-medium max-w-sm mx-auto">Taxa de Implementação (2% do faturamento anual)</p>
+                    <div className="h-[1px] w-12 bg-gold/30 my-2"></div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gold font-black text-xl md:text-2xl italic tracking-tighter">R$ 49,90</span>
+                      <span className="text-white/60 text-[10px] uppercase font-bold tracking-widest">/ mensal</span>
+                    </div>
+                  </div>
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
