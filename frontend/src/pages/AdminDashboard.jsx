@@ -616,8 +616,15 @@ const AdminDashboard = () => {
                           {c.name.charAt(0)}
                         </div>
                         <div className="cursor-pointer" onClick={() => handleSelectClient(c)}>
-                          <div className="font-bold text-sm">{c.name}</div>
-                          <div className="text-[10px] text-gold font-black uppercase italic">Membro Premium</div>
+                          <div className="font-bold text-sm flex items-center gap-2">
+                             {c.name}
+                             {c.isLead && (
+                               <span className="bg-gold text-[8px] font-black px-2 py-0.5 rounded text-navy-900 uppercase tracking-tighter shadow-sm">Lead Site</span>
+                             )}
+                          </div>
+                          <div className="text-[10px] text-gold font-black uppercase italic">
+                            {c.isActive ? 'Membro Premium' : 'Aguardando Ativação'}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -769,15 +776,19 @@ const AdminDashboard = () => {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Senha de Acesso <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-black text-slate-400 ml-2">
+                    {(editingClient?.isLead && !editingClient?.isActive) ? 'Cadastrar Senha Definitiva' : 'Senha de Acesso'} 
+                    {!editingClient && <span className="text-red-500">*</span>}
+                    {(editingClient?.isLead && !editingClient?.isActive) && <span className="text-gold ml-2 font-bold">(Obrigatório para Ativar)</span>}
+                  </label>
                   <div className="relative">
                     <input 
                       type={showPassword ? 'text' : 'password'} 
-                      placeholder={editingClient ? 'Deixe em branco para manter' : 'Crie uma senha segura'} 
-                      required={!editingClient} 
+                      placeholder={editingClient ? ((editingClient.isLead && !editingClient.isActive) ? 'Crie uma senha para o acesso' : 'Deixe em branco para manter') : 'Crie uma senha segura'} 
+                      required={!editingClient || (editingClient.isLead && !editingClient.isActive)} 
                       value={clientForm.password} 
                       onChange={e => setClientForm({ ...clientForm, password: e.target.value })} 
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 pr-12 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)]" 
+                      className={`w-full bg-[var(--bg-primary)] border p-4 pr-12 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)] ${(editingClient?.isLead && !editingClient?.isActive) ? 'border-gold/50' : 'border-[var(--border-primary)]'}`} 
                     />
                     <button
                       type="button"

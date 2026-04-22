@@ -14,6 +14,7 @@ const routes = new Router();
 
 // Public routes
 routes.post('/login', AuthController.login);
+routes.post('/register-lead', AuthController.registerLead);
 
 // Protected routes
 routes.use(authMiddleware);

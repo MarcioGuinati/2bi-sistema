@@ -66,6 +66,38 @@ class AuthController {
 
     return res.json(user);
   }
+ 
+  async registerLead(req, res) {
+    try {
+      const { name, email, phone, objective, message } = req.body;
+ 
+      const userExists = await User.findOne({ where: { email } });
+      if (userExists) {
+        return res.status(400).json({ error: 'E-mail já cadastrado' });
+      }
+ 
+      // Generate a random placeholder password
+      const randomPass = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const passwordHash = await bcrypt.hash(randomPass, 8);
+ 
+      const user = await User.create({
+        name,
+        email,
+        password: passwordHash,
+        role: 'client',
+        phone,
+        isLead: true,
+        isActive: false,
+        leadSource: 'site',
+        financialGoal: `Objetivo: ${objective}. Mensagem: ${message}`
+      });
+ 
+      return res.json({ success: true, message: 'Solicitação enviada com sucesso' });
+    } catch (err) {
+      console.error('Error registering lead:', err);
+      return res.status(500).json({ error: 'Erro ao processar sua solicitaçã' });
+    }
+  }
 
   async listClients(req, res) {
     if (req.userRole !== 'admin') {
@@ -74,7 +106,7 @@ class AuthController {
 
     const clients = await User.findAll({
       where: { role: 'client' },
-      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'onboardingData', 'created_at'],
+      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'onboardingData', 'isLead', 'isActive', 'leadSource', 'created_at'],
       order: [['created_at', 'DESC']]
     });
 
@@ -108,6 +140,8 @@ class AuthController {
 
       if (password && password.trim() !== '') {
         updateData.password = await bcrypt.hash(password, 8);
+        // Se era um lead inativo, ao cadastrar a senha ele vira um cliente ativo
+        updateData.isActive = true;
       }
 
       user.set(updateData);

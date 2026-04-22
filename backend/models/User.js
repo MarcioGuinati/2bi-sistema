@@ -56,6 +56,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSONB,
       allowNull: true,
       defaultValue: {}
+    },
+    isLead: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    leadSource: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     }
   });
 
