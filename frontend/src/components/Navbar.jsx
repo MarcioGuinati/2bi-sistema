@@ -28,20 +28,12 @@ const Navbar = () => {
   return (
     <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[var(--bg-secondary)]/80 backdrop-blur-xl border-b border-[var(--border-primary)] py-3 shadow-lg' : 'bg-transparent py-6'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center transition-all duration-300">
-        <Link to="/" className="flex items-center gap-2 group">
-          <motion.div 
-            animate={{ 
-              rotate: scrolled ? 360 : 0,
-              scale: scrolled ? 0.9 : 1
-            }}
-            className="text-gold font-bold text-3xl transition-transform group-hover:scale-110"
-          >
-            2BI
-          </motion.div>
-          <div className="flex flex-col leading-none">
-            <span className={`font-heading font-bold text-xl tracking-tight transition-colors duration-300 ${scrolled ? 'text-[var(--text-primary)]' : 'text-white'}`}>Planejamento</span>
-            <span className="text-gold text-[10px] uppercase tracking-[0.2em] font-black italic">Estratégia Financeira</span>
-          </div>
+        <Link to="/" className="flex items-center group">
+          <img 
+            src="/logo_2bi.png" 
+            alt="2BI Planejamento" 
+            className={`h-auto transition-all duration-300 ${scrolled ? 'w-32' : 'w-40'}`}
+          />
         </Link>
 
         {/* Desktop Links */}

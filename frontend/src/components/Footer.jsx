@@ -7,14 +7,15 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
           
           <div className="col-span-1 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-gold font-bold text-3xl">2BI</span>
-              <div className="flex flex-col leading-none">
-                <span className="text-white font-heading font-bold text-xl tracking-tight">Planejamento</span>
-              </div>
+            <div className="mb-6">
+              <img 
+                src="/logo_2bi.png" 
+                alt="2BI Planejamento" 
+                className="w-32 h-auto"
+              />
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-8">
-              Estratégia financeira para construir prosperidade com consistência. Onde os números encontram o propósito.
+              Estratégia financeira para construir prosperidade com consistência. Inteligência patrimonial para quem busca liberdade.
             </p>
           </div>
 

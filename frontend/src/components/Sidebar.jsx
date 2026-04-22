@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Wallet, 
@@ -47,17 +47,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       fixed inset-y-0 left-0 w-72 bg-navy-900 flex flex-col border-r border-white/5 z-[100] shadow-2xl transition-transform duration-300 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     `}>
-      {/* Brand */}
-      <div className="p-8 pb-12 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center font-black text-navy-900 text-xl shadow-lg shadow-gold/20">
-            2BI
-          </div>
-          <div className="flex flex-col">
-            <div className="text-white font-black tracking-tighter text-lg leading-none">PLANEJAMENTO</div>
-            <div className="text-gold text-[8px] font-black uppercase tracking-[0.2em] mt-1">Estratégia Financeira</div>
-          </div>
-        </div>
+      <div className="p-8 pb-10">
+        <Link to="/panel" className="block transform hover:scale-[1.02] transition-all duration-300">
+          <img 
+            src="/logo_2bi.png" 
+            alt="2BI Planejamento" 
+            className="w-full max-w-[180px] h-auto object-contain drop-shadow-xl"
+          />
+        </Link>
       </div>
 
       {/* Navigation */}

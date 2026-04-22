@@ -49,9 +49,11 @@ const Login = () => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="relative z-10 m-20 self-end p-10 bg-white/5 backdrop-blur-xl rounded-[3rem] border border-white/10 shadow-2xl max-w-lg"
         >
-            <div className="w-16 h-16 bg-gold rounded-2xl flex items-center justify-center text-navy-900 font-black text-2xl shadow-xl shadow-gold/20 mb-8">
-                2BI
-            </div>
+            <img 
+                src="/logo_2bi.png" 
+                alt="2BI Planejamento" 
+                className="w-48 h-auto object-contain mb-8 filter brightness-0 invert"
+            />
             <h2 className="text-4xl font-black text-white italic leading-tight tracking-tighter mb-4">
                 Estratégia e Inteligência <br/> <span className="text-gold">Financeira Aplicada.</span>
             </h2>
@@ -81,13 +83,12 @@ const Login = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-md w-full"
         >
-            {/* BRANDING MOBILE */}
-            <div className="md:hidden flex items-center gap-3 mb-10 justify-center">
-                 <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center font-black text-navy-900 text-xl shadow-lg">2BI</div>
-                 <div className="flex flex-col">
-                    <span className="text-navy-900 font-black tracking-tighter text-lg leading-none">PLANEJAMENTO</span>
-                    <span className="text-gold text-[8px] font-black uppercase tracking-widest font-heading">Estratégia Financeira</span>
-                 </div>
+            <div className="md:hidden flex items-center justify-center mb-10">
+                 <img 
+                    src="/logo_2bi.png" 
+                    alt="2BI Planejamento" 
+                    className="w-32 h-auto"
+                 />
             </div>
 
             <div className="mb-12">

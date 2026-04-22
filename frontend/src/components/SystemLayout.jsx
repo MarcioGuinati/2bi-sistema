@@ -14,9 +14,12 @@ const SystemLayout = ({ children }) => {
 
       {/* Mobile Top Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-navy-900 flex items-center justify-between px-6 z-[60] shadow-lg">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center font-black text-navy-900 text-sm">2BI</div>
-          <span className="text-white font-black text-xs tracking-tighter">PLANEJAMENTO</span>
+        <div className="flex items-center">
+          <img 
+            src="/logo_2bi.png" 
+            alt="2BI Planejamento" 
+            className="h-8 w-auto object-contain"
+          />
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
