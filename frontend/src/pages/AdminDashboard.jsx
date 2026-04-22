@@ -192,7 +192,17 @@ const AdminDashboard = () => {
     } catch (err) { console.error('Error fetching billing'); }
   };
 
-  const generateContractPDF = (contract) => {
+  const preloadImage = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
+
+  const generateContractPDF = async (contract) => {
     const doc = new jsPDF();
     const client = selectedClient;
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -211,21 +221,30 @@ const AdminDashboard = () => {
     doc.setFillColor(10, 25, 47); // Navy 900
     doc.rect(0, 0, pageWidth, 40, 'F');
     
+    // 2.1 Logo
+    try {
+      const logo = await preloadImage('/logo_2bi.png');
+      // Position logo at the left
+      doc.addImage(logo, 'PNG', 20, 8, 20, 20);
+    } catch (err) {
+      console.error('Erro ao carregar logo para o PDF (Admin):', err);
+    }
+    
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 20, 25);
+    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 45, 25);
     
     doc.setTextColor(197, 160, 89); // Gold
     doc.setFontSize(8);
-    doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 20, 32);
+    doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 45, 32);
 
     // 3. Document ID / Date
     doc.setTextColor(100, 116, 139); // Slate 400
     doc.setFontSize(7);
     const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
-    doc.text(docId, pageWidth - 20, 25, { align: 'right' });
-    doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 30, { align: 'right' });
+    doc.text(docId, pageWidth - 20, 15, { align: 'right' });
+    doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 20, { align: 'right' });
     
     // Summary of Fees for the header logic
     const hasSetup = Number(contract.setupValue) > 0;
@@ -350,15 +369,25 @@ const AdminDashboard = () => {
     return doc;
   };
 
-  const handleDownloadContract = (contract) => {
-    const doc = generateContractPDF(contract);
-    doc.save(`Contrato_${selectedClient.name}_${contract.title}.pdf`);
-    success('Contrato baixado!');
+  const handleDownloadContract = async (contract) => {
+    try {
+      const doc = await generateContractPDF(contract);
+      doc.save(`Contrato_${selectedClient.name}_${contract.title}.pdf`);
+      success('Contrato baixado!');
+    } catch (err) {
+      console.error('Erro ao baixar contrato:', err);
+      error('Falha ao gerar PDF.');
+    }
   };
 
-  const handlePreviewContract = (contract) => {
-    const doc = generateContractPDF(contract);
-    setPreviewUrl(doc.output('datauristring'));
+  const handlePreviewContract = async (contract) => {
+    try {
+      const doc = await generateContractPDF(contract);
+      setPreviewUrl(doc.output('datauristring'));
+    } catch (err) {
+      console.error('Erro ao gerar preview:', err);
+      error('Falha ao gerar visualização do contrato.');
+    }
   };
 
   const handleBillingSubmit = async (e) => {

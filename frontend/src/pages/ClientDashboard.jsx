@@ -140,7 +140,17 @@ const ClientDashboard = () => {
 
   const [currentQuote, setCurrentQuote] = useState(0);
 
-  const generateContractPDF = (contract) => {
+  const preloadImage = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
+
+  const generateContractPDF = async (contract) => {
     const doc = new jsPDF();
     const client = user;
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -159,21 +169,30 @@ const ClientDashboard = () => {
     doc.setFillColor(10, 25, 47); // Navy 900
     doc.rect(0, 0, pageWidth, 40, 'F');
     
+    // 2.1 Logo
+    try {
+      const logo = await preloadImage('/logo_2bi.png');
+      // Position logo at the left
+      doc.addImage(logo, 'PNG', 20, 8, 20, 20);
+    } catch (err) {
+      console.error('Erro ao carregar logo para o PDF:', err);
+    }
+    
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 20, 25);
+    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 45, 25);
     
     doc.setTextColor(197, 160, 89); // Gold
     doc.setFontSize(8);
-    doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 20, 32);
+    doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 45, 32);
 
     // 3. Document ID / Date
     doc.setTextColor(100, 116, 139); // Slate 400
     doc.setFontSize(7);
     const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
-    doc.text(docId, pageWidth - 20, 25, { align: 'right' });
-    doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 30, { align: 'right' });
+    doc.text(docId, pageWidth - 20, 15, { align: 'right' });
+    doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 20, { align: 'right' });
     
     // Summary of Fees
     const hasSetup = Number(contract.setupValue) > 0;
@@ -296,10 +315,15 @@ const ClientDashboard = () => {
     return doc;
   };
 
-  const handleDownloadContract = (contract) => {
-    const doc = generateContractPDF(contract);
-    doc.save(`Contrato_2BI_${contract.title}.pdf`);
-    success('Contrato baixado com sucesso!');
+  const handleDownloadContract = async (contract) => {
+    try {
+      const doc = await generateContractPDF(contract);
+      doc.save(`Contrato_2BI_${contract.title.replace(/\s+/g, '_')}.pdf`);
+      success('Contrato baixado com sucesso!');
+    } catch (err) {
+      console.error('Erro ao baixar contrato:', err);
+      error('Ocorreu um erro ao gerar o PDF do contrato.');
+    }
   };
 
   useEffect(() => {
