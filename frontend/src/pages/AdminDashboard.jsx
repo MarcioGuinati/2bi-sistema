@@ -382,7 +382,24 @@ const AdminDashboard = () => {
       await api.put(`/payments/${paymentId}/pay`);
       success('Pagamento baixado com sucesso!');
       fetchBillingData(selectedClient.id);
+      fetchData(); // Refresh main dashboard stats
     } catch (err) { error('Erro ao baixar pagamento'); }
+  };
+
+  const handleUnpayDebt = async (paymentId) => {
+    confirm({
+      title: 'Estornar Pagamento',
+      message: 'Deseja marcar este pagamento como pendente novamente?',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.put(`/payments/${paymentId}/unpay`);
+          success('Pagamento estornado com sucesso');
+          fetchBillingData(selectedClient.id);
+          fetchData(); // Refresh main dashboard stats
+        } catch (err) { error('Erro ao estornar pagamento'); }
+      }
+    });
   };
 
   const handleDeleteContract = (id) => {
@@ -442,9 +459,10 @@ const AdminDashboard = () => {
             <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">A Receber</div>
             <div className="text-2xl font-black text-red-600">R$ {Number(billingStats.pendingAmount).toLocaleString()}</div>
           </div>
-          <div className="bg-navy-900 p-6 rounded-3xl shadow-sm text-center">
-            <div className="text-gold font-black text-xl mb-1 italic">R$ {Number(billingStats.paidMonth).toLocaleString()}</div>
-            <div className="text-white/30 text-[10px] uppercase font-bold tracking-widest">Recebido este Mês</div>
+          <div className="card-premium p-6 flex flex-col justify-center text-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+            <div className="text-gold font-black text-2xl mb-1 italic">R$ {Number(billingStats.paidMonth).toLocaleString()}</div>
+            <div className="text-[var(--text-secondary)] text-[10px] uppercase font-black tracking-widest">Recebido este Mês</div>
           </div>
         </div>
 
@@ -920,6 +938,14 @@ const AdminDashboard = () => {
                                             className="px-6 py-3 bg-gold text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold-500 transition-all shadow-lg shadow-gold/20"
                                           >
                                             Dar Baixa
+                                          </button>
+                                        )}
+                                        {p.status === 'paid' && (
+                                          <button 
+                                            onClick={() => handleUnpayDebt(p.id)} 
+                                            className="px-6 py-3 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                                          >
+                                            Estornar
                                           </button>
                                         )}
                                       </td>

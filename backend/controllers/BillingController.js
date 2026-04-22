@@ -128,6 +128,24 @@ class BillingController {
     }
   }
 
+  async markPaymentAsPending(req, res) {
+    try {
+      const { id } = req.params;
+      const payment = await Payment.findByPk(id);
+      
+      if (!payment) return res.status(404).json({ error: 'Pagamento não encontrado' });
+
+      await payment.update({
+        status: 'pending',
+        paidAt: null
+      });
+
+      return res.json(payment);
+    } catch (err) {
+      return res.status(400).json({ error: 'Erro ao estornar pagamento' });
+    }
+  }
+
   // Get all payments for a specific user (Billing History)
   async listPayments(req, res) {
     try {
@@ -216,31 +234,46 @@ class BillingController {
       }
       
       if (startDate && endDate) {
-        where.startDate = { [Op.between]: [new Date(startDate), new Date(endDate)] };
-        payWhere.dueDate = { [Op.between]: [new Date(startDate), new Date(endDate)] };
+        // Force UTC by appending time and Z suffix to date strings
+        const start = new Date(`${startDate}T00:00:00.000Z`);
+        const end = new Date(`${endDate}T23:59:59.999Z`);
+
+        where.startDate = { [Op.between]: [start, end] };
+        payWhere.dueDate = { [Op.between]: [start, end] };
       }
 
-      const totalContracts = await Contract.sum('value', { where: { ...where, status: 'active' } });
-      const pendingPayments = await Payment.sum('amount', { where: { ...payWhere, status: 'pending' } });
+      // 1. Total Contracts Value
+      const contracts = await Contract.findAll({ where: { ...where, status: 'active' } });
+      const totalActiveValue = contracts.reduce((acc, c) => acc + Number(c.value || 0), 0);
+
+      // 2. Pending Amount
+      const pendingP = await Payment.findAll({ where: { ...payWhere, status: 'pending' } });
+      const pendingAmount = pendingP.reduce((acc, p) => acc + Number(p.amount || 0), 0);
       
-      const paidQuery = { 
-        status: 'paid',
-        paidAt: { [Op.gte]: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
-      };
-
-      // If filtering by date, we might want "paid in this period" instead of "paid this month"
+      // 3. Paid Month / Period
+      const paidQuery = { status: 'paid' };
+      
       if (startDate && endDate) {
-        paidQuery.paidAt = { [Op.between]: [new Date(startDate), new Date(endDate)] };
+        const start = new Date(`${startDate}T00:00:00.000Z`);
+        const end = new Date(`${endDate}T23:59:59.999Z`);
+        paidQuery.paidAt = { [Op.between]: [start, end] };
+      } else {
+        // Default: Start of current month in UTC to avoid local timezone issues
+        const now = new Date();
+        const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
+        paidQuery.paidAt = { [Op.gte]: startOfMonth };
       }
 
-      const paidInPeriod = await Payment.sum('amount', { where: paidQuery });
+      const paidP = await Payment.findAll({ where: paidQuery });
+      const paidMonth = paidP.reduce((acc, p) => acc + Number(p.amount || 0), 0);
 
       return res.json({
-        totalActiveValue: totalContracts || 0,
-        pendingAmount: pendingPayments || 0,
-        paidMonth: paidInPeriod || 0
+        totalActiveValue,
+        pendingAmount,
+        paidMonth
       });
     } catch (err) {
+      console.error('Stats Error:', err);
       return res.status(500).json({ error: 'Erro ao buscar estatísticas' });
     }
   }

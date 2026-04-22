@@ -58,6 +58,7 @@ routes.put('/contracts/:id', BillingController.updateContract);
 routes.delete('/contracts/:id', BillingController.deleteContract);
 routes.get('/payments/:userId', BillingController.listPayments);
 routes.put('/payments/:id/pay', BillingController.markPaymentAsPaid);
+routes.put('/payments/:id/unpay', BillingController.markPaymentAsPending);
 routes.get('/admin/billing/payments', BillingController.listAllPayments);
 routes.put('/admin/billing/payments/:id', BillingController.updatePayment);
 routes.delete('/admin/billing/payments/:id', BillingController.deletePayment);

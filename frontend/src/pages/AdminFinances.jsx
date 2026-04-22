@@ -69,6 +69,23 @@ const AdminFinances = () => {
         }
     };
 
+    const handleUnpayDebt = async (id) => {
+        confirm({
+            title: 'Estornar Pagamento',
+            message: 'Deseja marcar este pagamento como pendente novamente?',
+            isDestructive: true,
+            onConfirm: async () => {
+                try {
+                    await api.put(`/payments/${id}/unpay`);
+                    success('Pagamento estornado com sucesso');
+                    fetchData();
+                } catch (err) {
+                    error('Erro ao estornar pagamento');
+                }
+            }
+        });
+    };
+
     const handleDeletePayment = (id) => {
         confirm({
             title: 'Excluir Fatura',
@@ -148,19 +165,19 @@ const AdminFinances = () => {
                         </div>
                     </motion.div>
 
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-navy-900 p-6 rounded-[2.5rem] shadow-xl border border-white/5 flex flex-col justify-between group relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card-premium p-6 flex flex-col justify-between group relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                         <div className="flex justify-between items-start mb-4 relative z-10">
-                            <div className="w-12 h-12 bg-gold rounded-2xl flex items-center justify-center text-navy-900 shadow-lg group-hover:rotate-12 transition-transform">
+                            <div className="w-12 h-12 bg-gold/10 text-gold rounded-2xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
                                 <CreditCard size={24} />
                             </div>
                             <div className="text-right relative z-10">
-                                <span className="text-[10px] font-bold uppercase text-white/30">Recebido (Mês)</span>
+                                <span className="text-[10px] font-black uppercase text-[var(--text-secondary)] tracking-widest">Recebido (Mês)</span>
                             </div>
                         </div>
                         <div className="relative z-10">
-                            <h4 className="text-3xl font-bold text-gold tracking-tighter">R$ {Number(stats.paidMonth).toLocaleString('pt-BR')}</h4>
-                            <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest mt-1">Liquidação no período</p>
+                            <h4 className="text-3xl font-black text-gold tracking-tighter italic">R$ {Number(stats.paidMonth).toLocaleString('pt-BR')}</h4>
+                            <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mt-1">Liquidação no período</p>
                         </div>
                     </motion.div>
 
@@ -298,6 +315,15 @@ const AdminFinances = () => {
                                                             title="Dar Baixa"
                                                         >
                                                             <CheckCircle size={16} />
+                                                        </button>
+                                                    )}
+                                                    {p.status === 'paid' && (
+                                                        <button
+                                                            onClick={() => handleUnpayDebt(p.id)}
+                                                            className="p-2 bg-red-50 text-red-500 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                            title="Estornar"
+                                                        >
+                                                            <X size={16} />
                                                         </button>
                                                     )}
                                                     <button
