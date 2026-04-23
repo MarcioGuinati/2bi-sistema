@@ -6,7 +6,17 @@ import { useAuth } from '../context/AuthContext';
 
 const SystemLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(
+    localStorage.getItem('sidebar_collapsed') === 'true'
+  );
+  
   const { isImpersonating } = useAuth();
+
+  const toggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('sidebar_collapsed', newState);
+  };
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-primary)]">
@@ -38,10 +48,19 @@ const SystemLayout = ({ children }) => {
       )}
 
       {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        isCollapsed={isCollapsed}
+        toggleCollapse={toggleCollapse}
+        onClose={() => setIsSidebarOpen(false)} 
+      />
 
       {/* Main Content */}
-      <main className={`flex-1 overflow-y-auto lg:pl-72 transition-all mt-16 lg:mt-0 ${isImpersonating ? 'lg:pt-12 pb-24 sm:pb-0' : ''}`}>
+      <main className={`
+        flex-1 overflow-y-auto transition-all duration-300 mt-16 lg:mt-0 
+        ${isCollapsed ? 'lg:pl-20' : 'lg:pl-72'} 
+        ${isImpersonating ? 'lg:pt-12 pb-24 sm:pb-0' : ''}
+      `}>
         <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
           {children}
         </div>
