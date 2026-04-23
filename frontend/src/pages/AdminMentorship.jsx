@@ -22,11 +22,34 @@ const AdminMentorship = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, alerts, negative, overbudget
+  
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const months = [
+    { value: 1, label: 'Janeiro' },
+    { value: 2, label: 'Fevereiro' },
+    { value: 3, label: 'Março' },
+    { value: 4, label: 'Abril' },
+    { value: 5, label: 'Maio' },
+    { value: 6, label: 'Junho' },
+    { value: 7, label: 'Julho' },
+    { value: 8, label: 'Agosto' },
+    { value: 9, label: 'Setembro' },
+    { value: 10, label: 'Outubro' },
+    { value: 11, label: 'Novembro' },
+    { value: 12, label: 'Dezembro' }
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - 2 + i);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/admin/mentorship-overview');
+      const response = await api.get('/admin/mentorship-overview', {
+        params: { month: selectedMonth, year: selectedYear }
+      });
       setData(response.data);
     } catch (err) {
       error('Erro ao carregar visão de mentoria');
@@ -37,7 +60,7 @@ const AdminMentorship = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   const filteredData = data.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -48,13 +71,17 @@ const AdminMentorship = () => {
   });
 
   const getWhatsAppLink = (client) => {
+    const monthLabel = months.find(m => m.value === selectedMonth)?.label;
+    const isCurrentMonth = selectedMonth === now.getMonth() + 1 && selectedYear === now.getFullYear();
+    const periodStr = isCurrentMonth ? 'no mês' : `em ${monthLabel}/${selectedYear}`;
+
     let message = `Olá ${client.name.split(' ')[0]}, tudo bem? 2BI Planejamento aqui. `;
     if (client.isNegative) {
-      message += `Notei que seu saldo no mês está negativo em R$ ${Math.abs(client.balanceMonth).toLocaleString('pt-BR')}. Vamos conversar para ajustar seu fluxo de caixa?`;
+      message += `Notei que seu saldo ${periodStr} está negativo em R$ ${Math.abs(client.balanceMonth).toLocaleString('pt-BR')}. Vamos conversar para ajustar seu fluxo de caixa?`;
     } else if (client.overBudgetCount > 0) {
-      message += `Vi que você ultrapassou o orçamento em ${client.overBudgetCount} categorias este mês. Podemos revisar seus orçamentos?`;
+      message += `Vi que você ultrapassou o orçamento ${periodStr} em ${client.overBudgetCount} categorias. Podemos revisar seus orçamentos?`;
     } else {
-      message += `Passando para acompanhar seus resultados financeiros deste mês. Estão ótimos!`;
+      message += `Passando para acompanhar seus resultados financeiros ${periodStr}. Estão ótimos!`;
     }
     
     const phone = client.phone?.replace(/\D/g, '');
@@ -71,15 +98,36 @@ const AdminMentorship = () => {
             <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">Acompanhamento Consultivo de Clientes</p>
           </div>
           
-          <div className="flex items-center gap-4 bg-[var(--bg-secondary)] p-2 rounded-2xl border border-[var(--border-primary)] shadow-sm">
-            <div className={`p-4 rounded-xl flex items-center gap-3 ${data.some(c => c.isNegative || c.overBudgetCount > 0) ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
-              <AlertTriangle size={20} />
-              <div>
-                <div className="text-[10px] font-black uppercase leading-none">Alertas Ativos</div>
-                <div className="text-lg font-black leading-none mt-1">
-                    {data.filter(c => c.isNegative || c.overBudgetCount > 0).length}
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Month/Year Selectors */}
+            <div className="flex bg-[var(--bg-secondary)] p-1 rounded-2xl border border-[var(--border-primary)] shadow-sm">
+                <select 
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                    className="bg-transparent border-none text-[10px] font-black uppercase py-2 px-4 focus:ring-0 cursor-pointer outline-none text-[var(--text-primary)]"
+                >
+                    {months.map(m => <option key={m.value} value={m.value} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{m.label}</option>)}
+                </select>
+                <div className="w-px h-4 bg-[var(--border-primary)] self-center" />
+                <select 
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    className="bg-transparent border-none text-[10px] font-black uppercase py-2 px-4 focus:ring-0 cursor-pointer outline-none text-[var(--text-primary)]"
+                >
+                    {years.map(y => <option key={y} value={y} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{y}</option>)}
+                </select>
+            </div>
+
+            <div className="flex items-center gap-4 bg-[var(--bg-secondary)] p-2 rounded-2xl border border-[var(--border-primary)] shadow-sm">
+                <div className={`p-4 rounded-xl flex items-center gap-3 ${data.some(c => c.isNegative || c.overBudgetCount > 0) ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
+                <AlertTriangle size={20} />
+                <div>
+                    <div className="text-[10px] font-black uppercase leading-none">Alertas Ativos</div>
+                    <div className="text-lg font-black leading-none mt-1">
+                        {data.filter(c => c.isNegative || c.overBudgetCount > 0).length}
+                    </div>
                 </div>
-              </div>
+                </div>
             </div>
           </div>
         </div>

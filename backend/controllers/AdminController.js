@@ -4,16 +4,22 @@ const { Op } = require('sequelize');
 class AdminController {
   async getMentorshipOverview(req, res) {
     try {
+      const { month, year } = req.query;
+      const now = new Date();
+      
+      const targetMonth = month ? parseInt(month) - 1 : now.getMonth();
+      const targetYear = year ? parseInt(year) : now.getFullYear();
+
+      // Start and End dates for the selected month
+      const startDate = new Date(targetYear, targetMonth, 1).toISOString().split('T')[0];
+      const endDate = new Date(targetYear, targetMonth + 1, 0).toISOString().split('T')[0];
+
       // 1. Get all clients
       const clients = await User.findAll({
         where: { role: 'client' },
         attributes: ['id', 'name', 'email', 'phone', 'createdAt'],
         order: [['name', 'ASC']]
       });
-
-      const now = new Date();
-      const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const endDate = now.toISOString().split('T')[0];
 
       const overview = await Promise.all(clients.map(async (client) => {
         // Calculate totals for current month
