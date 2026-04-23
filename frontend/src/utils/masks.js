@@ -38,6 +38,7 @@ export const maskCurrency = (v) => {
 };
 
 export const sanitizeValue = (v) => {
-  if (!v && v !== 0) return "";
-  return v.toString().replace(/\D/g, "");
+  if (!v && v !== 0) return 0;
+  const numeric = v.toString().replace(/\D/g, "");
+  return Number(numeric) / 100;
 };

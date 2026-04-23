@@ -8,7 +8,11 @@ const ContractController = require('./controllers/ContractController');
 const AccountController = require('./controllers/AccountController');
 const BillingController = require('./controllers/BillingController');
 const AnnouncementController = require('./controllers/AnnouncementController');
+const ImportController = require('./controllers/ImportController');
 const authMiddleware = require('./middleware/auth');
+const multer = require('multer');
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const routes = new Router();
 
@@ -78,5 +82,9 @@ routes.get('/admin/announcements', AnnouncementController.index);
 routes.post('/admin/announcements', AnnouncementController.store);
 routes.put('/admin/announcements/:id', AnnouncementController.update);
 routes.delete('/admin/announcements/:id', AnnouncementController.delete);
+
+// Import
+routes.post('/import/ofx-preview', upload.single('file'), ImportController.preview);
+routes.post('/import/ofx-confirm', ImportController.confirm);
 
 module.exports = routes;

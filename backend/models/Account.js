@@ -16,8 +16,20 @@ module.exports = (sequelize, DataTypes) => {
     initial_balance: {
       type: DataTypes.DECIMAL(15, 2),
       defaultValue: 0
+    },
+    credit_limit: {
+      type: DataTypes.DECIMAL(15, 2),
+      defaultValue: 0
+    },
+    invoice_closing_day: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   });
+
+  Account.associate = (models) => {
+    Account.hasMany(models.Transaction, { foreignKey: 'account_id' });
+  };
 
   return Account;
 };

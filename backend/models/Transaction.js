@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     is_paid: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    external_id: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   });
 
