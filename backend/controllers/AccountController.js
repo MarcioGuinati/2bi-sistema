@@ -30,12 +30,14 @@ class AccountController {
   }
 
   async store(req, res) {
-    const { name, type, initial_balance } = req.body;
+    const { name, type, initial_balance, credit_limit, invoice_closing_day } = req.body;
 
     const account = await Account.create({
       name,
       type,
       initial_balance,
+      credit_limit,
+      invoice_closing_day,
       user_id: req.userId
     });
 
@@ -44,7 +46,7 @@ class AccountController {
 
   async update(req, res) {
     const { id } = req.params;
-    const { name, type, initial_balance } = req.body;
+    const { name, type, initial_balance, credit_limit, invoice_closing_day } = req.body;
 
     const account = await Account.findByPk(id);
 
@@ -52,7 +54,7 @@ class AccountController {
       return res.status(404).json({ error: 'Account not found' });
     }
 
-    await account.update({ name, type, initial_balance });
+    await account.update({ name, type, initial_balance, credit_limit, invoice_closing_day });
 
     return res.json(account);
   }
