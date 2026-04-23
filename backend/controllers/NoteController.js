@@ -4,10 +4,17 @@ class NoteController {
   async index(req, res) {
     const { userId } = req.params;
 
+    if (req.userRole === 'partner') {
+      const client = await User.findByPk(userId);
+      if (!client || String(client.partner_id) !== String(req.userId)) {
+        return res.status(403).json({ error: 'Acesso negado: Cliente não pertence a você' });
+      }
+    }
+
     const notes = await Note.findAll({
       where: { user_id: userId },
       include: [{ model: User, as: 'Admin', attributes: ['name'] }],
-      order: [['created_at', 'DESC']]
+      order: [['createdAt', 'DESC']]
     });
 
     return res.json(notes);
@@ -17,8 +24,15 @@ class NoteController {
     const { userId } = req.params;
     const { content } = req.body;
 
-    if (req.userRole !== 'admin') {
+    if (req.userRole !== 'admin' && req.userRole !== 'partner') {
       return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (req.userRole === 'partner') {
+      const client = await User.findByPk(userId);
+      if (!client || client.partner_id !== req.userId) {
+        return res.status(403).json({ error: 'Negado: Cliente não pertence a você' });
+      }
     }
 
     const note = await Note.create({

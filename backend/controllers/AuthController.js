@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const sequelize = require('../config/database');
 require('dotenv').config();
 
 class AuthController {
@@ -36,8 +37,8 @@ class AuthController {
   }
 
   async registerClient(req, res) {
-    if (req.userRole !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can register clients' });
+    if (req.userRole !== 'admin' && req.userRole !== 'partner') {
+      return res.status(403).json({ error: 'Only admins or partners can register clients' });
     }
 
     const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields, onboardingData } = req.body;
@@ -60,11 +61,84 @@ class AuthController {
       income,
       occupation,
       financialGoal,
+      partner_id: req.userRole === 'partner' ? req.userId : null,
       customFields: customFields || [],
       onboardingData: onboardingData || {}
     });
 
     return res.json(user);
+  }
+
+  async registerPartner(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can register partners' });
+    }
+
+    const { name, email, password, phone } = req.body;
+
+    const userExists = await User.findOne({ where: { email } });
+    if (userExists) return res.status(400).json({ error: 'User already exists' });
+
+    const passwordHash = await bcrypt.hash(password, 8);
+
+    const partner = await User.create({
+      name,
+      email,
+      password: passwordHash,
+      role: 'partner',
+      phone
+    });
+
+    return res.json(partner);
+  }
+
+  async updatePartner(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem gerenciar parceiros' });
+    }
+
+    try {
+      const { id } = req.params;
+      const { name, email, password, phone } = req.body;
+      const partner = await User.findByPk(id);
+
+      if (!partner || partner.role !== 'partner') {
+        return res.status(404).json({ error: 'Parceiro não encontrado' });
+      }
+
+      const updateData = { name, email, phone };
+      if (password && password.trim() !== '') {
+        updateData.password = await bcrypt.hash(password, 8);
+      }
+
+      await partner.update(updateData);
+      return res.json(partner);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Erro ao atualizar parceiro' });
+    }
+  }
+
+  async deletePartner(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try {
+      const { id } = req.params;
+      // Note: Clients will remain but partner_id set to null or kept? 
+      // Usually better to keep them but detached or block delete if has clients.
+      // For now, let's just delete the partner.
+      const partner = await User.findByPk(id);
+      if (!partner || partner.role !== 'partner') {
+        return res.status(404).json({ error: 'Parceiro não encontrado' });
+      }
+
+      await partner.destroy();
+      return res.send();
+    } catch (err) {
+      return res.status(500).json({ error: 'Erro ao excluir parceiro' });
+    }
   }
  
   async registerLead(req, res) {
@@ -114,14 +188,26 @@ class AuthController {
   }
 
   async listClients(req, res) {
-    if (req.userRole !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can list clients' });
+    if (req.userRole !== 'admin' && req.userRole !== 'partner') {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    const { partnerId } = req.query;
+    const where = { role: 'client' };
+    
+    if (req.userRole === 'partner') {
+      where.partner_id = req.userId;
+    } else if (partnerId && partnerId !== 'all') {
+      where.partner_id = partnerId;
     }
 
     const clients = await User.findAll({
-      where: { role: 'client' },
-      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'onboardingData', 'isLead', 'isActive', 'leadSource', 'created_at'],
-      order: [['created_at', 'DESC']]
+      where,
+      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'onboardingData', 'isLead', 'isActive', 'leadSource', 'partner_id', 'createdAt'],
+      include: [
+        { model: User, as: 'Partner', attributes: ['id', 'name'] }
+      ],
+      order: [['createdAt', 'DESC']]
     });
 
     return res.json(clients);
@@ -129,7 +215,7 @@ class AuthController {
 
   async updateClient(req, res) {
     if (req.userRole !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can update clients' });
+      return res.status(403).json({ error: 'Apenas administradores podem editar perfiis de clientes' });
     }
 
     try {
@@ -140,6 +226,11 @@ class AuthController {
 
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
+      }
+
+      // If partner, check if client belongs to them
+      if (req.userRole === 'partner' && user.partner_id !== req.userId) {
+        return res.status(403).json({ error: 'Este cliente não pertence à sua carteira' });
       }
 
       // Only update fields provided in the request body
@@ -154,61 +245,56 @@ class AuthController {
 
       if (password && password.trim() !== '') {
         updateData.password = await bcrypt.hash(password, 8);
-        // Se era um lead inativo, ao cadastrar a senha ele vira um cliente ativo
         updateData.isActive = true;
       }
 
       user.set(updateData);
       
-      if (customFields) {
-        user.changed('customFields', true);
-      }
-      if (onboardingData) {
-        user.changed('onboardingData', true);
-      }
+      if (customFields) user.changed('customFields', true);
+      if (onboardingData) user.changed('onboardingData', true);
       
       await user.save();
-
       return res.json(user);
     } catch (err) {
       console.error('Error updating client:', err);
-      return res.status(500).json({ 
-        error: 'Error updating client', 
-        details: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      });
+      return res.status(500).json({ error: 'Erro ao atualizar cliente' });
     }
   }
 
   async deleteClient(req, res) {
     if (req.userRole !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can delete clients' });
+      return res.status(403).json({ error: 'Apenas administradores podem excluir clientes' });
     }
 
     const { id } = req.params;
-
     const user = await User.findByPk(id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    await user.destroy();
+    if (req.userRole === 'partner' && user.partner_id !== req.userId) {
+      return res.status(403).json({ error: 'Este cliente não pertence à sua carteira' });
+    }
 
+    await user.destroy();
     return res.send();
   }
 
   async impersonate(req, res) {
     if (req.userRole !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can impersonate users' });
+      return res.status(403).json({ error: 'Apenas administradores podem utilizar o monitoramento (olhinho)' });
     }
 
     const { id } = req.params;
-
     const user = await User.findByPk(id);
 
     if (!user) {
       return res.status(404).json({ error: 'Client not found' });
+    }
+
+    if (req.userRole === 'partner' && user.partner_id !== req.userId) {
+      return res.status(403).json({ error: 'Este cliente não pertence à sua carteira' });
     }
 
     if (user.role !== 'client') {

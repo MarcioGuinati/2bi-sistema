@@ -17,9 +17,11 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { useNotification } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminFinances = () => {
+    const { user } = useAuth();
     const { success, error, confirm } = useNotification();
     const [payments, setPayments] = useState([]);
     const [stats, setStats] = useState({ totalActiveValue: 0, pendingAmount: 0, paidMonth: 0 });
@@ -308,47 +310,53 @@ const AdminFinances = () => {
                                             </td>
                                             <td className="px-8 py-5 text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    {p.status === 'pending' && (
-                                                        <button
-                                                            onClick={() => handlePayDebt(p.id)}
-                                                            className="p-2 bg-navy-900 text-gold rounded-lg hover:bg-gold hover:text-navy-900 transition-all shadow-sm"
-                                                            title="Dar Baixa"
-                                                        >
-                                                            <CheckCircle size={16} />
-                                                        </button>
+                                                    {user?.role === 'admin' ? (
+                                                        <>
+                                                            {p.status === 'pending' && (
+                                                                <button
+                                                                    onClick={() => handlePayDebt(p.id)}
+                                                                    className="p-2 bg-navy-900 text-gold rounded-lg hover:bg-gold hover:text-navy-900 transition-all shadow-sm"
+                                                                    title="Dar Baixa"
+                                                                >
+                                                                    <CheckCircle size={16} />
+                                                                </button>
+                                                            )}
+                                                            {p.status === 'paid' && (
+                                                                <button
+                                                                    onClick={() => handleUnpayDebt(p.id)}
+                                                                    className="p-2 bg-red-50 text-red-500 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                                    title="Estornar"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingPayment(p);
+                                                                    setEditForm({
+                                                                        amount: p.amount,
+                                                                        dueDate: p.dueDate.split('T')[0],
+                                                                        description: p.description,
+                                                                        status: p.status
+                                                                    });
+                                                                    setShowEditModal(true);
+                                                                }}
+                                                                className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-sm transition-all"
+                                                                title="Editar"
+                                                            >
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeletePayment(p.id)}
+                                                                className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-sm transition-all"
+                                                                title="Excluir"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Apenas Visualização</span>
                                                     )}
-                                                    {p.status === 'paid' && (
-                                                        <button
-                                                            onClick={() => handleUnpayDebt(p.id)}
-                                                            className="p-2 bg-red-50 text-red-500 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                                                            title="Estornar"
-                                                        >
-                                                            <X size={16} />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingPayment(p);
-                                                            setEditForm({
-                                                                amount: p.amount,
-                                                                dueDate: p.dueDate.split('T')[0],
-                                                                description: p.description,
-                                                                status: p.status
-                                                            });
-                                                            setShowEditModal(true);
-                                                        }}
-                                                        className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-sm transition-all"
-                                                        title="Editar"
-                                                    >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeletePayment(p.id)}
-                                                        className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-sm transition-all"
-                                                        title="Excluir"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
                                                 </div>
                                             </td>
                                         </motion.tr>

@@ -16,9 +16,10 @@ import {
   Moon,
   ChevronLeft,
   ChevronRight,
-  Menu,
-  Zap,
-  Cpu
+  Cpu,
+  Trophy,
+  Briefcase,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -40,15 +41,23 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Agendar Metoria', path: '/mentoria', icon: Calendar },
   ];
 
+  const partnerLinks = [
+    { name: 'Minha Carteira', path: '/admin', icon: Users },
+    { name: 'Monitoramento Financeiro', path: '/admin/mentorship', icon: PieChart },
+    { name: 'Controle de Lançamentos', path: '/admin/finances', icon: TrendingUp },
+    { name: 'Agenda Meet', path: '/mentoria', icon: Calendar },
+  ];
+
   const adminLinks = [
-    { name: 'Base de Clientes', path: '/admin', icon: Users },
+    { name: 'Base de Usuários', path: '/admin', icon: Users },
+    { name: 'Gestão de Parceiros', path: '/admin/partners', icon: Briefcase },
     { name: 'Visão Geral Mentoria', path: '/admin/mentorship', icon: PieChart },
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Controle Financeiro', path: '/admin/finances', icon: TrendingUp },
     { name: 'Agenda Meet', path: '/mentoria', icon: Calendar },
   ];
 
-  const links = user?.role === 'admin' ? adminLinks : clientLinks;
+  const links = user?.role === 'admin' ? adminLinks : (user?.role === 'partner' ? partnerLinks : clientLinks);
 
   return (
     <div className={`

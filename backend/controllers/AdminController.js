@@ -1,4 +1,5 @@
-const { User, Transaction, Goal, Category, sequelize } = require('../models');
+const { User, Transaction, Goal, Category } = require('../models');
+const sequelize = require('../config/database');
 const { Op } = require('sequelize');
 
 class AdminController {
@@ -14,9 +15,15 @@ class AdminController {
       const startDate = new Date(targetYear, targetMonth, 1).toISOString().split('T')[0];
       const endDate = new Date(targetYear, targetMonth + 1, 0).toISOString().split('T')[0];
 
+      // Logic: If user is partner, filter by partner_id. If admin, show all.
+      const where = { role: 'client' };
+      if (req.userRole === 'partner') {
+        where.partner_id = req.userId;
+      }
+
       // 1. Get all clients
       const clients = await User.findAll({
-        where: { role: 'client' },
+        where,
         attributes: ['id', 'name', 'email', 'phone', 'createdAt'],
         order: [['name', 'ASC']]
       });
@@ -83,6 +90,29 @@ class AdminController {
     } catch (error) {
       console.error('Error in Mentorship Overview:', error);
       return res.status(500).json({ error: 'Erro ao carregar visão consolidada' });
+    }
+  }
+
+  async listPartners(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try {
+      const partners = await User.findAll({
+        where: { role: 'partner' },
+        attributes: ['id', 'name', 'email', 'phone', 'createdAt'],
+        include: [{
+          model: User,
+          as: 'Clients',
+          attributes: ['id']
+        }],
+        order: [['name', 'ASC']]
+      });
+
+      return res.json(partners);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao listar parceiros' });
     }
   }
 }

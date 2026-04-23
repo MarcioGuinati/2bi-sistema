@@ -29,6 +29,10 @@ routes.use(authMiddleware);
 // Auth & Users
 routes.post('/register-client', AuthController.registerClient);
 routes.get('/clients', AuthController.listClients);
+routes.get('/admin/partners', AdminController.listPartners);
+routes.post('/admin/register-partner', AuthController.registerPartner);
+routes.put('/admin/partners/:id', AuthController.updatePartner);
+routes.delete('/admin/partners/:id', AuthController.deletePartner);
 routes.get('/admin/mentorship-overview', AdminController.getMentorshipOverview);
 routes.get('/admin/ai-config', ConfigController.getAIConfig);
 routes.post('/admin/ai-config', ConfigController.updateAIConfig);

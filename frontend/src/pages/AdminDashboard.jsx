@@ -36,7 +36,7 @@ import { maskCPF, maskPhone, maskCurrency, sanitizeValue } from '../utils/masks'
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { logout, impersonate } = useAuth();
+  const { user, logout, impersonate } = useAuth();
   const { success, error, confirm } = useNotification();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -90,12 +90,15 @@ const AdminDashboard = () => {
     link: ''
   });
 
+  const [partners, setPartners] = useState([]);
+  const [partnerFilter, setPartnerFilter] = useState('all');
+
   const fetchData = async () => {
     try {
       setLoading(true);
       const [clientsRes, statsRes] = await Promise.all([
-        api.get('/clients'),
-        api.get('/billing/stats')
+        api.get(`/clients${partnerFilter !== 'all' ? `?partnerId=${partnerFilter}` : ''}`),
+        api.get(`/billing/stats${partnerFilter !== 'all' ? `?partnerId=${partnerFilter}` : ''}`)
       ]);
       setClients(clientsRes.data);
       setBillingStats(statsRes.data);
@@ -108,8 +111,18 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    fetchAnnouncements();
-  }, []);
+    if (user?.role === 'admin') {
+      fetchAnnouncements();
+      fetchPartners();
+    }
+  }, [partnerFilter]);
+
+  const fetchPartners = async () => {
+    try {
+      const res = await api.get('/admin/partners');
+      setPartners(res.data);
+    } catch (err) { console.error('Error fetching partners'); }
+  };
 
   const fetchAnnouncements = async () => {
     try {
@@ -156,7 +169,7 @@ const AdminDashboard = () => {
         await api.post('/register-client', sanitizedForm);
       }
       setShowRegModal(false);
-      success(editingClient ? 'Cliente atualizado!' : 'Novo parceiro registrado com sucesso!');
+      success(editingClient ? 'Cliente atualizado!' : 'Novo cliente registrado com sucesso!');
       fetchData();
     } catch (err) { error('Erro ao processar solicitação'); }
   };
@@ -532,19 +545,21 @@ const AdminDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold font-heading">Painel Gestor 2BI</h1>
-            <p className="text-slate-400 font-medium tracking-tight">Gestão estratégica de parcerias e CRM.</p>
+            <p className="text-slate-400 font-medium tracking-tight">Gestão estratégica de clientes e CRM.</p>
           </div>
           <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setEditingAnn(null);
-                setAnnForm({ title: '', content: '', type: 'info', priority: false, active: true, link: '' });
-                setShowAnnModal(true);
-              }}
-              className="bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-[var(--bg-primary)] transition-all shadow-sm"
-            >
-              <Megaphone size={20} className="text-gold" /> Gerenciar Avisos
-            </button>
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => {
+                  setEditingAnn(null);
+                  setAnnForm({ title: '', content: '', type: 'info', priority: false, active: true, link: '' });
+                  setShowAnnModal(true);
+                }}
+                className="bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-[var(--bg-primary)] transition-all shadow-sm"
+              >
+                <Megaphone size={20} className="text-gold" /> Gerenciar Avisos
+              </button>
+            )}
             <button
               onClick={handleOpenRegister}
               className="btn-primary flex items-center gap-2"
@@ -587,14 +602,28 @@ const AdminDashboard = () => {
         {/* Client List */}
         <div className="card-premium overflow-hidden">
           <div className="p-8 border-b border-[var(--border-primary)] flex flex-col md:flex-row justify-between items-center gap-4">
-            <h3 className="text-xl font-bold font-heading">Base de Parceiros</h3>
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-              <input
-                type="text"
-                placeholder="Buscar por nome..."
-                className="w-full pl-10 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-xl text-sm outline-none focus:border-gold"
-              />
+            <h3 className="text-xl font-bold font-heading">{user?.role === 'partner' ? 'Minha Carteira' : 'Base de Clientes'}</h3>
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              {user?.role === 'admin' && (
+                <select 
+                  value={partnerFilter}
+                  onChange={(e) => setPartnerFilter(e.target.value)}
+                  className="bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-xs font-bold outline-none focus:border-gold transition-all"
+                >
+                  <option value="all">Todos os Parceiros</option>
+                  {partners.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              )}
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome..."
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-xl text-sm outline-none focus:border-gold"
+                />
+              </div>
             </div>
           </div>
           <div className="table-responsive">
@@ -622,8 +651,13 @@ const AdminDashboard = () => {
                                <span className="bg-gold text-[8px] font-black px-2 py-0.5 rounded text-navy-900 uppercase tracking-tighter shadow-sm">Lead Site</span>
                              )}
                           </div>
-                          <div className="text-[10px] text-gold font-black uppercase italic">
+                          <div className="text-[10px] text-gold font-black uppercase italic flex items-center gap-2">
                             {c.isActive ? 'Membro Premium' : 'Aguardando Ativação'}
+                            {user?.role === 'admin' && c.Partner && (
+                              <span className="bg-navy-900/40 text-slate-300 text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 normal-case italic not-italic">
+                                {c.Partner.name}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -633,30 +667,38 @@ const AdminDashboard = () => {
                       <div className="text-xs text-[var(--text-secondary)] font-medium">{c.phone || 'N/A'}</div>
                     </td>
                     <td className="px-8 py-5 text-sm text-[var(--text-secondary)] font-medium">
-                      {new Date(c.created_at).toLocaleDateString('pt-BR')}
+                      {new Date(c.created_at || c.createdAt).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex justify-end gap-2 text-right">
-                        <button 
-                          onClick={async () => {
-                            await impersonate(c.id);
-                            navigate('/dashboard');
-                          }} 
-                          title="Monitorar Sistema"
-                          className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button 
-                          onClick={() => navigate(`/admin/clients/${c.id}/onboarding`)} 
-                          title="Ficha de Onboarding"
-                          className="p-2 text-slate-400 hover:text-green-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
-                        >
-                          <FileText size={16} />
-                        </button>
+                        {user?.role === 'admin' && (
+                          <button 
+                            onClick={async () => {
+                              await impersonate(c.id);
+                              navigate('/dashboard');
+                            }} 
+                            title="Monitorar Sistema"
+                            className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        )}
+                        {user?.role === 'admin' && (
+                          <button 
+                            onClick={() => navigate(`/admin/clients/${c.id}/onboarding`)} 
+                            title="Ficha de Onboarding"
+                            className="p-2 text-slate-400 hover:text-green-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
+                          >
+                            <FileText size={16} />
+                          </button>
+                        )}
                         <button onClick={() => handleSelectClient(c)} className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all" title="CRM e Mensagens"><MessageSquare size={16} /></button>
-                        <button onClick={() => handleOpenEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
-                        <button onClick={() => handleDeleteClient(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
+                        {user?.role === 'admin' && (
+                          <>
+                            <button onClick={() => handleOpenEdit(c)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Edit2 size={16} /></button>
+                            <button onClick={() => handleDeleteClient(c.id)} className="p-2 text-slate-400 hover:text-red-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)]"><Trash2 size={16} /></button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -989,26 +1031,28 @@ const AdminDashboard = () => {
                                   <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em] px-3 py-1 bg-gold/10 rounded-full">{c.billingCycle === 'monthly' ? 'Mensalidade' : 'Anuidade'}</span>
                                   <h4 className="font-black text-[var(--text-primary)] text-xl mt-2 tracking-tight group-hover:text-gold transition-colors">{c.title}</h4>
                                 </div>
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button 
-                                    onClick={() => {
-                                      setEditingBillingContract(c);
-                                      setContractForm({
-                                        title: c.title,
-                                        value: c.value,
-                                        billingCycle: c.billingCycle,
-                                        startDate: c.startDate.split('T')[0]
-                                      });
-                                      setShowContractModal(true);
-                                    }}
-                                    className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                                  >
-                                    <Edit2 size={16} />
-                                  </button>
-                                  <button onClick={() => handleDeleteContract(c.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
+                                {user?.role === 'admin' && (
+                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button 
+                                      onClick={() => {
+                                        setEditingBillingContract(c);
+                                        setContractForm({
+                                          title: c.title,
+                                          value: c.value,
+                                          billingCycle: c.billingCycle,
+                                          startDate: c.startDate.split('T')[0]
+                                        });
+                                        setShowContractModal(true);
+                                      }}
+                                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                                    >
+                                      <Edit2 size={16} />
+                                    </button>
+                                    <button onClick={() => handleDeleteContract(c.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                               <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                                 <div>
@@ -1077,21 +1121,27 @@ const AdminDashboard = () => {
                                         </span>
                                       </td>
                                       <td className="px-8 py-6 text-right">
-                                        {p.status === 'pending' && (
-                                          <button 
-                                            onClick={() => handlePayDebt(p.id)} 
-                                            className="px-6 py-3 bg-gold text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold-500 transition-all shadow-lg shadow-gold/20"
-                                          >
-                                            Dar Baixa
-                                          </button>
-                                        )}
-                                        {p.status === 'paid' && (
-                                          <button 
-                                            onClick={() => handleUnpayDebt(p.id)} 
-                                            className="px-6 py-3 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
-                                          >
-                                            Estornar
-                                          </button>
+                                        {user?.role === 'admin' ? (
+                                          <>
+                                            {p.status === 'pending' && (
+                                              <button 
+                                                onClick={() => handlePayDebt(p.id)} 
+                                                className="px-6 py-3 bg-gold text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold-500 transition-all shadow-lg shadow-gold/20"
+                                              >
+                                                Dar Baixa
+                                              </button>
+                                            )}
+                                            {p.status === 'paid' && (
+                                              <button 
+                                                onClick={() => handleUnpayDebt(p.id)} 
+                                                className="px-6 py-3 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                                              >
+                                                Estornar
+                                              </button>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Somente Leitura</div>
                                         )}
                                       </td>
                                     </tr>

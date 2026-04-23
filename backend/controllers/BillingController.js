@@ -5,7 +5,12 @@ class BillingController {
     try {
       const { userId } = req.params;
 
-      if (req.userRole !== 'admin' && String(req.userId) !== String(userId)) {
+      if (req.userRole === 'partner') {
+        const client = await User.findByPk(userId);
+        if (!client || String(client.partner_id) !== String(req.userId)) {
+          return res.status(403).json({ error: 'Não autorizado: Cliente não pertence a você' });
+        }
+      } else if (req.userRole !== 'admin' && String(req.userId) !== String(userId)) {
         return res.status(403).json({ error: 'Não autorizado' });
       }
 
@@ -84,6 +89,9 @@ class BillingController {
   }
 
   async updateContract(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem gerenciar contratos' });
+    }
     try {
       const { id } = req.params;
       const { title, value, billingCycle, startDate } = req.body;
@@ -99,6 +107,9 @@ class BillingController {
   }
 
   async deleteContract(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem excluir contratos' });
+    }
     try {
       const { id } = req.params;
       // Payments will be deleted by cascade or manually
@@ -111,6 +122,9 @@ class BillingController {
   }
 
   async markPaymentAsPaid(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem baixar pagamentos' });
+    }
     try {
       const { id } = req.params;
       const payment = await Payment.findByPk(id);
@@ -129,6 +143,9 @@ class BillingController {
   }
 
   async markPaymentAsPending(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem estornar pagamentos' });
+    }
     try {
       const { id } = req.params;
       const payment = await Payment.findByPk(id);
@@ -151,7 +168,12 @@ class BillingController {
     try {
       const { userId } = req.params;
 
-      if (req.userRole !== 'admin' && String(req.userId) !== String(userId)) {
+      if (req.userRole === 'partner') {
+        const client = await User.findByPk(userId);
+        if (!client || String(client.partner_id) !== String(req.userId)) {
+          return res.status(403).json({ error: 'Não autorizado: Cliente não pertence a você' });
+        }
+      } else if (req.userRole !== 'admin' && String(req.userId) !== String(userId)) {
         return res.status(403).json({ error: 'Não autorizado' });
       }
 
@@ -178,10 +200,16 @@ class BillingController {
         where.dueDate = { [Op.between]: [new Date(startDate), new Date(endDate)] };
       }
 
+      // If partner, only show their clients
+      const userWhere = { role: 'client' };
+      if (req.userRole === 'partner') {
+        userWhere.partner_id = req.userId;
+      }
+
       const payments = await Payment.findAll({
         where,
         include: [
-          { model: User, attributes: ['id', 'name', 'email'] },
+          { model: User, where: userWhere, attributes: ['id', 'name', 'email'] },
           { model: Contract, attributes: ['id', 'title'] }
         ],
         order: [['dueDate', 'DESC']]
@@ -193,6 +221,9 @@ class BillingController {
   }
 
   async updatePayment(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem editar faturas' });
+    }
     try {
       const { id } = req.params;
       const { amount, dueDate, description, status } = req.body;
@@ -208,6 +239,9 @@ class BillingController {
   }
 
   async deletePayment(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem excluir faturas' });
+    }
     try {
       const { id } = req.params;
       const payment = await Payment.findByPk(id);
@@ -234,37 +268,45 @@ class BillingController {
       }
       
       if (startDate && endDate) {
-        // Force UTC by appending time and Z suffix to date strings
         const start = new Date(`${startDate}T00:00:00.000Z`);
         const end = new Date(`${endDate}T23:59:59.999Z`);
-
         where.startDate = { [Op.between]: [start, end] };
         payWhere.dueDate = { [Op.between]: [start, end] };
       }
 
-      // 1. Total Contracts Value
-      const contracts = await Contract.findAll({ where: { ...where, status: 'active' } });
+      const userWhere = { role: 'client' };
+      if (req.userRole === 'partner') {
+        userWhere.partner_id = req.userId;
+      }
+
+      // Filter by joining User
+      const contracts = await Contract.findAll({ 
+        where: { ...where, status: 'active' },
+        include: [{ model: User, where: userWhere, attributes: [] }]
+      });
       const totalActiveValue = contracts.reduce((acc, c) => acc + Number(c.value || 0), 0);
 
-      // 2. Pending Amount
-      const pendingP = await Payment.findAll({ where: { ...payWhere, status: 'pending' } });
+      const pendingP = await Payment.findAll({ 
+        where: { ...payWhere, status: 'pending' },
+        include: [{ model: User, where: userWhere, attributes: [] }]
+      });
       const pendingAmount = pendingP.reduce((acc, p) => acc + Number(p.amount || 0), 0);
       
-      // 3. Paid Month / Period
       const paidQuery = { status: 'paid' };
-      
       if (startDate && endDate) {
         const start = new Date(`${startDate}T00:00:00.000Z`);
         const end = new Date(`${endDate}T23:59:59.999Z`);
         paidQuery.paidAt = { [Op.between]: [start, end] };
       } else {
-        // Default: Start of current month in UTC to avoid local timezone issues
         const now = new Date();
         const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
         paidQuery.paidAt = { [Op.gte]: startOfMonth };
       }
 
-      const paidP = await Payment.findAll({ where: paidQuery });
+      const paidP = await Payment.findAll({ 
+        where: paidQuery,
+        include: [{ model: User, where: userWhere, attributes: [] }]
+      });
       const paidMonth = paidP.reduce((acc, p) => acc + Number(p.amount || 0), 0);
 
       return res.json({

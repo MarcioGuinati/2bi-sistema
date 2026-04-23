@@ -14,6 +14,10 @@ const Announcement = require('./Announcement')(sequelize, DataTypes);
 const Setting = require('./Setting')(sequelize, DataTypes);
 const Insight = require('./Insight')(sequelize, DataTypes);
 
+// Partner & Clients (User self-reference)
+User.hasMany(User, { as: 'Clients', foreignKey: 'partner_id' });
+User.belongsTo(User, { as: 'Partner', foreignKey: 'partner_id' });
+
 // User & Category
 User.hasMany(Category, { foreignKey: 'user_id' });
 Category.belongsTo(User, { foreignKey: 'user_id' });

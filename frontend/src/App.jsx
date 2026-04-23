@@ -22,6 +22,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminFinances from './pages/AdminFinances';
 import AdminMentorship from './pages/AdminMentorship';
 import AdminAIConfig from './pages/AdminAIConfig';
+import PartnerManagement from './pages/PartnerManagement';
 import ClientDashboard from './pages/ClientDashboard';
 import FinanceManagement from './pages/FinanceManagement';
 import CategoryManagement from './pages/CategoryManagement';
@@ -51,7 +52,7 @@ const Institutional = () => (
 const DashboardRedirect = () => {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" />;
-    if (user.role === 'admin') return <Navigate to="/admin" />;
+    if (user.role === 'admin' || user.role === 'partner') return <Navigate to="/admin" />;
     return <Navigate to="/dashboard" />;
 };
 
@@ -69,7 +70,7 @@ function App() {
           <Route 
             path="/admin" 
             element={
-              <ProtectedRoute role="admin">
+              <ProtectedRoute role={['admin', 'partner']}>
                 <AdminDashboard />
               </ProtectedRoute>
             } 
@@ -77,7 +78,7 @@ function App() {
           <Route 
             path="/admin/finances" 
             element={
-              <ProtectedRoute role="admin">
+              <ProtectedRoute role={['admin', 'partner']}>
                 <AdminFinances />
               </ProtectedRoute>
             } 
@@ -142,6 +143,14 @@ function App() {
             } 
           />
           <Route 
+            path="/admin/partners" 
+            element={
+              <ProtectedRoute role="admin">
+                <PartnerManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/insights" 
             element={
               <ProtectedRoute role="client">
@@ -169,7 +178,7 @@ function App() {
           <Route 
             path="/admin/mentorship" 
             element={
-              <ProtectedRoute role="admin">
+              <ProtectedRoute role={['admin', 'partner']}>
                 <AdminMentorship />
               </ProtectedRoute>
             } 
