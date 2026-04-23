@@ -3,7 +3,7 @@ import { ArrowRight, MessageCircle, Calendar } from 'lucide-react';
 
 const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden bg-navy-900">
+    <section className="relative min-h-[90vh] flex items-center pt-32 md:pt-20 overflow-hidden bg-navy-900">
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
