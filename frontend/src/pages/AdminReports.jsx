@@ -122,7 +122,7 @@ const AdminReports = () => {
     });
   };
 
-  const handleDownload = (report) => {
+  const handleDownload = async (report) => {
     const fullData = {
       user: { name: report.client.name },
       summary: report.summary_data.summary,
@@ -132,7 +132,7 @@ const AdminReports = () => {
       period: { start: report.period_start, end: report.period_end },
       consultant_note: report.consultant_note
     };
-    reportGenerator.generateStrategicReport(fullData);
+    await reportGenerator.generateStrategicReport(fullData);
   };
 
   const filteredClients = clients.filter(c => 
@@ -255,7 +255,7 @@ const AdminReports = () => {
                     
                     <div className="flex justify-end gap-4">
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
                            const fullData = {
                              user: { name: selectedClient.name },
                              summary: currentPreview.summary,
@@ -265,7 +265,7 @@ const AdminReports = () => {
                              period: { start: startDate, end: endDate },
                              consultant_note: consultantNote
                            };
-                           reportGenerator.generateStrategicReport(fullData);
+                           await reportGenerator.generateStrategicReport(fullData);
                         }}
                         className="px-6 py-3 border border-gold text-gold font-black text-[10px] uppercase rounded-xl hover:bg-gold/10 transition-all"
                       >

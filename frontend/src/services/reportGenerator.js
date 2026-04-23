@@ -13,15 +13,41 @@ class ReportGenerator {
     this.accentColor = [251, 191, 36]; // Gold (#fbbf24)
     this.textColor = [30, 41, 59];
     this.secondaryTextColor = [100, 116, 139];
+    this.logoPath = '/logo_2bi.png';
   }
 
-  generateStrategicReport(data) {
+  async _getBase64Image(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL('image/png');
+        resolve(dataURL);
+      };
+      img.onerror = (error) => reject(error);
+      img.src = url;
+    });
+  }
+
+  async generateStrategicReport(data) {
     const { user, summary, transactions, categories, goals, period, consultant_note } = data;
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
     });
+
+    let logoData = null;
+    try {
+      logoData = await this._getBase64Image(this.logoPath);
+    } catch (e) {
+      console.warn('Could not load logo for PDF', e);
+    }
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -32,13 +58,19 @@ class ReportGenerator {
     doc.rect(0, 0, pageWidth, 45, 'F');
 
     // Logo / Brand
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', margin, 12, 35, 20); // Adjust size as needed
+    } else {
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(24);
+      doc.text('2BI', margin, 25);
+    }
+
     doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(24);
-    doc.text('2BI', margin, 25);
-    doc.setFontSize(10);
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.text('PLANEJAMENTO FINANCEIRO', margin, 32);
+    doc.text('PLANEJAMENTO FINANCEIRO', margin, 35);
 
     // Report Title & User
     doc.setFontSize(14);

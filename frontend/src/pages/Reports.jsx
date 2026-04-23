@@ -38,7 +38,7 @@ const Reports = () => {
     }
   };
 
-  const handleDownload = (report) => {
+  const handleDownload = async (report) => {
     const fullData = {
       user: { name: authUser.name },
       summary: report.summary_data.summary,
@@ -48,7 +48,7 @@ const Reports = () => {
       period: { start: report.period_start, end: report.period_end },
       consultant_note: report.consultant_note
     };
-    reportGenerator.generateStrategicReport(fullData);
+    await reportGenerator.generateStrategicReport(fullData);
   };
 
   return (
