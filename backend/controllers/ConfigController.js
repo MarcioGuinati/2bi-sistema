@@ -1,4 +1,4 @@
-const { Setting } = require('../models');
+const { Setting, Insight, User, sequelize } = require('../models');
 
 class ConfigController {
   async getAIConfig(req, res) {
@@ -37,6 +37,34 @@ class ConfigController {
       return res.json({ message: 'Configurações atualizadas com sucesso' });
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao atualizar configurações' });
+    }
+  }
+
+  async getAIUsage(req, res) {
+    try {
+      // Invertemos a lógica: buscamos usuários que possuem insights para garantir os dados do usuário
+      const usage = await User.findAll({
+        attributes: [
+          ['id', 'user_id'],
+          'name',
+          'email',
+          [sequelize.fn('COUNT', sequelize.col('Insights.id')), 'total_insights'],
+          [sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'last_use']
+        ],
+        include: [{
+          model: Insight,
+          attributes: [],
+          required: true // Somente usuários que tem insights
+        }],
+        group: ['User.id'],
+        order: [[sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'DESC']],
+        raw: true
+      });
+
+      return res.json(usage);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao buscar relatório de uso' });
     }
   }
 }
