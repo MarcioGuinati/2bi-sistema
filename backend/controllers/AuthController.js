@@ -4,6 +4,7 @@ const { User } = require('../models');
 const sequelize = require('../config/database');
 const otplib = require('otplib');
 const qrcode = require('qrcode');
+const AuditService = require('../services/AuditService');
 require('dotenv').config();
 
 class AuthController {
@@ -14,10 +15,12 @@ class AuthController {
       const user = await User.findOne({ where: { email } });
 
       if (!user) {
+        await AuditService.log(null, 'LOGIN_FAILED', 'Auth', { email, reason: 'User not found' }, req.ip);
         return res.status(401).json({ error: 'User not found' });
       }
 
       if (!(await bcrypt.compare(password, user.password))) {
+        await AuditService.log(user.id, 'LOGIN_FAILED', 'Auth', { email, reason: 'Invalid password' }, req.ip);
         return res.status(401).json({ error: 'Password does not match' });
       }
 
@@ -29,11 +32,15 @@ class AuthController {
           expiresIn: '5m', // Short-lived
         });
 
+        await AuditService.log(user.id, 'LOGIN_2FA_REQUIRED', 'Auth', { email }, req.ip);
+
         return res.json({
           twoFactorRequired: true,
           tempToken
         });
       }
+
+      await AuditService.log(user.id, 'LOGIN_SUCCESS', 'Auth', { email, role }, req.ip);
 
       return res.json({
         user: { id, name, email, role },
@@ -74,10 +81,13 @@ class AuthController {
       });
 
       if (!isValid || !isValid.valid) {
+        await AuditService.log(user.id, '2FA_VERIFY_FAILED', 'Auth', { email: user.email }, req.ip);
         return res.status(401).json({ error: 'Código de autenticação inválido' });
       }
 
       const { id, name, email, role } = user;
+
+      await AuditService.log(user.id, '2FA_VERIFY_SUCCESS', 'Auth', { email: user.email, role }, req.ip);
 
       return res.json({
         user: { id, name, email, role },
@@ -442,6 +452,15 @@ class AuthController {
         expiresIn: '7d',
       }),
     });
+  }
+
+  async logout(req, res) {
+    try {
+      await AuditService.log(req.userId, 'LOGOUT', 'Auth', {}, req.ip);
+      return res.status(200).json({ message: 'Logout realizado com sucesso' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Erro ao realizar logout' });
+    }
   }
 }
 

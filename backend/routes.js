@@ -12,6 +12,7 @@ const ImportController = require('./controllers/ImportController');
 const AdminController = require('./controllers/AdminController');
 const ConfigController = require('./controllers/ConfigController');
 const AIController = require('./controllers/AIController');
+const AuditController = require('./controllers/AuditController');
 const authMiddleware = require('./middleware/auth');
 const multer = require('multer');
 
@@ -23,6 +24,7 @@ const routes = new Router();
 routes.post('/login', AuthController.login);
 routes.post('/2fa/verify-login', AuthController.verify2FALogin);
 routes.post('/register-lead', AuthController.registerLead);
+routes.post('/logout', authMiddleware, AuthController.logout);
 
 // Protected routes
 routes.use(authMiddleware);
@@ -103,6 +105,9 @@ routes.get('/admin/announcements', AnnouncementController.index);
 routes.post('/admin/announcements', AnnouncementController.store);
 routes.put('/admin/announcements/:id', AnnouncementController.update);
 routes.delete('/admin/announcements/:id', AnnouncementController.delete);
+
+// Auditoria
+routes.get('/admin/audit-logs', AuditController.index);
 
 // Import
 routes.post('/import/ofx-preview', upload.single('file'), ImportController.preview);

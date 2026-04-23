@@ -1,5 +1,6 @@
 const { Transaction, Category, User, Account, sequelize } = require('../models');
 const { Op } = require('sequelize');
+const AuditService = require('../services/AuditService');
 
 class TransactionController {
   async index(req, res) {
@@ -144,6 +145,15 @@ class TransactionController {
       const createdTransactions = await Transaction.bulkCreate(transactions, { transaction: t });
       await t.commit();
 
+      // Log the action (if bulk, we log the first one's detail or a summary)
+      await AuditService.log(
+        req.userId, 
+        createdTransactions.length > 1 ? 'TRANSACTION_BULK_CREATE' : 'TRANSACTION_CREATE', 
+        'Finance', 
+        { count: createdTransactions.length, firstDescription: createdTransactions[0].description },
+        req.ip
+      );
+
       return res.json(createdTransactions[0]);
     } catch (error) {
       await t.rollback();
@@ -164,6 +174,14 @@ class TransactionController {
 
     await transaction.update({ amount, description, type, category_id, account_id, date, is_paid });
 
+    await AuditService.log(
+      req.userId, 
+      'TRANSACTION_UPDATE', 
+      'Finance', 
+      { id, description: transaction.description },
+      req.ip
+    );
+
     return res.json(transaction);
   }
 
@@ -177,6 +195,14 @@ class TransactionController {
     }
 
     await transaction.destroy();
+
+    await AuditService.log(
+      req.userId, 
+      'TRANSACTION_DELETE', 
+      'Finance', 
+      { id, description: transaction.description },
+      req.ip
+    );
 
     return res.send();
   }
@@ -326,6 +352,14 @@ class TransactionController {
           user_id: req.userId
         }
       });
+
+      await AuditService.log(
+        req.userId, 
+        'TRANSACTION_BULK_DELETE', 
+        'Finance', 
+        { count: ids.length, ids },
+        req.ip
+      );
 
       return res.status(204).send();
     } catch (error) {

@@ -1,4 +1,5 @@
 const { Account } = require('../models');
+const AuditService = require('../services/AuditService');
 
 class AccountController {
   async index(req, res) {
@@ -41,6 +42,8 @@ class AccountController {
       user_id: req.userId
     });
 
+    await AuditService.log(req.userId, 'ACCOUNT_CREATE', 'Finance', { id: account.id, name, type }, req.ip);
+
     return res.json(account);
   }
 
@@ -56,6 +59,8 @@ class AccountController {
 
     await account.update({ name, type, initial_balance, credit_limit, invoice_closing_day });
 
+    await AuditService.log(req.userId, 'ACCOUNT_UPDATE', 'Finance', { id, name }, req.ip);
+
     return res.json(account);
   }
 
@@ -69,6 +74,8 @@ class AccountController {
     }
 
     await account.destroy();
+
+    await AuditService.log(req.userId, 'ACCOUNT_DELETE', 'Finance', { id, name: account.name }, req.ip);
 
     return res.send();
   }

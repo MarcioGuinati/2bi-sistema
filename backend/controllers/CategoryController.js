@@ -1,4 +1,5 @@
 const { Category } = require('../models');
+const AuditService = require('../services/AuditService');
 
 class CategoryController {
   async index(req, res) {
@@ -19,6 +20,8 @@ class CategoryController {
       user_id: req.userId
     });
 
+    await AuditService.log(req.userId, 'CATEGORY_CREATE', 'Finance', { id: category.id, name, type }, req.ip);
+
     return res.json(category);
   }
 
@@ -34,6 +37,8 @@ class CategoryController {
 
     await category.update({ name, type });
 
+    await AuditService.log(req.userId, 'CATEGORY_UPDATE', 'Finance', { id, name, type }, req.ip);
+
     return res.json(category);
   }
 
@@ -47,6 +52,8 @@ class CategoryController {
     }
 
     await category.destroy();
+
+    await AuditService.log(req.userId, 'CATEGORY_DELETE', 'Finance', { id, name: category.name }, req.ip);
 
     return res.send();
   }

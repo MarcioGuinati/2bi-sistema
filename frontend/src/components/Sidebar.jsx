@@ -15,6 +15,7 @@ import {
   Sun,
   Moon,
   ShieldCheck,
+  Shield,
   ChevronLeft,
   ChevronRight,
   Cpu,
@@ -56,6 +57,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Controle Financeiro', path: '/admin/finances', icon: TrendingUp },
     { name: 'Segurança & 2FA', path: '/admin/security', icon: ShieldCheck },
+    { name: 'Logs do Sistema', path: '/admin/audit-logs', icon: Shield },
     { name: 'Agenda Meet', path: '/mentoria', icon: Calendar },
   ];
 

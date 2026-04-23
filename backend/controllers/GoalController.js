@@ -1,5 +1,6 @@
 const { Goal, Transaction, Category } = require('../models');
 const { Op } = require('sequelize');
+const AuditService = require('../services/AuditService');
 
 class GoalController {
   async index(req, res) {
@@ -52,6 +53,8 @@ class GoalController {
       user_id: req.userId
     });
 
+    await AuditService.log(req.userId, 'GOAL_CREATE', 'Finance', { id: goal.id, title, targetAmount }, req.ip);
+
     return res.json(goal);
   }
 
@@ -73,6 +76,8 @@ class GoalController {
       category_id: category_id || null 
     });
 
+    await AuditService.log(req.userId, 'GOAL_UPDATE', 'Finance', { id, title }, req.ip);
+
     return res.json(goal);
   }
 
@@ -86,6 +91,8 @@ class GoalController {
     }
 
     await goal.destroy();
+
+    await AuditService.log(req.userId, 'GOAL_DELETE', 'Finance', { id, title: goal.title }, req.ip);
 
     return res.send();
   }

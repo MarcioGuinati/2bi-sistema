@@ -13,6 +13,11 @@ const Payment = require('./Payment')(sequelize, DataTypes);
 const Announcement = require('./Announcement')(sequelize, DataTypes);
 const Setting = require('./Setting')(sequelize, DataTypes);
 const Insight = require('./Insight')(sequelize, DataTypes);
+const AuditLog = require('./AuditLog')(sequelize, DataTypes);
+
+// Audit Logs
+User.hasMany(AuditLog, { foreignKey: 'userId' });
+AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 // Partner & Clients (User self-reference)
 User.hasMany(User, { as: 'Clients', foreignKey: 'partner_id' });
@@ -87,5 +92,6 @@ module.exports = {
   Payment,
   Announcement,
   Setting,
-  Insight
+  Insight,
+  AuditLog
 };
