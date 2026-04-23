@@ -13,6 +13,7 @@ const AdminController = require('./controllers/AdminController');
 const ConfigController = require('./controllers/ConfigController');
 const AIController = require('./controllers/AIController');
 const AuditController = require('./controllers/AuditController');
+const ReportController = require('./controllers/ReportController');
 const authMiddleware = require('./middleware/auth');
 const multer = require('multer');
 
@@ -106,8 +107,11 @@ routes.post('/admin/announcements', AnnouncementController.store);
 routes.put('/admin/announcements/:id', AnnouncementController.update);
 routes.delete('/admin/announcements/:id', AnnouncementController.delete);
 
-// Auditoria
+// Auditoria & Relatórios
 routes.get('/admin/audit-logs', AuditController.index);
+routes.get('/reports', ReportController.index);
+routes.post('/reports', ReportController.store);
+routes.delete('/reports/:id', ReportController.delete);
 
 // Import
 routes.post('/import/ofx-preview', upload.single('file'), ImportController.preview);

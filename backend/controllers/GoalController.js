@@ -4,8 +4,12 @@ const AuditService = require('../services/AuditService');
 
 class GoalController {
   async index(req, res) {
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+      ? req.query.userId 
+      : req.userId;
+
     const goals = await Goal.findAll({
-      where: { user_id: req.userId },
+      where: { user_id: targetUserId },
       include: [{ model: Category, attributes: ['name', 'type'] }],
       order: [['deadline', 'ASC']]
     });
@@ -24,7 +28,7 @@ class GoalController {
         // Calculate sum of transactions for this category in the current month
         const totalSpent = await Transaction.sum('amount', {
           where: {
-            user_id: req.userId,
+            user_id: targetUserId,
             category_id: g.category_id,
             date: {
               [Op.between]: [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]

@@ -216,8 +216,13 @@ class TransactionController {
       description,
       type
     } = req.query;
+    
+    // Allow admin/partner to view stats for a specific user
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+      ? req.query.userId 
+      : req.userId;
 
-    const where = { user_id: req.userId };
+    const where = { user_id: targetUserId };
 
     if (startDate && endDate) {
       where.date = { [Op.between]: [startDate, endDate] };
@@ -258,7 +263,9 @@ class TransactionController {
   }
 
   async dashboardStats(req, res) {
-    const userId = req.userId;
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+      ? req.query.userId 
+      : req.userId;
     const currentYear = new Date().getFullYear();
 
     try {
@@ -275,7 +282,7 @@ class TransactionController {
 
         const monthTransactions = await Transaction.findAll({
           where: {
-            user_id: userId,
+            user_id: targetUserId,
             date: {
               [Op.between]: [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]
             }
@@ -301,7 +308,7 @@ class TransactionController {
       // 2. Category Breakdown (Expenses only)
       const { startDate, endDate } = req.query;
       const categoryWhere = {
-        user_id: userId,
+        user_id: targetUserId,
         type: 'expense'
       };
 

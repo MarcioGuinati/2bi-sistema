@@ -12,6 +12,7 @@ import {
   PieChart,
   Settings,
   Target,
+  FileText,
   Sun,
   Moon,
   ShieldCheck,
@@ -35,6 +36,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
   const clientLinks = [
     { name: 'Visão Geral', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Dashboard Estratégico', path: '/dashboard?tab=dashboard', icon: PieChart },
+    { name: 'Relatórios PDF', path: '/reports', icon: FileText },
     { name: 'Extrato Financeiro', path: '/finance', icon: Wallet },
     { name: 'Contas Bancárias', path: '/accounts', icon: CreditCard },
     { name: 'Categorias', path: '/categories', icon: Layers },
@@ -54,6 +56,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Base de Usuários', path: '/admin', icon: Users },
     { name: 'Gestão de Parceiros', path: '/admin/partners', icon: Briefcase },
     { name: 'Visão Geral Mentoria', path: '/admin/mentorship', icon: PieChart },
+    { name: 'Relatórios PDF', path: '/admin/reports', icon: FileText },
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Controle Financeiro', path: '/admin/finances', icon: TrendingUp },
     { name: 'Segurança & 2FA', path: '/admin/security', icon: ShieldCheck },

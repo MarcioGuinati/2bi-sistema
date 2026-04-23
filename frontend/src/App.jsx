@@ -33,6 +33,8 @@ import Mentoria from './pages/Mentoria';
 import ClientOnboarding from './pages/ClientOnboarding';
 import SecuritySettings from './pages/SecuritySettings';
 import AuditLogs from './pages/AuditLogs';
+import Reports from './pages/Reports';
+import AdminReports from './pages/AdminReports';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -198,6 +200,22 @@ function App() {
             element={
               <ProtectedRoute role="admin">
                 <AuditLogs />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/reports" 
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/reports" 
+            element={
+              <ProtectedRoute role="admin">
+                <AdminReports />
               </ProtectedRoute>
             } 
           />
