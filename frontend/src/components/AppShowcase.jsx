@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, TrendingUp, BarChart3, Smartphone, Laptop, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, TrendingUp, BarChart3, Smartphone, Laptop, CheckCircle2, DollarSign } from 'lucide-react';
 
 const AppShowcase = () => {
   return (
@@ -18,23 +18,23 @@ const AppShowcase = () => {
               <div className="flex items-center gap-2 mb-6">
                 <span className="h-[2px] w-12 bg-gold" />
                 <span className="text-gold uppercase tracking-[0.3em] text-sm font-black">
-                  Controle total na palma da mão
+                  Inteligência a serviço do seu bolso
                 </span>
               </div>
 
               <h2 className="text-4xl md:text-6xl font-black text-navy-900 font-heading mb-8 leading-[1.1] tracking-tight">
-                Controle melhor seus <span className="text-gold italic">gastos</span> e receitas.
+                Gestão <span className="text-gold italic">Automática</span> & Insights com IA.
               </h2>
 
               <p className="text-lg text-slate-500 mb-10 leading-relaxed font-medium">
-                Uma consultoria do começo ao fim, com <span className="text-navy-900 font-black">controle total</span>. Nossa plataforma exclusiva transforma a complexidade financeira em decisões inteligentes e automáticas.
+                Diga adeus à digitação manual. Nossa plataforma <span className="text-navy-900 font-black">se conecta diretamente</span> ao seu banco e utiliza IA para guiar suas decisões.
               </p>
 
               <div className="space-y-6 mb-12">
                 {[
-                  { icon: BarChart3, title: "Dashboards Estratégicos", desc: "Visualize seu patrimônio com métricas de BI avançadas." },
-                  { icon: ShieldCheck, title: "Segurança de Nível Bancário", desc: "Seus dados protegidos com criptografia de ponta a ponta." },
-                  { icon: TrendingUp, title: "Projeção de Longo Prazo", desc: "Simule cenários e planeje sua aposentadoria com precisão." }
+                  { icon: ShieldCheck, title: "Importação Automática", desc: "Conexão direta com bancos para conciliação em tempo real de despesas e receitas." },
+                  { icon: TrendingUp, title: "Insights de IA Conversacional", desc: "Uma assistente que analisa seus padrões e sugere economias via chat." },
+                  { icon: BarChart3, title: "Mapeamento 360°", desc: "Visão completa do seu ecossistema financeiro em um único painel estratégico." }
                 ].map((item, index) => (
                   <div key={index} className="flex gap-4 group">
                     <div className="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-all duration-300">
@@ -56,63 +56,108 @@ const AppShowcase = () => {
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-200 hidden sm:block" />
                 <div className="flex items-center gap-2 text-navy-900 font-black italic">
                    <CheckCircle2 size={20} className="text-green-500" />
-                   <p className="text-xs uppercase tracking-widest">Acompanhamento Real</p>
+                   <p className="text-xs uppercase tracking-widest">Conciliação Bancária</p>
                 </div>
               </div>
             </motion.div>
           </div>
 
-          {/* Visual Showcase */}
+          {/* Visual Showcase - ANIMATED PHONE */}
           <div className="flex-1 order-1 lg:order-2 relative">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="relative z-10"
-            >
-              {/* Main Image Mockup */}
-              <div className="relative">
-                <div className="absolute inset-0 bg-gold/20 blur-[100px] rounded-full -z-10" />
-                <img 
-                  src="/assets/2bi_app_mockup.png" 
-                  alt="2BI App Preview" 
-                  className="w-full h-auto drop-shadow-[0_35px_35px_rgba(0,0,0,0.15)] rounded-[2rem]"
-                />
-              </div>
+            <div className="relative mx-auto w-[280px] h-[580px] bg-navy-900 rounded-[3rem] border-[8px] border-slate-800 shadow-2xl overflow-hidden">
+               {/* Phone Notch */}
+               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-2xl z-50"></div>
+               
+               {/* App UI Simulation */}
+               <div className="p-6 pt-10 space-y-6">
+                  {/* AI Greeting */}
+                  <div className="flex items-center gap-3">
+                     <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-navy-900 animate-pulse">
+                        <TrendingUp size={20} />
+                     </div>
+                     <div>
+                        <p className="text-[10px] text-white/40 uppercase font-black">Assistente 2BI</p>
+                        <p className="text-xs text-white font-bold">Olá, seu resumo de hoje:</p>
+                     </div>
+                  </div>
 
-              {/* Floating Cards */}
-              <motion.div
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-10 -right-6 md:-right-10 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100 z-20 flex items-center gap-4"
-              >
-                <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                  <TrendingUp size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-black text-slate-400">Patrimônio</p>
-                  <p className="text-lg font-black text-navy-900">+12.4%</p>
-                </div>
-              </motion.div>
+                  {/* Transaction List with Animation */}
+                  <div className="space-y-3">
+                     <p className="text-[9px] uppercase font-black text-white/30 tracking-widest">Transações Recentes</p>
+                     
+                     {/* Row 1 - Static */}
+                     <div className="bg-white/5 border border-white/10 p-3 rounded-xl flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                           <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center"><Smartphone size={14} className="text-blue-400" /></div>
+                           <span className="text-[10px] text-white font-bold">Assinatura Digital</span>
+                        </div>
+                        <span className="text-[10px] text-red-500 font-black">- R$ 49,90</span>
+                     </div>
 
-              <motion.div
-                animate={{ y: [0, 15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute -bottom-6 -left-6 md:-left-10 bg-navy-900 p-6 rounded-3xl shadow-2xl border border-white/10 z-20 flex items-center gap-4 text-white"
-              >
-                <div className="w-10 h-10 bg-gold text-navy-900 rounded-full flex items-center justify-center">
-                  <Smartphone size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-black text-gold/60">Controle App</p>
-                  <p className="text-lg font-black italic">Tudo em Um</p>
-                </div>
-              </motion.div>
-            </motion.div>
+                     {/* Row 2 - AUTOMATIC IMPORT ANIMATION */}
+                     <motion.div 
+                        initial={{ x: -20, opacity: 0 }}
+                        whileInView={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 1, duration: 0.5 }}
+                        className="bg-white/5 border border-gold/40 p-3 rounded-xl flex justify-between items-center relative overflow-hidden"
+                     >
+                        <div className="flex items-center gap-2">
+                           <div className="w-8 h-8 bg-gold/20 rounded-lg flex items-center justify-center"><CheckCircle2 size={14} className="text-gold" /></div>
+                           <div>
+                              <span className="text-[10px] text-white font-bold block">Restaurante Gourmet</span>
+                              <span className="text-[8px] text-gold uppercase font-black tracking-tighter">Importado do Banco</span>
+                           </div>
+                        </div>
+                        <span className="text-[10px] text-red-500 font-black">- R$ 157,00</span>
+                        <motion.div 
+                           animate={{ x: ['100%', '-100%'] }}
+                           transition={{ duration: 2, repeat: Infinity }}
+                           className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/5 to-transparent" 
+                        />
+                     </motion.div>
 
-            {/* Background pattern */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-slate-50 via-transparent to-transparent -z-20 opacity-50" />
+                     {/* Row 3 - INCOME */}
+                     <motion.div 
+                        initial={{ x: 20, opacity: 0 }}
+                        whileInView={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 2, duration: 0.5 }}
+                        className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl flex justify-between items-center"
+                     >
+                        <div className="flex items-center gap-2">
+                           <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center"><DollarSign size={14} className="text-green-400" /></div>
+                           <span className="text-[10px] text-white font-bold">Recebimento Honorários</span>
+                        </div>
+                        <span className="text-[10px] text-green-500 font-black">+ R$ 4.500,00</span>
+                     </motion.div>
+                  </div>
+
+                  {/* AI CHAT INSIGHT ANIMATION */}
+                  <motion.div 
+                     initial={{ y: 20, opacity: 0 }}
+                     whileInView={{ y: 0, opacity: 1 }}
+                     transition={{ delay: 3, duration: 0.7 }}
+                     className="bg-gold p-4 rounded-2xl rounded-tl-none shadow-2xl relative"
+                  >
+                     <p className="text-[11px] font-black italic text-navy-900 leading-tight">
+                        "Notei que você economizou 12% a mais este mês. Que tal aportar R$ 500 no seu objetivo 'Aposentadoria'?"
+                     </p>
+                     <div 
+                        className="absolute -left-[10px] top-0 w-0 h-0" 
+                        style={{
+                          borderRight: '12px solid var(--color-gold)',
+                          borderBottom: '12px solid transparent'
+                        }}
+                     ></div>
+                     <div className="mt-2 flex gap-2">
+                        <button className="bg-navy-900 text-white text-[8px] font-black px-3 py-1.5 rounded-full">Sim, agora!</button>
+                        <button className="bg-white/20 text-navy-900 text-[8px] font-black px-3 py-1.5 rounded-full">Depois</button>
+                     </div>
+                  </motion.div>
+               </div>
+            </div>
+
+            {/* Background elements */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent -z-10 blur-3xl" />
           </div>
 
         </div>
