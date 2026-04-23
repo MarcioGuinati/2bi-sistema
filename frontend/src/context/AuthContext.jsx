@@ -23,12 +23,27 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const response = await api.post('/login', { email, password });
+    
+    if (response.data.twoFactorRequired) {
+      return response.data; // Return to trigger 2FA UI
+    }
 
     const { user: userData, token } = response.data;
 
     setUser(userData);
     localStorage.setItem('@2BI:user', JSON.stringify(userData));
     localStorage.setItem('@2BI:token', token);
+    return response.data;
+  };
+
+  const verify2FALogin = async (tempToken, code) => {
+    const response = await api.post('/2fa/verify-login', { tempToken, code });
+    const { user: userData, token } = response.data;
+
+    setUser(userData);
+    localStorage.setItem('@2BI:user', JSON.stringify(userData));
+    localStorage.setItem('@2BI:token', token);
+    return response.data;
   };
 
   const logout = () => {
@@ -79,6 +94,7 @@ export const AuthProvider = ({ children }) => {
       signed: !!user, 
       user, 
       login, 
+      verify2FALogin,
       logout, 
       impersonate, 
       stopImpersonating,

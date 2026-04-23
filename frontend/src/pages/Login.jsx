@@ -12,8 +12,11 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [require2FA, setRequire2FA] = useState(false);
+  const [tempToken, setTempToken] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
   
-  const { login } = useAuth();
+  const { login, verify2FALogin } = useAuth();
   const navigate = useNavigate();
 
   // Auto-slide every 6 seconds
@@ -30,10 +33,24 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      if (require2FA) {
+        await verify2FALogin(tempToken, twoFactorCode);
+        navigate('/panel');
+        return;
+      }
+
+      const response = await login(email, password);
+      
+      if (response && response.twoFactorRequired) {
+        setRequire2FA(true);
+        setTempToken(response.tempToken);
+        setLoading(false);
+        return;
+      }
+
       navigate('/panel'); 
     } catch (err) {
-      setError('Credenciais inválidas. Verifique seus dados e tente novamente.');
+      setError(err.response?.data?.error || 'Credenciais inválidas. Verifique seus dados.');
     } finally {
       setLoading(false);
     }
@@ -226,59 +243,97 @@ const Login = () => {
                     </motion.div>
                 )}
 
-                <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-4 tracking-[0.2em]">Identificação</label>
-                    <div className="relative group">
-                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
-                        <input 
-                            type="email" 
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-navy-900"
-                            placeholder="E-mail ou ID de Usuário"
-                        />
-                    </div>
-                </div>
+                {!require2FA ? (
+                    <>
+                        <div className="space-y-2">
+                            <label className="text-[10px] uppercase font-black text-slate-400 ml-4 tracking-[0.2em]">Identificação</label>
+                            <div className="relative group">
+                                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
+                                <input 
+                                    type="email" 
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-navy-900"
+                                    placeholder="E-mail ou ID de Usuário"
+                                />
+                            </div>
+                        </div>
 
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center ml-4">
-                        <label className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Senha Criptografada</label>
-                    </div>
-                    <div className="relative group">
-                        <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-16 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-navy-900"
-                            placeholder="••••••••"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-gold transition-colors"
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center ml-4">
+                                <label className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Senha Criptografada</label>
+                            </div>
+                            <div className="relative group">
+                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
+                                <input 
+                                    type={showPassword ? "text" : "password"} 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-16 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-navy-900"
+                                    placeholder="••••••••"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-gold transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between px-4 text-[11px]">
+                            <label className="flex items-center gap-2 text-slate-500 font-bold cursor-pointer group">
+                                <input type="checkbox" className="w-4 h-4 rounded border-slate-200 text-gold focus:ring-gold transition-all" />
+                                Lembrar neste dispositivo
+                            </label>
+                            <button type="button" className="text-navy-900 font-black uppercase tracking-widest hover:text-gold transition-colors">Solicitar Nova Senha</button>
+                        </div>
+                    </>
+                ) : (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-6 text-center"
+                    >
+                        <div className="p-6 bg-gold/5 border border-gold/20 rounded-[2rem]">
+                            <Smartphone className="w-12 h-12 text-gold mx-auto mb-4" />
+                            <h4 className="text-navy-900 font-black italic tracking-tight mb-2">Google Authenticator</h4>
+                            <p className="text-slate-400 text-xs font-semibold">Insira o código de 6 dígitos gerado pelo seu aplicativo de autenticação.</p>
+                        </div>
+                        
+                        <div className="relative group">
+                            <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
+                            <input 
+                                type="text" 
+                                value={twoFactorCode}
+                                onChange={(e) => setTwoFactorCode(e.target.value)}
+                                required
+                                maxLength={6}
+                                className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-6 py-6 text-center text-3xl font-black tracking-[0.5em] focus:border-gold outline-none transition-all shadow-sm text-navy-900"
+                                placeholder="000000"
+                                autoFocus
+                            />
+                        </div>
+
+                        <button 
+                            type="button" 
+                            onClick={() => setRequire2FA(false)}
+                            className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] hover:text-gold transition-colors"
                         >
-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            Voltar para login principal
                         </button>
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between px-4 text-[11px]">
-                    <label className="flex items-center gap-2 text-slate-500 font-bold cursor-pointer group">
-                        <input type="checkbox" className="w-4 h-4 rounded border-slate-200 text-gold focus:ring-gold transition-all" />
-                        Lembrar neste dispositivo
-                    </label>
-                    <button type="button" className="text-navy-900 font-black uppercase tracking-widest hover:text-gold transition-colors">Solicitar Nova Senha</button>
-                </div>
+                    </motion.div>
+                )}
 
                 <button
                     type="submit"
                     disabled={loading}
                     className="w-full bg-navy-900 text-white !py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-3 hover:bg-gold hover:text-navy-900 transition-all shadow-2xl active:scale-[0.98] disabled:opacity-70 group"
                 >
-                    {loading ? 'Sincronizando...' : 'Acessar Workspace'}
+                    {loading ? 'Validando...' : require2FA ? 'Confirmar Autenticação' : 'Acessar Workspace'}
                     <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
                         <ArrowRight size={20} />
                     </motion.div>

@@ -31,6 +31,7 @@ import BudgetManagement from './pages/BudgetManagement';
 import AIInsights from './pages/AIInsights';
 import Mentoria from './pages/Mentoria';
 import ClientOnboarding from './pages/ClientOnboarding';
+import SecuritySettings from './pages/SecuritySettings';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -180,6 +181,14 @@ function App() {
             element={
               <ProtectedRoute role={['admin', 'partner']}>
                 <AdminMentorship />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/security" 
+            element={
+              <ProtectedRoute role="admin">
+                <SecuritySettings />
               </ProtectedRoute>
             } 
           />

@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const sequelize = require('../config/database');
+const otplib = require('otplib');
+const qrcode = require('qrcode');
 require('dotenv').config();
 
 class AuthController {
@@ -19,7 +21,19 @@ class AuthController {
         return res.status(401).json({ error: 'Password does not match' });
       }
 
-      const { id, name, role } = user;
+      const { id, name, role, twoFactorEnabled } = user;
+
+      // If 2FA is enabled, return a temporary flag but no final token yet
+      if (twoFactorEnabled && role === 'admin') {
+        const tempToken = jwt.sign({ id, role, isTemp: true }, process.env.JWT_SECRET, {
+          expiresIn: '5m', // Short-lived
+        });
+
+        return res.json({
+          twoFactorRequired: true,
+          tempToken
+        });
+      }
 
       return res.json({
         user: { id, name, email, role },
@@ -33,6 +47,125 @@ class AuthController {
         error: 'Error in login', 
         details: err.message 
       });
+    }
+  }
+
+  async verify2FALogin(req, res) {
+    try {
+      const { tempToken, code } = req.body;
+
+      if (!tempToken || !code) {
+        return res.status(400).json({ error: 'Token temporário e código são obrigatórios' });
+      }
+
+      const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+      
+      if (!decoded.isTemp) {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+
+      const user = await User.findByPk(decoded.id);
+      if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+      // Use functional verify from otplib v13
+      const isValid = await otplib.verify({
+        token: code,
+        secret: user.twoFactorSecret
+      });
+
+      if (!isValid || !isValid.valid) {
+        return res.status(401).json({ error: 'Código de autenticação inválido' });
+      }
+
+      const { id, name, email, role } = user;
+
+      return res.json({
+        user: { id, name, email, role },
+        token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
+          expiresIn: '7d',
+        }),
+      });
+    } catch (err) {
+      console.error('Error in 2FA verification:', err);
+      return res.status(401).json({ error: 'Sessão expirada ou inválida' });
+    }
+  }
+
+  async setup2FA(req, res) {
+    try {
+      const user = await User.findByPk(req.userId);
+      if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+      if (user.role !== 'admin') {
+        return res.status(403).json({ error: 'Recurso restrito a administradores' });
+      }
+
+      // Use functional API from otplib v13
+      const secret = otplib.generateSecret();
+      const otpauth = otplib.generateURI({
+        label: user.email,
+        issuer: '2BI Planejamento',
+        secret
+      });
+      
+      const qrCodeUrl = await qrcode.toDataURL(otpauth);
+
+      // Save secret temporarily (we'll only set enabled=true after verification)
+      await user.update({ twoFactorSecret: secret });
+
+      return res.json({ qrCodeUrl, secret });
+    } catch (err) {
+      console.error('Error setting up 2FA:', err);
+      return res.status(500).json({ error: 'Erro ao configurar 2FA', details: err.message });
+    }
+  }
+
+  async enable2FA(req, res) {
+    try {
+      const { code } = req.body;
+      const user = await User.findByPk(req.userId);
+      
+      if (!user || !user.twoFactorSecret) {
+        return res.status(400).json({ error: 'Secret de 2FA não gerado' });
+      }
+
+      const isValid = await otplib.verify({
+        token: code,
+        secret: user.twoFactorSecret
+      });
+
+      if (!isValid || !isValid.valid) {
+        return res.status(400).json({ error: 'Código de validação incorreto' });
+      }
+
+      await user.update({ twoFactorEnabled: true });
+
+      return res.json({ success: true, message: '2FA ativado com sucesso' });
+    } catch (err) {
+      console.error('Error enabling 2FA:', err);
+      return res.status(500).json({ error: 'Erro ao ativar 2FA', details: err.message });
+    }
+  }
+
+  async disable2FA(req, res) {
+    try {
+      const user = await User.findByPk(req.userId);
+      await user.update({ 
+        twoFactorEnabled: false,
+        twoFactorSecret: null
+      });
+      return res.json({ success: true, message: '2FA desativado com sucesso' });
+    } catch (err) {
+      return res.status(500).json({ error: 'Erro ao desativar 2FA' });
+    }
+  }
+
+  async get2FAStatus(req, res) {
+    try {
+      const user = await User.findByPk(req.userId);
+      return res.json({ enabled: user.twoFactorEnabled });
+    } catch (err) {
+      return res.status(500).json({ error: 'Erro ao buscar status de 2FA' });
     }
   }
 

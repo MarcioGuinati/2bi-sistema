@@ -21,10 +21,17 @@ const routes = new Router();
 
 // Public routes
 routes.post('/login', AuthController.login);
+routes.post('/2fa/verify-login', AuthController.verify2FALogin);
 routes.post('/register-lead', AuthController.registerLead);
 
 // Protected routes
 routes.use(authMiddleware);
+
+// 2FA Management
+routes.get('/2fa/status', AuthController.get2FAStatus);
+routes.post('/2fa/setup', AuthController.setup2FA);
+routes.post('/2fa/enable', AuthController.enable2FA);
+routes.post('/2fa/disable', AuthController.disable2FA);
 
 // Auth & Users
 routes.post('/register-client', AuthController.registerClient);

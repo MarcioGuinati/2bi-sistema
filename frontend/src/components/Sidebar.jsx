@@ -14,6 +14,7 @@ import {
   Target,
   Sun,
   Moon,
+  ShieldCheck,
   ChevronLeft,
   ChevronRight,
   Cpu,
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
   const { user, logout } = useAuth();
@@ -54,6 +55,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Visão Geral Mentoria', path: '/admin/mentorship', icon: PieChart },
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Controle Financeiro', path: '/admin/finances', icon: TrendingUp },
+    { name: 'Segurança & 2FA', path: '/admin/security', icon: ShieldCheck },
     { name: 'Agenda Meet', path: '/mentoria', icon: Calendar },
   ];
 

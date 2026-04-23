@@ -72,6 +72,14 @@ module.exports = (sequelize, DataTypes) => {
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+    },
+    twoFactorSecret: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    twoFactorEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   });
 
