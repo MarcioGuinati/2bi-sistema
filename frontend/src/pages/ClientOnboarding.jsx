@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Activity,
   ArrowRight,
+  ExternalLink,
   X
 } from 'lucide-react';
 import { 
@@ -31,13 +32,14 @@ import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 
 const steps = [
-  { id: 1, title: 'Identificação', icon: User },
-  { id: 2, title: 'Proteções', icon: Shield },
-  { id: 3, title: 'Investimentos', icon: Briefcase },
-  { id: 4, title: 'Renda', icon: CreditCard },
-  { id: 5, title: 'Fluxo/Gastos', icon: DollarSign },
-  { id: 6, title: 'Review', icon: PieChart },
-  { id: 7, title: 'Fechamento', icon: FileText },
+  { id: 1, title: 'Apresentação', icon: FileText },
+  { id: 2, title: 'Identificação', icon: User },
+  { id: 3, title: 'Proteções', icon: Shield },
+  { id: 4, title: 'Investimentos', icon: Briefcase },
+  { id: 5, title: 'Renda', icon: CreditCard },
+  { id: 6, title: 'Fluxo/Gastos', icon: DollarSign },
+  { id: 7, title: 'Review', icon: PieChart },
+  { id: 8, title: 'Fechamento', icon: FileText },
 ];
 
 const ClientOnboarding = () => {
@@ -193,6 +195,39 @@ const ClientOnboarding = () => {
     switch(currentStep) {
       case 1:
         return (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="bg-[var(--bg-secondary)] rounded-[2.5rem] p-8 md:p-12 border border-[var(--border-primary)] shadow-xl relative overflow-hidden">
+               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                  <div className="space-y-2">
+                    <h3 className="text-3xl font-black font-heading tracking-tighter text-[var(--text-primary)]">Apresentação Estratégica</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.3em] font-medium italic">Metodologia 2BI Planejamento</p>
+                  </div>
+                  <a 
+                    href="/Apresentação.pdf" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn-primary px-8 py-4 flex items-center gap-3 text-xs"
+                  >
+                    <ExternalLink size={18} /> Abrir em Nova Aba
+                  </a>
+               </div>
+
+               <div className="aspect-[16/9] w-full bg-navy-900 rounded-[2rem] overflow-hidden border-4 border-gold/20 shadow-2xl">
+                  <iframe 
+                    src="/Apresentação.pdf#toolbar=0&navpanes=0&scrollbar=0" 
+                    className="w-full h-full"
+                    title="Apresentação 2BI"
+                  ></iframe>
+               </div>
+
+               <div className="mt-10 p-8 bg-blue-50/10 rounded-3xl border border-blue-500/20 text-center animate-pulse">
+                  <p className="text-[var(--text-secondary)] text-sm font-bold tracking-tight">Utilize os controles do mouse para navegar nos slides acima, ou avance para iniciar o mapeamento.</p>
+               </div>
+            </div>
+          </motion.div>
+        );
+      case 2:
+        return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -317,7 +352,7 @@ const ClientOnboarding = () => {
             </div>
           </motion.div>
         );
-      case 2:
+      case 3:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
             <div className="space-y-6">
@@ -368,7 +403,7 @@ const ClientOnboarding = () => {
             </div>
           </motion.div>
         );
-      case 3:
+      case 4:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
             <div className="bg-navy-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
@@ -414,7 +449,7 @@ const ClientOnboarding = () => {
             </div>
           </motion.div>
         );
-      case 4:
+      case 5:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
              <div className="flex justify-between items-center mb-4">
@@ -483,7 +518,7 @@ const ClientOnboarding = () => {
              </div>
           </motion.div>
         );
-      case 5:
+      case 6:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -580,7 +615,7 @@ const ClientOnboarding = () => {
             </div>
           </motion.div>
         );
-      case 6:
+      case 7:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -634,8 +669,8 @@ const ClientOnboarding = () => {
              </div>
           </motion.div>
         );
-      case 7:
-        const fee = calculatedTotals.incomeTotal * 12 * 0.02;
+      case 8:
+        const fee = calculatedTotals.incomeTotal * 12 * 0.03;
         const gaps = getGapAnalysis();
         const projectionData = getProjectionData();
         const cashFlowData = [
@@ -655,7 +690,6 @@ const ClientOnboarding = () => {
                     R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
                   <div className="flex flex-col items-center gap-1 mb-6">
-                    <p className="text-white/40 text-[10px] md:text-xs font-medium max-w-sm mx-auto">Taxa de Implementação (2% do faturamento anual)</p>
                     <div className="h-[1px] w-12 bg-gold/30 my-2"></div>
                     <div className="flex items-center gap-2">
                       <span className="text-gold font-black text-xl md:text-2xl italic tracking-tighter">R$ 49,90</span>
