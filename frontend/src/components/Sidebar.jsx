@@ -39,6 +39,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
 
   const adminLinks = [
     { name: 'Base de Clientes', path: '/admin', icon: Users },
+    { name: 'Visão Geral Mentoria', path: '/admin/mentorship', icon: PieChart },
     { name: 'Controle Financeiro', path: '/admin/finances', icon: TrendingUp },
     { name: 'Agenda Meet', path: '/mentoria', icon: Calendar },
   ];

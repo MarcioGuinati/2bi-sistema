@@ -20,6 +20,7 @@ import Footer from './components/Footer';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminFinances from './pages/AdminFinances';
+import AdminMentorship from './pages/AdminMentorship';
 import ClientDashboard from './pages/ClientDashboard';
 import FinanceManagement from './pages/FinanceManagement';
 import CategoryManagement from './pages/CategoryManagement';
@@ -144,6 +145,14 @@ function App() {
             element={
               <ProtectedRoute role="admin">
                 <ClientOnboarding />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/mentorship" 
+            element={
+              <ProtectedRoute role="admin">
+                <AdminMentorship />
               </ProtectedRoute>
             } 
           />

@@ -9,6 +9,7 @@ const AccountController = require('./controllers/AccountController');
 const BillingController = require('./controllers/BillingController');
 const AnnouncementController = require('./controllers/AnnouncementController');
 const ImportController = require('./controllers/ImportController');
+const AdminController = require('./controllers/AdminController');
 const authMiddleware = require('./middleware/auth');
 const multer = require('multer');
 
@@ -26,6 +27,7 @@ routes.use(authMiddleware);
 // Auth & Users
 routes.post('/register-client', AuthController.registerClient);
 routes.get('/clients', AuthController.listClients);
+routes.get('/admin/mentorship-overview', AdminController.getMentorshipOverview);
 routes.put('/clients/:id', AuthController.updateClient);
 routes.delete('/clients/:id', AuthController.deleteClient);
 routes.post('/admin/impersonate/:id', AuthController.impersonate);
