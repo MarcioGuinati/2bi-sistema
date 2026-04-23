@@ -28,18 +28,28 @@ const AuditLogs = () => {
   
   // Filters
   const [actionFilter, setActionFilter] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   
   const { error: notifyError } = useNotification();
 
   useEffect(() => {
-    fetchLogs();
-  }, [page, actionFilter]);
+    const timer = setTimeout(() => {
+      fetchLogs();
+    }, 400); // Debounce
+    return () => clearTimeout(timer);
+  }, [page, actionFilter, startDate, endDate]);
 
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const params = { page, limit: 15 };
-      if (actionFilter) params.action = actionFilter;
+      const params = { 
+        page, 
+        limit: 15,
+        action: actionFilter,
+        startDate: startDate ? `${startDate}T00:00:00Z` : undefined,
+        endDate: endDate ? `${endDate}T23:59:59Z` : undefined
+      };
 
       const response = await api.get('/admin/audit-logs', { params });
       setLogs(response.data.rows);
@@ -85,21 +95,55 @@ const AuditLogs = () => {
 
         {/* Filters */}
         <div className="card-premium p-6 flex flex-wrap items-center gap-6">
-          <div className="flex-1 min-w-[200px] relative">
+          <div className="flex-1 min-w-[250px] relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gold" size={18} />
             <input 
               type="text"
-              placeholder="Filtrar por ação (ex: LOGIN)..."
+              placeholder="Buscar por ação (ex: login, create)..."
               value={actionFilter}
               onChange={(e) => {
-                setActionFilter(e.target.value.toUpperCase());
+                setActionFilter(e.target.value);
                 setPage(1);
               }}
               className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-gold text-sm font-bold text-[var(--text-primary)] transition-all"
             />
           </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-3 bg-[var(--bg-primary)] border border-[var(--border-primary)] p-2 rounded-2xl">
+              <span className="text-[10px] font-black uppercase text-[var(--text-secondary)] pl-2">De:</span>
+              <input 
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-transparent text-xs font-bold text-[var(--text-primary)] outline-none pr-2"
+              />
+            </div>
+            <div className="flex items-center gap-3 bg-[var(--bg-primary)] border border-[var(--border-primary)] p-2 rounded-2xl">
+              <span className="text-[10px] font-black uppercase text-[var(--text-secondary)] pl-2">Até:</span>
+              <input 
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-transparent text-xs font-bold text-[var(--text-primary)] outline-none pr-2"
+              />
+            </div>
+          </div>
           
-          <div className="flex items-center gap-2 px-4 py-2 bg-gold/10 rounded-2xl border border-gold/20">
+          {(actionFilter || startDate || endDate) && (
+            <button 
+              onClick={() => {
+                setActionFilter('');
+                setStartDate('');
+                setEndDate('');
+              }}
+              className="text-xs font-black text-red-500 hover:text-red-600 transition-all uppercase tracking-widest"
+            >
+              Limpar
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 px-4 py-3 bg-gold/10 rounded-2xl border border-gold/20 ml-auto">
             <Activity size={16} className="text-gold" />
             <span className="text-[10px] font-black uppercase text-gold tracking-widest">Live Feed</span>
           </div>
