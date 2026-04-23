@@ -11,6 +11,8 @@ const Contract = require('./Contract')(sequelize, DataTypes);
 const Account = require('./Account')(sequelize, DataTypes);
 const Payment = require('./Payment')(sequelize, DataTypes);
 const Announcement = require('./Announcement')(sequelize, DataTypes);
+const Setting = require('./Setting')(sequelize, DataTypes);
+const Insight = require('./Insight')(sequelize, DataTypes);
 
 // User & Category
 User.hasMany(Category, { foreignKey: 'user_id' });
@@ -19,6 +21,10 @@ Category.belongsTo(User, { foreignKey: 'user_id' });
 // User & Transaction
 User.hasMany(Transaction, { foreignKey: 'user_id' });
 Transaction.belongsTo(User, { foreignKey: 'user_id' });
+
+// User & Insight
+User.hasMany(Insight, { foreignKey: 'user_id' });
+Insight.belongsTo(User, { foreignKey: 'user_id' });
 
 // User & Account
 User.hasMany(Account, { foreignKey: 'user_id' });
@@ -75,5 +81,7 @@ module.exports = {
   Contract,
   Account,
   Payment,
-  Announcement
+  Announcement,
+  Setting,
+  Insight
 };

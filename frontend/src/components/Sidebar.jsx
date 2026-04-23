@@ -16,7 +16,9 @@ import {
   Moon,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Zap,
+  Cpu
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -34,12 +36,14 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Contas Bancárias', path: '/accounts', icon: CreditCard },
     { name: 'Categorias', path: '/categories', icon: Layers },
     { name: 'Metas e Orçamentos', path: '/budgets', icon: Target },
-    { name: 'Agendar Mentoria', path: '/mentoria', icon: Calendar },
+    { name: 'Insights de IA', path: '/insights', icon: Zap },
+    { name: 'Agendar Metoria', path: '/mentoria', icon: Calendar },
   ];
 
   const adminLinks = [
     { name: 'Base de Clientes', path: '/admin', icon: Users },
     { name: 'Visão Geral Mentoria', path: '/admin/mentorship', icon: PieChart },
+    { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Controle Financeiro', path: '/admin/finances', icon: TrendingUp },
     { name: 'Agenda Meet', path: '/mentoria', icon: Calendar },
   ];

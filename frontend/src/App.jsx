@@ -21,11 +21,13 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminFinances from './pages/AdminFinances';
 import AdminMentorship from './pages/AdminMentorship';
+import AdminAIConfig from './pages/AdminAIConfig';
 import ClientDashboard from './pages/ClientDashboard';
 import FinanceManagement from './pages/FinanceManagement';
 import CategoryManagement from './pages/CategoryManagement';
 import AccountManagement from './pages/AccountManagement';
 import BudgetManagement from './pages/BudgetManagement';
+import AIInsights from './pages/AIInsights';
 import Mentoria from './pages/Mentoria';
 import ClientOnboarding from './pages/ClientOnboarding';
 
@@ -131,6 +133,22 @@ function App() {
             } 
           />
 
+          <Route 
+            path="/admin/ai" 
+            element={
+              <ProtectedRoute role="admin">
+                <AdminAIConfig />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/insights" 
+            element={
+              <ProtectedRoute role="client">
+                <AIInsights />
+              </ProtectedRoute>
+            } 
+          />
           {/* Catch-all/Redirect */}
           <Route 
             path="/panel" 
