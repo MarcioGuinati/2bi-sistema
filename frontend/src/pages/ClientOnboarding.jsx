@@ -203,7 +203,7 @@ const ClientOnboarding = () => {
                     <p className="text-gold text-[10px] font-black uppercase tracking-[0.3em] font-medium italic">Metodologia 2BI Planejamento</p>
                   </div>
                   <a 
-                    href="/Apresentação.pdf" 
+                    href="/apresentacao.pdf" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="btn-primary px-8 py-4 flex items-center gap-3 text-xs"
@@ -214,7 +214,7 @@ const ClientOnboarding = () => {
 
                <div className="aspect-[16/9] w-full bg-navy-900 rounded-[2rem] overflow-hidden border-4 border-gold/20 shadow-2xl">
                   <iframe 
-                    src="/Apresentação.pdf#toolbar=0&navpanes=0&scrollbar=0" 
+                    src="/apresentacao.pdf#toolbar=0&navpanes=0&scrollbar=0" 
                     className="w-full h-full"
                     title="Apresentação 2BI"
                   ></iframe>
