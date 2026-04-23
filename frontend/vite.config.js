@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.png'],
+      includeAssets: ['logo.png', 'apresentacao.pdf'],
       manifest: {
         name: '2BI Planejamento Estratégico',
         short_name: '2BI Finance',
