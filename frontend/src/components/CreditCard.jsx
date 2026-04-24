@@ -81,7 +81,7 @@ const CreditCard = ({ account, onClick, onEdit, onDelete, onImport }) => {
             </div>
             <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden border border-white/10">
               <div
-                className={`h-full transition-all duration-1000 ${percentage > 85 ? 'bg-red-500' : 'bg-white'}`}
+                className="h-full bg-white transition-all duration-1000"
                 style={{ width: `${percentage}%` }}
               />
             </div>
