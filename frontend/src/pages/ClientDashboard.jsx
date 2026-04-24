@@ -57,7 +57,7 @@ const ClientDashboard = () => {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [previewUrl, setPreviewUrl] = useState(null);
-  
+
   // Date Filtering State
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
@@ -96,7 +96,7 @@ const ClientDashboard = () => {
       setCategories(catsRes.data);
       setGoals(goalsRes.data);
       setDashboardData(dashRes.data);
-      
+
       // Fetch Billing
       const [contractsRes, paymentsRes] = await Promise.all([
         api.get(`/contracts/${user.id}`),
@@ -169,7 +169,7 @@ const ClientDashboard = () => {
     // 2. Premium Header Bar
     doc.setFillColor(10, 25, 47); // Navy 900
     doc.rect(0, 0, pageWidth, 40, 'F');
-    
+
     // 2.1 Logo
     try {
       const logo = await preloadImage('/logo_2bi.png');
@@ -178,12 +178,12 @@ const ClientDashboard = () => {
     } catch (err) {
       console.error('Erro ao carregar logo para o PDF:', err);
     }
-    
+
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 45, 25);
-    
+
     doc.setTextColor(197, 160, 89); // Gold
     doc.setFontSize(8);
     doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 45, 32);
@@ -194,7 +194,7 @@ const ClientDashboard = () => {
     const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
     doc.text(docId, pageWidth - 20, 15, { align: 'right' });
     doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 20, { align: 'right' });
-    
+
     // Summary of Fees
     const hasSetup = Number(contract.setupValue) > 0;
     const hasMonthly = Number(contract.monthlyValue) > 0;
@@ -205,23 +205,23 @@ const ClientDashboard = () => {
     doc.setDrawColor(197, 160, 89); // Gold
     doc.setLineWidth(0.5);
     doc.line(20, y, 40, y);
-    
+
     doc.setTextColor(10, 25, 47);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text('I. DAS PARTES', 20, y + 8);
-    
+
     y += 18;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(51, 65, 85);
-    
+
     doc.text('CONTRATADA:', 20, y);
     doc.setFont('helvetica', 'bold');
     doc.text('2BI PLANEJAMENTO ESTRATÉGICO LTDA', 50, y);
     doc.setFont('helvetica', 'normal');
     doc.text('CNPJ: XX.XXX.XXX/0001-XX | Sede: Maringá - PR', 50, y + 5);
-    
+
     y += 15;
     doc.text('CONTRATANTE:', 20, y);
     doc.setFont('helvetica', 'bold');
@@ -236,7 +236,7 @@ const ClientDashboard = () => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(10, 25, 47);
     doc.text('II. DO OBJETO', 20, y + 8);
-    
+
     y += 18;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
@@ -252,11 +252,11 @@ const ClientDashboard = () => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(10, 25, 47);
     doc.text('III. VALORES E CONDIÇÕES', 20, y + 8);
-    
+
     y += 18;
-    
+
     if (hasSetup) {
-      doc.setFillColor(248, 250, 252); 
+      doc.setFillColor(248, 250, 252);
       doc.roundedRect(20, y - 5, (pageWidth - 40) / (hasMonthly ? 2.1 : 1), 25, 3, 3, 'F');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
@@ -271,7 +271,7 @@ const ClientDashboard = () => {
       doc.setTextColor(150, 150, 150);
       doc.text('* Taxa de Implementação (Setup) Isenta', 20, y + 5);
     }
-    
+
     if (hasMonthly) {
       const startX = hasSetup ? (pageWidth / 2) + 5 : 20;
       doc.setFillColor(248, 250, 252);
@@ -285,7 +285,7 @@ const ClientDashboard = () => {
       doc.setTextColor(197, 160, 89);
       doc.text(`R$ ${Number(contract.monthlyValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, startX + 10, y + 13);
     }
-    
+
     y += 30;
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
@@ -297,12 +297,12 @@ const ClientDashboard = () => {
     doc.setDrawColor(226, 232, 240); // Slate 200
     doc.line(20, y, 90, y);
     doc.line(120, y, pageWidth - 20, y);
-    
+
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(client.name, 55, y + 5, { align: 'center' });
     doc.text('Contratante', 55, y + 10, { align: 'center' });
-    
+
     doc.text('2BI PLANEJAMENTO', 155, y + 5, { align: 'center' });
     doc.text('Contratada', 155, y + 10, { align: 'center' });
 
@@ -354,7 +354,7 @@ const ClientDashboard = () => {
               <div className="flex items-center gap-2 pl-3 text-gold">
                 <Calendar size={16} />
               </div>
-              <select 
+              <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                 className="bg-transparent border-none outline-none text-xs font-bold text-[var(--text-primary)] cursor-pointer pr-4"
@@ -362,7 +362,7 @@ const ClientDashboard = () => {
                 {months.map((m, i) => <option key={m} value={i} className="bg-[var(--bg-secondary)]">{m}</option>)}
               </select>
               <div className="w-px h-4 bg-[var(--border-primary)]" />
-              <select 
+              <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 className="bg-transparent border-none outline-none text-xs font-bold text-[var(--text-primary)] cursor-pointer"
@@ -390,19 +390,19 @@ const ClientDashboard = () => {
 
         {/* Tab Navigation */}
         <div className="flex gap-4 border-b border-[var(--border-primary)] pb-4 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4 md:mx-0 md:px-0">
-          <button 
+          <button
             onClick={() => setActiveTab('overview')}
             className={`text-[10px] md:text-xs font-black uppercase tracking-widest px-4 md:px-6 py-2 rounded-xl transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-gold text-white shadow-lg shadow-gold/20' : 'text-slate-400 hover:bg-[var(--bg-primary)]'}`}
           >
             Visão Geral
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('dashboard')}
             className={`text-[10px] md:text-xs font-black uppercase tracking-widest px-4 md:px-6 py-2 rounded-xl transition-all whitespace-nowrap ${activeTab === 'dashboard' ? 'bg-gold text-white shadow-lg shadow-gold/20' : 'text-slate-400 hover:bg-[var(--bg-primary)]'}`}
           >
             Dashboard Estratégico
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('billing')}
             className={`text-[10px] md:text-xs font-black uppercase tracking-widest px-4 md:px-6 py-2 rounded-xl transition-all whitespace-nowrap ${activeTab === 'billing' ? 'bg-gold text-white shadow-lg shadow-gold/20' : 'text-slate-400 hover:bg-[var(--bg-primary)]'}`}
           >
@@ -413,16 +413,15 @@ const ClientDashboard = () => {
         {activeTab === 'overview' ? (
           <>
             {/* Motivational Banner */}
-            <div className={`relative overflow-hidden rounded-[2.5rem] border p-8 md:p-12 shadow-2xl group transition-all duration-300 ${
-              theme === 'dark' 
-                ? 'bg-navy-900 border-white/5 text-white shadow-navy-900/20' 
+            <div className={`relative overflow-hidden rounded-[2.5rem] border p-8 md:p-12 shadow-2xl group transition-all duration-300 ${theme === 'dark'
+                ? 'bg-navy-900 border-white/5 text-white shadow-navy-900/20'
                 : 'bg-white border-slate-100 text-navy-900 shadow-gold/5'
-            }`}>
+              }`}>
               <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gold/10 dark:from-gold/20 to-transparent pointer-events-none" />
               <div className="absolute -bottom-10 -right-10 opacity-5 dark:opacity-10">
                 <Quote size={200} className="text-gold" />
               </div>
-              
+
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentQuote}
@@ -449,9 +448,9 @@ const ClientDashboard = () => {
               {/* Progress Indicators */}
               <div className="flex gap-2 mt-8 justify-center md:justify-start relative z-10">
                 {quotes.map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`h-1 rounded-full transition-all duration-1000 ${i === currentQuote ? 'w-8 bg-gold' : 'w-2 bg-slate-300 dark:bg-white/20'}`} 
+                  <div
+                    key={i}
+                    className={`h-1 rounded-full transition-all duration-1000 ${i === currentQuote ? 'w-8 bg-gold' : 'w-2 bg-slate-300 dark:bg-white/20'}`}
                   />
                 ))}
               </div>
@@ -459,265 +458,266 @@ const ClientDashboard = () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="card-premium p-8 flex items-center gap-6"
-          >
-            <div className="w-16 h-16 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center shadow-inner">
-              <ArrowUpRight size={32} />
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Entradas do Mês</p>
-              <h3 className="text-2xl font-black text-[var(--text-primary)]">R$ {stats.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="card-premium p-8 flex items-center gap-6"
-          >
-            <div className="w-16 h-16 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center shadow-inner">
-              <ArrowDownLeft size={32} />
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Saídas Consolidadas</p>
-              <h3 className="text-2xl font-black text-red-600">R$ {stats.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-            </div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="bg-[var(--bg-secondary)] p-8 rounded-[2rem] shadow-xl shadow-gold/5 border border-gold/10 flex items-center gap-6 relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-5 font-medium">
-              <TrendingUp size={80} className="text-gold" />
-            </div>
-            <div className="w-16 h-16 bg-gold/10 text-gold rounded-3xl flex items-center justify-center border border-gold/20">
-              <Wallet size={32} />
-            </div>
-            <div className="relative z-10">
-              <p className="text-[10px] uppercase font-black text-gold tracking-widest mb-1">Saldo Atual</p>
-              <h3 className="text-2xl font-black text-[var(--text-primary)] italic">R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Chart */}
-          <div className="lg:col-span-2 card-premium p-8">
-            <div className="flex justify-between items-center mb-10">
-              <h3 className="text-xl font-bold font-heading">Saúde Financeira</h3>
-              <div className="flex gap-2">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 font-medium">
-                  <div className="w-2 h-2 rounded-full bg-green-500" /> Receitas
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="card-premium p-8 flex items-center gap-6"
+              >
+                <div className="w-16 h-16 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center shadow-inner">
+                  <ArrowUpRight size={32} />
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 font-medium">
-                  <div className="w-2 h-2 rounded-full bg-red-500" /> Despesas
+                <div>
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Entradas do Mês</p>
+                  <h3 className="text-2xl font-black text-[var(--text-primary)]">R$ {stats.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
                 </div>
-              </div>
-            </div>
-            <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} barGap={12}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 'bold' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
-                  <Tooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={60}>
-                    {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+              </motion.div>
 
-          {/* Goals / Budgets */}
-          <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 rounded-[2.5rem] text-[var(--text-primary)] shadow-xl flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-8">
-                <h3 className="text-xl font-bold font-heading">Orçamentário</h3>
-                <TrendingUp className="text-gold" size={24} />
-              </div>
-              <div className="space-y-8">
-                {goals.length > 0 ? goals.map(goal => {
-                  const percentage = Math.round((goal.currentAmount / goal.targetAmount) * 100);
-                  const isExceeded = percentage > 100;
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="card-premium p-8 flex items-center gap-6"
+              >
+                <div className="w-16 h-16 bg-red-50 text-red-600 rounded-3xl flex items-center justify-center shadow-inner">
+                  <ArrowDownLeft size={32} />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Saídas Consolidadas</p>
+                  <h3 className="text-2xl font-black text-red-600">R$ {stats.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+                </div>
+              </motion.div>
 
-                  return (
-                    <div key={goal.id} className="space-y-3">
-                      <div className="flex justify-between items-end text-xs font-bold">
-                        <div className="flex flex-col">
-                          <span className="text-gold uppercase tracking-widest">{goal.title}</span>
-                          <span className="text-[8px] text-[var(--text-secondary)] uppercase tracking-tighter">
-                            {goal.Category?.name ? `Cat: ${goal.Category.name}` : 'Meta Geral'}
-                          </span>
-                        </div>
-                        <span className={`${isExceeded ? 'text-red-500' : 'text-[var(--text-secondary)]'}`}>{percentage}%</span>
-                      </div>
-                      <div className="h-3 bg-[var(--bg-primary)] rounded-full overflow-hidden border border-[var(--border-primary)]">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(percentage, 100)}%` }}
-                          className={`h-full shadow-lg ${isExceeded ? 'bg-red-500 shadow-red-500/20' : 'bg-gradient-to-r from-gold to-yellow-500 shadow-gold/20'}`}
-                        />
-                      </div>
-                      <div className="text-[10px] text-[var(--text-secondary)] font-bold flex justify-between">
-                        <span>Gasto: R$ {Number(goal.currentAmount).toLocaleString()}</span>
-                        <span>Limite: R$ {Number(goal.targetAmount).toLocaleString()}</span>
-                      </div>
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="bg-[var(--bg-secondary)] p-8 rounded-[2rem] shadow-xl shadow-gold/5 border border-gold/10 flex items-center gap-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-4 opacity-5 font-medium">
+                  <TrendingUp size={80} className="text-gold" />
+                </div>
+                <div className="w-16 h-16 bg-gold/10 text-gold rounded-3xl flex items-center justify-center border border-gold/20">
+                  <Wallet size={32} />
+                </div>
+                <div className="relative z-10">
+                  <p className="text-[10px] uppercase font-black text-gold tracking-widest mb-1">Saldo Atual</p>
+                  <h3 className="text-2xl font-black text-[var(--text-primary)] italic">R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Chart */}
+              <div className="lg:col-span-2 card-premium p-8">
+                <div className="flex justify-between items-center mb-10">
+                  <h3 className="text-xl font-bold font-heading">Saúde Financeira</h3>
+                  <div className="flex gap-2">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 font-medium">
+                      <div className="w-2 h-2 rounded-full bg-green-500" /> Receitas
                     </div>
-                  );
-                }) : (
-                  <div className="text-center py-10 text-[var(--text-secondary)] italic text-sm">Nenhum orçamento definido.</div>
-                )}
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 font-medium">
+                      <div className="w-2 h-2 rounded-full bg-red-500" /> Despesas
+                    </div>
+                  </div>
+                </div>
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} barGap={12}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 'bold' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
+                      <Tooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                      <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={60}>
+                        {data.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Goals / Budgets */}
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 rounded-[2.5rem] text-[var(--text-primary)] shadow-xl flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-8">
+                    <h3 className="text-xl font-bold font-heading">Orçamentário</h3>
+                    <TrendingUp className="text-gold" size={24} />
+                  </div>
+                  <div className="space-y-8">
+                    {goals.length > 0 ? goals.map(goal => {
+                      const percentage = Math.round((goal.currentAmount / goal.targetAmount) * 100);
+                      const isExceeded = percentage > 100;
+
+                      return (
+                        <div key={goal.id} className="space-y-3">
+                          <div className="flex justify-between items-end text-xs font-bold">
+                            <div className="flex flex-col">
+                              <span className="text-gold uppercase tracking-widest">{goal.title}</span>
+                              <span className="text-[8px] text-[var(--text-secondary)] uppercase tracking-tighter">
+                                {goal.Category?.name ? `Cat: ${goal.Category.name}` : 'Meta Geral'}
+                              </span>
+                            </div>
+                            <span className={`${isExceeded ? 'text-red-500' : 'text-[var(--text-secondary)]'}`}>{percentage}%</span>
+                          </div>
+                          <div className="h-3 bg-[var(--bg-primary)] rounded-full overflow-hidden border border-[var(--border-primary)]">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(percentage, 100)}%` }}
+                              className={`h-full shadow-lg ${isExceeded ? 'bg-red-500 shadow-red-500/20' : 'bg-gradient-to-r from-gold to-yellow-500 shadow-gold/20'}`}
+                            />
+                          </div>
+                          <div className="text-[10px] text-[var(--text-secondary)] font-bold flex justify-between">
+                            <span>Gasto: R$ {Number(goal.currentAmount).toLocaleString()}</span>
+                            <span>Limite: R$ {Number(goal.targetAmount).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      );
+                    }) : (
+                      <div className="text-center py-10 text-[var(--text-secondary)] italic text-sm">Nenhum orçamento definido.</div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowGoalModal(true)}
+                  className="w-full mt-8 py-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-gold hover:bg-gold hover:text-white transition-all shadow-sm"
+                >
+                  Configurar Novo Limite
+                </button>
               </div>
             </div>
-            <button
-              onClick={() => setShowGoalModal(true)}
-              className="w-full mt-8 py-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-gold hover:bg-gold hover:text-white transition-all shadow-sm"
-            >
-              Configurar Novo Limite
-            </button>
-          </div>
-        </div>
 
-        {/* Recent Transactions List */}
-        <div className="card-premium overflow-hidden">
-          <div className="p-8 border-b border-[var(--border-primary)] flex justify-between items-center">
-            <h3 className="text-xl font-bold font-heading">Lançamentos Recentes</h3>
-            <a href="/finance" className="text-xs font-black text-gold uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all">
-              Acessar Gestão Completa <ChevronRight size={14} />
-            </a>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-[var(--bg-primary)] text-slate-400 text-[10px] uppercase tracking-widest font-bold">
-                  <th className="px-8 py-5">Descrição</th>
-                  <th className="px-8 py-5">Categoria</th>
-                  <th className="px-8 py-5">Data</th>
-                  <th className="px-8 py-5 text-right">Valor</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border-primary)]">
-                {transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-[var(--bg-primary)]/20 transition-colors group">
-                    <td className="px-8 py-5">
-                      <div className="text-sm font-bold">{t.description}</div>
-                      <div className="text-[10px] text-[var(--text-secondary)] font-medium uppercase tracking-widest italic">{t.Account?.name || 'Geral'}</div>
-                    </td>
-                    <td className="px-8 py-5">
-                      <span className="text-xs font-bold px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-secondary)]">
-                        {t.Category?.name || 'Sem categoria'}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 text-sm text-[var(--text-secondary)] font-medium">
-                      {new Date(t.date).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className={`px-8 py-5 text-right font-black text-sm ${t.type === 'income' ? 'text-green-600' : 'text-[var(--text-primary)]'}`}>
-                      {t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </>
+            {/* Recent Transactions List */}
+            <div className="card-premium overflow-hidden">
+              <div className="p-8 border-b border-[var(--border-primary)] flex justify-between items-center">
+                <h3 className="text-xl font-bold font-heading">Lançamentos Recentes</h3>
+                <a href="/finance" className="text-xs font-black text-gold uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all">
+                  Acessar Gestão Completa <ChevronRight size={14} />
+                </a>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-[var(--bg-primary)] text-slate-400 text-[10px] uppercase tracking-widest font-bold">
+                      <th className="px-8 py-5">Descrição</th>
+                      <th className="px-8 py-5">Categoria</th>
+                      <th className="px-8 py-5">Data</th>
+                      <th className="px-8 py-5 text-right">Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-primary)]">
+                    {transactions.map((t) => (
+                      <tr key={t.id} className="hover:bg-[var(--bg-primary)]/20 transition-colors group">
+                        <td className="px-8 py-5">
+                          <div className="text-sm font-bold">{t.description}</div>
+                          <div className="text-[10px] text-[var(--text-secondary)] font-medium uppercase tracking-widest italic">{t.Account?.name || 'Geral'}</div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <span className="text-xs font-bold px-3 py-1 rounded-lg bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+                            {t.Category?.name || 'Sem categoria'}
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 text-sm text-[var(--text-secondary)] font-medium">
+                          {new Date(t.date).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className={`px-8 py-5 text-right font-black text-sm ${t.type === 'income' ? 'text-green-600' : 'text-[var(--text-primary)]'}`}>
+                          {t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         ) : activeTab === 'billing' ? (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-               {/* Contract Overview */}
-               <div className="lg:col-span-1 space-y-6">
-                  {contracts.length > 0 ? contracts.map(c => (
-                    <div key={c.id} className="bg-navy-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden border border-white/10 shadow-2xl">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-                      <div className="relative z-10 space-y-6">
-                        <div>
-                          <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em] px-3 py-1 bg-gold/10 rounded-full border border-gold/20">Seu Plano Ativo</span>
-                          <h3 className="text-2xl font-black italic mt-3 tracking-tighter text-white">{c.title}</h3>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          {Number(c.setupValue) > 0 && (
-                            <div className="flex justify-between items-end border-b border-white/5 pb-3">
-                              <span className="text-[10px] uppercase font-black text-white/40">Taxa de Setup</span>
-                              <span className="text-lg font-black text-gold">R$ {Number(c.setupValue).toLocaleString()}</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between items-end border-b border-white/5 pb-3">
-                            <span className="text-[10px] uppercase font-black text-white/40">Mensalidade</span>
-                            <span className="text-xl font-black text-white italic">R$ {Number(c.monthlyValue).toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between items-end">
-                            <span className="text-[10px] uppercase font-black text-white/40">Vínculo desde</span>
-                            <span className="text-xs font-bold text-white/60">{new Date(c.startDate).toLocaleDateString('pt-BR')}</span>
-                          </div>
-                        </div>
-
-                        <button 
-                          onClick={() => handleDownloadContract(c)}
-                          className="w-full py-4 bg-gold text-navy-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-400 transition-all flex items-center justify-center gap-2 shadow-xl shadow-gold/20"
-                        >
-                           <CreditCard size={16} /> Baixar Contrato PDF
-                        </button>
+              {/* Contract Overview */}
+              <div className="lg:col-span-1 space-y-6">
+                {contracts.length > 0 ? contracts.map(c => (
+                  <div key={c.id} className="bg-navy-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden border border-white/10 shadow-2xl">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+                    <div className="relative z-10 space-y-6">
+                      <div>
+                        <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em] px-3 py-1 bg-gold/10 rounded-full border border-gold/20">Seu Plano Ativo</span>
+                        <h3 className="text-2xl font-black italic mt-3 tracking-tighter text-white">{c.title}</h3>
                       </div>
-                    </div>
-                  )) : (
-                    <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-12 rounded-[2.5rem] text-center">
-                      <CreditCard className="text-slate-200 mx-auto mb-4" size={48} />
-                      <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum contrato ativo identificado.</p>
-                    </div>
-                  )}
 
-                  <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 rounded-[2.5rem] shadow-sm">
-                    <h4 className="text-xs font-black uppercase text-gold tracking-widest mb-4">Informação de Apoio</h4>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
-                      Suas mensalidades são geradas automaticamente. Caso tenha dúvidas sobre cobranças ou precise alterar dados de faturamento, entre em contato via WhatsApp com nossa equipe.
-                    </p>
-                  </div>
-               </div>
+                      <div className="space-y-4">
+                        {Number(c.setupValue) > 0 && (
+                          <div className="flex justify-between items-end border-b border-white/5 pb-3">
+                            <span className="text-[10px] uppercase font-black text-white/40">Taxa de Setup</span>
+                            <span className="text-lg font-black text-gold">R$ {Number(c.setupValue).toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-end border-b border-white/5 pb-3">
+                          <span className="text-[10px] uppercase font-black text-white/40">Mensalidade</span>
+                          <span className="text-xl font-black text-white italic">R$ {Number(c.monthlyValue).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                          <span className="text-[10px] uppercase font-black text-white/40">Vínculo desde</span>
+                          <span className="text-xs font-bold text-white/60">{new Date(c.startDate).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      </div>
 
-               {/* Payment History */}
-               <div className="lg:col-span-2 space-y-6">
-                  <div className="card-premium overflow-hidden border border-[var(--border-primary)]">
-                    <div className="p-6 md:p-8 border-b border-[var(--border-primary)]">
-                      <h3 className="text-lg md:text-xl font-bold font-heading">Histórico de Parcelas</h3>
-                    </div>
-                    <div className="overflow-x-auto custom-scrollbar">
-                       <table className="w-full text-left min-w-[600px]">
-                          <thead>
-                             <tr className="bg-[var(--bg-primary)] text-[10px] font-black uppercase text-slate-400">
-                                <th className="px-8 py-6">Vencimento</th>
-                                <th className="px-8 py-6">Descrição</th>
-                                <th className="px-8 py-6">Valor</th>
-                                <th className="px-8 py-6 text-right">Status</th>
-                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[var(--border-primary)]">
-                             {payments.map(p => (
-                               <tr key={p.id} className="hover:bg-[var(--bg-primary)]/50 transition-colors">
-                                  <td className="px-6 md:px-8 py-4 md:py-6 text-xs font-black">{new Date(p.dueDate).toLocaleDateString('pt-BR')}</td>
-                                  <td className="px-6 md:px-8 py-4 md:py-6">
-                                     <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-tight">{p.description}</div>
-                                  </td>
-                                  <td className="px-6 md:px-8 py-4 md:py-6 text-sm font-black italic whitespace-nowrap">R$ {Number(p.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                  <td className="px-6 md:px-8 py-4 md:py-6 text-right">
-                                     <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-full border shadow-sm ${p.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20'}`}>
-                                        {p.status === 'paid' ? 'Liquidado' : 'Aguardando'}
-                                     </span>
-                                  </td>
-                               </tr>
-                             ))}
-                          </tbody>
-                       </table>
+                      <button
+                        onClick={() => handleDownloadContract(c)}
+                        className="w-full py-4 bg-gold text-navy-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-400 transition-all flex items-center justify-center gap-2 shadow-xl shadow-gold/20"
+                      >
+                        <CreditCard size={16} /> Baixar Contrato PDF
+                      </button>
                     </div>
                   </div>
-               </div>
+                )) : (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-12 rounded-[2.5rem] text-center">
+                    <CreditCard className="text-slate-200 mx-auto mb-4" size={48} />
+                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum contrato ativo identificado.</p>
+                  </div>
+                )}
+
+                <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 rounded-[2.5rem] shadow-sm">
+                  <h4 className="text-xs font-black uppercase text-gold tracking-widest mb-4">Informação de Apoio</h4>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+                    Suas mensalidades são geradas automaticamente. Caso tenha dúvidas sobre cobranças ou precise alterar dados de faturamento, entre em contato via WhatsApp com nossa equipe.
+                  </p>
+                </div>
+              </div>
+
+              {/* Payment History */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="card-premium overflow-hidden border border-[var(--border-primary)]">
+                  <div className="p-6 md:p-8 border-b border-[var(--border-primary)]">
+                    <h3 className="text-lg md:text-xl font-bold font-heading">Histórico de Parcelas</h3>
+                  </div>
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left min-w-[600px]">
+                      <thead>
+                        <tr className="bg-[var(--bg-primary)] text-[10px] font-black uppercase text-slate-400">
+                          <th className="px-8 py-6">Vencimento</th>
+                          <th className="px-8 py-6">Descrição</th>
+                          <th className="px-8 py-6">Valor</th>
+                          <th className="px-8 py-6 text-right">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--border-primary)]">
+                        {payments.map(p => (
+                          <tr key={p.id} className="hover:bg-[var(--bg-primary)]/50 transition-colors">
+                            <td className="px-6 md:px-8 py-4 md:py-6 text-xs font-black">{new Date(p.dueDate).toLocaleDateString('pt-BR')}</td>
+                            <td className="px-6 md:px-8 py-4 md:py-6">
+                              <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-tight">{p.description}</div>
+                            </td>
+                            <td className="px-6 md:px-8 py-4 md:py-6 text-sm font-black italic whitespace-nowrap">R$ {Number(p.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            <td className="px-6 md:px-8 py-4 md:py-6 text-right">
+                              <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-full border shadow-sm ${p.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20'}`}>
+                                {p.status === 'paid' ? 'Liquidado' : 'Aguardando'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
         ) : (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
             {/* Row 1: Provisionamento Anual */}
@@ -741,18 +741,18 @@ const ClientDashboard = () => {
                   <AreaChart data={dashboardData.monthlyData}>
                     <defs>
                       <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4ADE80" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#4ADE80" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#4ADE80" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#4ADE80" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#F87171" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#F87171" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#F87171" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#F87171" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} tickFormatter={(val) => `R$ ${val}`} />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
                       itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
                     />
@@ -783,11 +783,11 @@ const ClientDashboard = () => {
                           <Cell key={`cell-${index}`} fill={['#1e293b', '#EAB308', '#dc2626', '#16a34a', '#2563eb'][index % 5]} />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                       />
-                      <Legend 
-                        verticalAlign="bottom" 
+                      <Legend
+                        verticalAlign="bottom"
                         content={({ payload }) => (
                           <div className="max-h-28 overflow-y-auto custom-scrollbar mt-6 pr-2">
                             <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
@@ -799,7 +799,7 @@ const ClientDashboard = () => {
                               ))}
                             </div>
                           </div>
-                        )} 
+                        )}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -816,9 +816,9 @@ const ClientDashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} />
-                      <Tooltip 
-                         cursor={{ fill: 'transparent' }}
-                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      <Tooltip
+                        cursor={{ fill: 'transparent' }}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                       />
                       <Bar dataKey="saldo" radius={[8, 8, 0, 0]}>
                         {dashboardData.monthlyData.map((entry, index) => (
@@ -853,7 +853,7 @@ const ClientDashboard = () => {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} tickFormatter={(val) => `R$ ${val}`} />
-                    <Tooltip 
+                    <Tooltip
                       cursor={{ fill: '#F1F5F9' }}
                       contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
                     />
@@ -863,15 +863,15 @@ const ClientDashboard = () => {
                 </ResponsiveContainer>
               </div>
             </div>
-            
+
             {/* Visual Quote / Placeholder for better design */}
             <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-12 rounded-[3rem] text-center relative overflow-hidden shadow-sm">
-               <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-               <TrendingUp className="text-gold mx-auto mb-6" size={48} />
-               <h4 className="text-2xl font-black text-[var(--text-primary)] italic max-w-2xl mx-auto leading-tight">
-                 "O planejamento financeiro estratégico é a bússola que transforma objetivos em realidades tangíveis."
-               </h4>
-               <p className="text-gold text-xs font-black uppercase tracking-[0.3em] mt-6 font-bold">Inteligência Financeira 2BI</p>
+              <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+              <TrendingUp className="text-gold mx-auto mb-6" size={48} />
+              <h4 className="text-2xl font-black text-[var(--text-primary)] italic max-w-2xl mx-auto leading-tight">
+                "O planejamento financeiro estratégico é a bússola que transforma objetivos em realidades tangíveis."
+              </h4>
+              <p className="text-gold text-xs font-black uppercase tracking-[0.3em] mt-6 font-bold">Inteligência Financeira 2BI</p>
             </div>
           </div>
         )}
@@ -881,51 +881,51 @@ const ClientDashboard = () => {
       <AnimatePresence>
         {showGoalModal && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[1.5rem] md:rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl">
-               <div className="bg-navy-900 p-8 text-white flex justify-between items-center text-center">
-                 <div>
-                   <h3 className="text-2xl font-black font-heading">Definir Orçamento</h3>
-                   <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Fronteira Financeira 2BI</p>
-                 </div>
-                 <button onClick={() => setShowGoalModal(false)}><X size={20} /></button>
-               </div>
-               <form onSubmit={handleGoalSubmit} className="p-8 space-y-4">
-                 <div className="space-y-1">
-                   <label className="text-[10px] uppercase font-black text-slate-400">Título do Orçamento</label>
-                   <input
-                     type="text"
-                     required
-                     value={goalForm.title}
-                     onChange={e => setGoalForm({ ...goalForm, title: e.target.value })}
-                     className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
-                     placeholder="Ex: Gasto com Alimentação"
-                   />
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div className="space-y-1">
-                     <label className="text-[10px] uppercase font-black text-slate-400">Limite Mensal (R$)</label>
-                     <input
-                       type="number"
-                       required
-                       value={goalForm.targetAmount}
-                       onChange={e => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
-                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black"
-                       placeholder="0.00"
-                     />
-                   </div>
-                   <div className="space-y-1">
-                     <label className="text-[10px] uppercase font-black text-slate-400">Vincular Categoria</label>
-                     <select
-                       required
-                       value={goalForm.category_id}
-                       onChange={e => setGoalForm({ ...goalForm, category_id: e.target.value })}
-                       className="select-premium"
-                     >
-                       <option value="">Selecione...</option>
-                       {categories.map(c => <option key={c.id} value={c.id}>{c.name} ({c.type})</option>)}
-                     </select>
-                   </div>
-                 </div>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[1.5rem] md:rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl">
+              <div className="bg-navy-900 p-8 text-white flex justify-between items-center text-center">
+                <div>
+                  <h3 className="text-2xl font-black font-heading">Definir Orçamento</h3>
+                  <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Fronteira Financeira 2BI</p>
+                </div>
+                <button onClick={() => setShowGoalModal(false)}><X size={20} /></button>
+              </div>
+              <form onSubmit={handleGoalSubmit} className="p-8 space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-black text-slate-400">Título do Orçamento</label>
+                  <input
+                    type="text"
+                    required
+                    value={goalForm.title}
+                    onChange={e => setGoalForm({ ...goalForm, title: e.target.value })}
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
+                    placeholder="Ex: Gasto com Alimentação"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Limite Mensal (R$)</label>
+                    <input
+                      type="number"
+                      required
+                      value={goalForm.targetAmount}
+                      onChange={e => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Vincular Categoria</label>
+                    <select
+                      required
+                      value={goalForm.category_id}
+                      onChange={e => setGoalForm({ ...goalForm, category_id: e.target.value })}
+                      className="select-premium"
+                    >
+                      <option value="">Selecione...</option>
+                      {categories.map(c => <option key={c.id} value={c.id}>{c.name} ({c.type})</option>)}
+                    </select>
+                  </div>
+                </div>
                 <p className="text-[10px] text-slate-400 italic">O sistema calculará automaticamente seus gastos nesta categoria do dia 1º até hoje.</p>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30 mt-4">Ativar Orçamento</button>
               </form>

@@ -1,3 +1,4 @@
+require('dotenv').config({ path: './backend/.env' });
 const { sequelize, AuditLog } = require('./models');
 
 async function sync() {

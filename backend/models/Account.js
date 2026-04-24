@@ -24,6 +24,14 @@ module.exports = (sequelize, DataTypes) => {
     invoice_closing_day: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    due_day: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    color: {
+      type: DataTypes.STRING,
+      defaultValue: '#1e293b'
     }
   });
 

@@ -22,6 +22,7 @@ import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 import { maskCurrency, sanitizeValue } from '../utils/masks';
+import CreditCardComponent from '../components/CreditCard';
 
 const AccountManagement = () => {
   const { success, error, confirm } = useNotification();
@@ -36,7 +37,9 @@ const AccountManagement = () => {
     type: 'Corrente', 
     initial_balance: maskCurrency('0'),
     credit_limit: maskCurrency('0'),
-    invoice_closing_day: ''
+    invoice_closing_day: '',
+    due_day: '',
+    color: '#1e293b'
   });
 
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -45,6 +48,7 @@ const AccountManagement = () => {
   const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [invoicePage, setInvoicePage] = useState(1);
   const [invoiceTotalPages, setInvoiceTotalPages] = useState(1);
+  const [invoiceMonthOffset, setInvoiceMonthOffset] = useState(0);
   
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewTransactions, setPreviewTransactions] = useState([]);
@@ -73,7 +77,8 @@ const AccountManagement = () => {
         ...form, 
         initial_balance: sanitizeValue(form.initial_balance),
         credit_limit: sanitizeValue(form.credit_limit),
-        invoice_closing_day: form.type === 'Cartão de Crédito' ? form.invoice_closing_day : null
+        invoice_closing_day: form.type === 'Cartão de Crédito' ? form.invoice_closing_day : null,
+        due_day: form.type === 'Cartão de Crédito' ? form.due_day : null
       };
       
       if (editingAcc) {
@@ -88,7 +93,9 @@ const AccountManagement = () => {
         type: 'Corrente', 
         initial_balance: maskCurrency('0'),
         credit_limit: maskCurrency('0'),
-        invoice_closing_day: ''
+        invoice_closing_day: '',
+        due_day: '',
+        color: '#1e293b'
       });
       success(editingAcc ? 'Conta atualizada!' : 'Nova conta bancária registrada!');
       fetchData();
@@ -117,7 +124,9 @@ const AccountManagement = () => {
       type: acc.type, 
       initial_balance: maskCurrency(acc.initial_balance),
       credit_limit: maskCurrency(acc.credit_limit || '0'),
-      invoice_closing_day: acc.invoice_closing_day || ''
+      invoice_closing_day: acc.invoice_closing_day || '',
+      due_day: acc.due_day || '',
+      color: acc.color || '#1e293b'
     });
     setShowModal(true);
   };
@@ -198,24 +207,26 @@ const AccountManagement = () => {
     );
   };
 
-  const handleOpenInvoice = async (acc, page = 1) => {
+  const handleOpenInvoice = async (acc, page = 1, offset = 0) => {
     setSelectedAccInvoice(acc);
     setShowInvoiceModal(true);
     setInvoiceLoading(true);
     setInvoicePage(page);
+    setInvoiceMonthOffset(offset);
     
     try {
       const now = new Date();
-      const dayNow = now.getDate();
+      // Lógica de datas mais robusta
+      const targetDate = new Date();
+      targetDate.setMonth(targetDate.getMonth() + offset);
       const closingDay = parseInt(acc.invoice_closing_day) || 30;
       
-      let startDate, endDate;
-      if (dayNow <= closingDay) {
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
-        endDate = new Date(now.getFullYear(), now.getMonth(), closingDay);
-      } else {
-        startDate = new Date(now.getFullYear(), now.getMonth(), closingDay + 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, closingDay);
+      const startDate = new Date(targetDate.getFullYear(), targetDate.getMonth() - 1, closingDay + 1);
+      const endDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), closingDay);
+      
+      // Ajuste para evitar bugs de virada de mês/ano
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+         throw new Error("Data inválida");
       }
 
       const response = await api.get('/transactions', {
@@ -265,34 +276,65 @@ const AccountManagement = () => {
         </div>
 
         {/* Dashboard of Accounts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-navy-900 p-6 rounded-3xl shadow-lg border border-white/5 text-white">
-            <div className="text-[10px] uppercase font-black text-gold mb-1">Total de Contas</div>
-            <div className="text-3xl font-black">{accounts.length}</div>
+            <div className="text-[10px] uppercase font-black text-gold mb-1">Total em Contas</div>
+            <div className="text-2xl font-black italic">R$ {accounts.filter(a => a.type !== 'Cartão de Crédito').reduce((acc, a) => acc + Number(a.current_balance || 0), 0).toLocaleString('pt-BR')}</div>
+          </div>
+          <div className="bg-[var(--bg-secondary)] p-6 rounded-3xl shadow-sm border border-[var(--border-primary)] text-[var(--text-primary)]">
+            <div className="text-[10px] uppercase font-black text-slate-400 mb-1">Limite Disponível</div>
+            <div className="text-2xl font-black italic">R$ {accounts.filter(a => a.type === 'Cartão de Crédito').reduce((acc, a) => acc + (Number(a.credit_limit) - Number(a.used_limit || 0)), 0).toLocaleString('pt-BR')}</div>
+          </div>
+        </div>
+
+        {/* Credit Cards Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-black font-heading uppercase tracking-widest text-[var(--text-primary)]">Meus Cartões</h2>
+            <div className="h-[1px] flex-1 bg-[var(--border-primary)]" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {accounts.filter(a => a.type === 'Cartão de Crédito').length > 0 ? (
+              accounts.filter(a => a.type === 'Cartão de Crédito').map(acc => (
+                <CreditCardComponent 
+                  key={acc.id} 
+                  account={acc} 
+                  onClick={() => handleOpenInvoice(acc)}
+                  onEdit={handleOpenEdit}
+                  onDelete={handleDelete}
+                  onImport={handleImportOFX}
+                />
+              ))
+            ) : (
+              <div className="card-premium p-8 text-center text-slate-400 italic md:col-span-3">
+                Nenhum cartão de crédito registrado.
+              </div>
+            )}
           </div>
         </div>
 
         {/* Accounts Table */}
         <div className="card-premium overflow-hidden">
           <div className="p-8 border-b border-[var(--border-primary)] flex justify-between items-center bg-[var(--bg-primary)]/50">
-            <h3 className="text-xl font-bold font-heading">Meus Bancos e Carteiras</h3>
+            <h3 className="text-xl font-bold font-heading">Contas Correntes e Outros</h3>
           </div>
           <div className="table-responsive">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-[var(--bg-primary)] text-slate-400 text-[10px] uppercase tracking-widest font-bold">
                   <th className="px-8 py-5">Identificação</th>
-                  <th className="px-8 py-5">Tipo / Ciclo</th>
-                  <th className="px-8 py-5">Disponibilidade / Limite</th>
+                  <th className="px-8 py-5">Tipo</th>
+                  <th className="px-8 py-5">Saldo Atual</th>
                   <th className="px-8 py-5 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-primary)]">
-                {accounts.map((acc) => (
+                {accounts.filter(a => a.type !== 'Cartão de Crédito').map((acc) => (
                   <tr key={acc.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[var(--bg-primary)] text-gold rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-[var(--bg-primary)] text-navy-900 rounded-xl flex items-center justify-center">
                           <Building2 size={20} />
                         </div>
                         <div className="font-bold text-sm tracking-tight">{acc.name}</div>
@@ -302,37 +344,11 @@ const AccountManagement = () => {
                       <span className="text-[10px] font-black uppercase text-slate-400 italic block">
                         {acc.type}
                       </span>
-                      {acc.type === 'Cartão de Crédito' && acc.invoice_closing_day && (
-                        <span className="text-[9px] font-bold text-gold uppercase tracking-tighter">
-                          Fecha dia {acc.invoice_closing_day}
-                        </span>
-                      )}
                     </td>
                     <td className="px-8 py-5">
-                      <div className="font-bold text-sm">
-                        {acc.type === 'Cartão de Crédito' 
-                          ? `R$ ${Number(acc.used_limit || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} utilizados`
-                          : `R$ ${Number(acc.initial_balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                      <div className={`font-black text-sm ${Number(acc.current_balance) < 0 ? 'text-red-600' : 'text-[var(--text-primary)]'}`}>
+                         R$ {Number(acc.current_balance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </div>
-                      {acc.type === 'Cartão de Crédito' && acc.credit_limit > 0 && (
-                        <div className="mt-2 w-full max-w-[150px]">
-                          <div className="flex justify-between text-[10px] mb-1 font-bold">
-                            <span className="text-slate-400 capitalize">Limite</span>
-                            <span className="text-gold">
-                              {Math.min(100, Math.round(((acc.used_limit || 0) / acc.credit_limit) * 100))}%
-                            </span>
-                          </div>
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full transition-all duration-500 ${ ((acc.used_limit || 0) / acc.credit_limit) > 0.8 ? 'bg-red-500' : 'bg-gold' }`}
-                              style={{ width: `${Math.min(100, ((acc.used_limit || 0) / acc.credit_limit) * 100)}%` }}
-                            />
-                          </div>
-                          <div className="text-[9px] text-slate-400 mt-1">
-                            Disponível: R$ {(acc.credit_limit - (acc.used_limit || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </div>
-                        </div>
-                      )}
                     </td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex flex-col md:flex-row justify-end gap-2">
@@ -348,16 +364,6 @@ const AccountManagement = () => {
                         >
                           <Trash2 size={16} />
                         </button>
-                        {acc.type === 'Cartão de Crédito' && (
-                          <button
-                            onClick={() => handleOpenInvoice(acc)}
-                            className="p-2 text-slate-400 hover:text-blue-600 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)] flex items-center gap-2"
-                            title="Ver Fatura"
-                          >
-                            <Eye size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Fatura</span>
-                          </button>
-                        )}
                         <button
                           onClick={() => handleImportOFX(acc.id)}
                           className="p-2 text-slate-400 hover:text-blue-600 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)] flex items-center gap-2"
@@ -379,14 +385,25 @@ const AccountManagement = () => {
       {/* Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-white">
-              <div className="bg-navy-900 p-8 text-white flex justify-between items-center text-center">
-                <h3 className="text-xl font-black font-heading tracking-tight">{editingAcc ? 'Editar Conta' : 'Nova Conta Bancária'}</h3>
-                <button onClick={() => setShowModal(false)}><X size={20} /></button>
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: 50 }} 
+              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border-primary)] flex flex-col"
+            >
+              <div className="bg-navy-900 p-6 text-white flex justify-between items-center sticky top-0 z-20 shrink-0">
+                <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingAcc ? 'Editar Conta' : 'Nova Conta'}</h3>
+                <button 
+                  onClick={() => setShowModal(false)} 
+                  className="p-2 hover:bg-white/10 rounded-full transition-all"
+                >
+                  <X size={24} />
+                </button>
               </div>
-              <form onSubmit={handleSubmit} className="p-8 space-y-4">
-                <div className="space-y-1">
+              <div className="flex-1 overflow-y-auto">
+                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-4">
+                  <div className="space-y-1">
                   <label className="text-[10px] uppercase font-black text-slate-400">Nome da Conta / Banco</label>
                   <input
                     type="text"
@@ -427,7 +444,7 @@ const AccountManagement = () => {
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="grid grid-cols-2 gap-4 pt-2"
+                    className="space-y-4 pt-2"
                   >
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400">Limite de Crédito</label>
@@ -439,85 +456,161 @@ const AccountManagement = () => {
                         className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400">Dia de Fechamento</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="31"
-                        required
-                        value={form.invoice_closing_day}
-                        onChange={e => setForm({ ...form, invoice_closing_day: e.target.value })}
-                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
-                        placeholder="Ex: 20"
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-black text-slate-400">Dia Fechamento</label>
+                        <input
+                          type="number" min="1" max="31" required
+                          value={form.invoice_closing_day}
+                          onChange={e => setForm({ ...form, invoice_closing_day: e.target.value })}
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-black text-slate-400">Dia Vencimento</label>
+                        <input
+                          type="number" min="1" max="31" required
+                          value={form.due_day}
+                          onChange={e => setForm({ ...form, due_day: e.target.value })}
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] uppercase font-black text-slate-400">Cor do Cartão</label>
+                       <div className="flex flex-wrap gap-3">
+                       {['#1e293b', '#FF6600', '#8A05BE', '#F7D116', '#004B8D', '#003399', '#ED1C24'].map(c => {
+                          const labels = {
+                            '#FF6600': 'Inter',
+                            '#8A05BE': 'Nubank',
+                            '#F7D116': 'BB',
+                            '#004B8D': 'Bradesco',
+                            '#003399': 'Caixa',
+                            '#ED1C24': 'Santander',
+                            '#1e293b': 'Padrão'
+                          };
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setForm({ ...form, color: c })}
+                              className={`w-10 h-10 rounded-full border-4 transition-all relative group ${form.color === c ? 'border-gold scale-110 shadow-lg' : 'border-transparent opacity-60'}`}
+                              style={{ backgroundColor: c }}
+                            >
+                               <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase hidden group-hover:block whitespace-nowrap bg-navy-900 text-white px-1 rounded">{labels[c]}</span>
+                            </button>
+                          );
+                       })}
+                          <input 
+                            type="color" 
+                            value={form.color}
+                            onChange={e => setForm({ ...form, color: e.target.value })}
+                            className="w-10 h-10 rounded-full bg-transparent border-none cursor-pointer"
+                          />
+                       </div>
                     </div>
                   </motion.div>
                 )}
-                <button type="submit" className="w-full btn-primary py-4 font-black mt-4">Salvar Alterações</button>
+                <div className="pt-4 space-y-3">
+                  <button type="submit" className="w-full btn-primary py-4 font-black">
+                    {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowModal(false)}
+                    className="w-full sm:hidden py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest"
+                  >
+                    Cancelar e Voltar
+                  </button>
+                </div>
               </form>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
+        </div>
         )}
       </AnimatePresence>
  
       {/* Invoice Details Modal */}
       <AnimatePresence>
         {showInvoiceModal && selectedAccInvoice && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[60] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl border border-white">
-              <div className="bg-navy-900 p-8 text-white relative">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[110] flex items-center justify-center sm:p-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: 100 }} 
+              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-lg h-full sm:h-auto overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
+            >
+              <div className="bg-navy-900 p-6 text-white relative shrink-0">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2 text-gold mb-2">
                        <CreditCard size={20} />
-                       <span className="text-[10px] uppercase font-black tracking-widest">Fatura em Aberto</span>
+                       <span className="text-[10px] uppercase font-black tracking-widest text-gold">
+                         {invoiceMonthOffset === 0 ? 'Fatura em Aberto' : invoiceMonthOffset < 0 ? 'Fatura Retroativa' : 'Fatura Futura'}
+                       </span>
                     </div>
                     <h3 className="text-3xl font-black font-heading tracking-tight !text-white">{selectedAccInvoice.name}</h3>
-                    <p className="text-white/50 text-xs font-bold mt-1">
-                      Ciclo: Fechamento dia {selectedAccInvoice.invoice_closing_day}
+                    <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mt-1">
+                      Referente a: {new Date(new Date().getFullYear(), new Date().getMonth() + invoiceMonthOffset).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                     </p>
                   </div>
-                  <button onClick={() => setShowInvoiceModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all">
-                    <X size={20} />
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                     <button onClick={() => setShowInvoiceModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all">
+                       <X size={20} />
+                     </button>
+                     <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleOpenInvoice(selectedAccInvoice, 1, invoiceMonthOffset - 1)}
+                          className="bg-white/5 p-2 rounded-lg hover:bg-gold transition-colors text-white"
+                          title="Mês Anterior"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleOpenInvoice(selectedAccInvoice, 1, invoiceMonthOffset + 1)}
+                          className="bg-white/5 p-2 rounded-lg hover:bg-gold transition-colors text-white"
+                          title="Próximo Mês"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                     </div>
+                  </div>
                 </div>
  
-                <div className="mt-8 bg-white/5 rounded-3xl p-6 border border-white/10">
+                <div className="mt-6 bg-white/5 rounded-2xl p-5 border border-white/10">
                   <div className="text-[10px] uppercase font-black text-gold mb-1">Total da Fatura Atual</div>
-                  <div className="text-4xl font-black">
+                  <div className="text-3xl font-black italic">
                     R$ {invoiceTransactions.reduce((acc, t) => acc + Number(t.amount), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
                 </div>
               </div>
  
-              <div className="p-8">
+              <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6">
-                  <h4 className="font-black text-xs uppercase tracking-[0.2em] text-slate-400">Lançamentos do Ciclo</h4>
-                  <div className="h-[1px] flex-1 bg-slate-100 mx-4" />
+                  <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Lançamentos do Ciclo</h4>
+                  <div className="h-[1px] flex-1 bg-[var(--border-primary)] mx-4" />
                 </div>
  
-                <div className="max-h-[40vh] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                <div className="space-y-3">
                   {invoiceLoading ? (
-                    <div className="py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest text-xs">Carregando lançamentos...</div>
+                    <div className="py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest text-[10px]">Carregando lançamentos...</div>
                   ) : invoiceTransactions.length === 0 ? (
-                    <div className="py-20 text-center text-slate-400 italic">Nenhum lançamento encontrado para este ciclo de fatura.</div>
+                    <div className="py-20 text-center text-slate-400 italic text-sm">Nenhum lançamento encontrado.</div>
                   ) : invoiceTransactions.map(t => (
                     <div key={t.id} className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] hover:border-gold/30 transition-all group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-navy-900 font-black text-xs">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center text-[var(--text-primary)] font-black text-xs border border-[var(--border-primary)]">
                           {new Date(t.date).getUTCDate()}
                         </div>
-                        <div>
-                          <div className="font-bold text-sm text-[var(--text-primary)]">{t.description}</div>
-                          <div className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">
-                            {new Date(t.date).toLocaleDateString('pt-BR', { month: 'long' })}
+                        <div className="min-w-0">
+                          <div className="font-bold text-sm text-[var(--text-primary)] truncate">{t.description}</div>
+                          <div className="text-[9px] text-slate-400 uppercase font-black tracking-tighter">
+                            {new Date(t.date).toLocaleDateString('pt-BR', { month: 'short' })}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-black text-sm text-red-600">- R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        <div className="text-[9px] font-bold text-slate-400 uppercase">{t.Category?.name || 'Geral'}</div>
+                      <div className="text-right shrink-0">
+                        <div className="font-black text-sm text-red-600">- R$ {Number(t.amount).toLocaleString('pt-BR')}</div>
                       </div>
                     </div>
                   ))}
@@ -545,7 +638,7 @@ const AccountManagement = () => {
                   </div>
                 )}
  
-                <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
+                <div className="mt-8 pt-6 border-t border-[var(--border-primary)] flex justify-between items-center">
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Limite Disponível</div>
                   <div className="text-sm font-black text-[var(--text-primary)] italic">
                     R$ {(selectedAccInvoice.credit_limit - (selectedAccInvoice.used_limit || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -554,7 +647,7 @@ const AccountManagement = () => {
  
                 <button 
                   onClick={() => setShowInvoiceModal(false)}
-                  className="w-full mt-6 bg-navy-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gold transition-all shadow-lg shadow-navy-900/10"
+                  className="w-full mt-6 bg-navy-900 sm:bg-gold text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gold transition-all shadow-lg"
                 >
                   Fechar Detalhes
                 </button>
@@ -567,7 +660,7 @@ const AccountManagement = () => {
       {/* OFX Preview Modal */}
       <AnimatePresence>
         {showPreviewModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[70] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
               <div className="bg-navy-900 p-6 md:p-8 text-white flex justify-between items-center">
                 <div>
