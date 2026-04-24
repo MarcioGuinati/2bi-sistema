@@ -52,6 +52,7 @@ const ClientOnboarding = () => {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPDFMaximized, setIsPDFMaximized] = useState(false);
+  const [showFee, setShowFee] = useState(false);
 
   const [data, setData] = useState({
     personal: { name: '', birthDate: '' },
@@ -1068,20 +1069,46 @@ const ClientOnboarding = () => {
         return (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
             <div id="strategic-proposal" className="bg-[var(--bg-primary)] p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-[var(--border-primary)] space-y-12 transition-colors">
-              {/* FEE HEADER */}
-              <div className="bg-navy-900 dark:bg-navy-800 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 text-center relative overflow-hidden shadow-2xl border border-gold/20">
+              {/* FEE HEADER - CLICK TO REVEAL */}
+              <div 
+                onClick={() => setShowFee(!showFee)}
+                className="bg-navy-900 dark:bg-navy-800 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 text-center relative overflow-hidden shadow-2xl border border-gold/20 cursor-pointer hover:bg-navy-800 transition-all group"
+              >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-                <h4 className="text-gold text-[10px] font-black uppercase tracking-[0.5em] mb-4">Investimento para Implementação</h4>
-                <div className="text-4xl md:text-7xl font-black text-white italic tracking-tighter mb-2">
-                  R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <div className="flex flex-col items-center gap-1 mb-6">
-                  <div className="h-[1px] w-12 bg-gold/30 my-2"></div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gold font-black text-xl md:text-2xl italic tracking-tighter">R$ 49,90</span>
-                    <span className="text-white/60 text-[10px] uppercase font-bold tracking-widest">/ mensal</span>
-                  </div>
-                </div>
+                <h4 className="text-gold text-[10px] font-black uppercase tracking-[0.5em] flex items-center justify-center gap-3">
+                  Investimento para Implementação
+                  <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
+                    <ChevronRight size={14} />
+                  </motion.div>
+                </h4>
+                
+                <AnimatePresence>
+                  {showFee ? (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pt-8">
+                        <div className="text-4xl md:text-7xl font-black text-white italic tracking-tighter mb-2">
+                          R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="h-[1px] w-12 bg-gold/30 my-2"></div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gold font-black text-xl md:text-2xl italic tracking-tighter">R$ 49,90</span>
+                            <span className="text-white/60 text-[10px] uppercase font-bold tracking-widest">/ mensal</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4">
+                      <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest italic group-hover:text-gold transition-colors">Clique para revelar a proposta comercial</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
