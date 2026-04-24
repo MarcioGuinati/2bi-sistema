@@ -877,7 +877,7 @@ const ClientOnboarding = () => {
                 <div className="grid grid-cols-2 gap-4">
                   {['housing', 'food', 'transport', 'health', 'energy', 'water', 'internet'].map(field => (
                     <div key={field} className="space-y-1">
-                      <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">{
+                      <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)] ml-1">{
                         field === 'housing' ? 'Moradia' :
                           field === 'food' ? 'Alimentação' :
                             field === 'transport' ? 'Transporte' :
@@ -885,14 +885,14 @@ const ClientOnboarding = () => {
                                 field === 'energy' ? 'Energia' :
                                   field === 'water' ? 'Água' : 'Internet'
                       }</label>
-                      <input type="text" value={data.cashFlow.fixed[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-3 py-2 text-xs" />
+                      <input type="text" value={data.cashFlow.fixed[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-4 py-3 text-sm" />
                     </div>
                   ))}
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center bg-[var(--bg-primary)] p-4 rounded-2xl border border-[var(--border-primary)]">
-                    <span className="text-[9px] font-black uppercase text-[var(--text-secondary)]">Outros Fixos</span>
-                    <button type="button" onClick={() => setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: [...(data.cashFlow.fixed.others || []), { label: '', value: '' }] } } })} className="text-[9px] text-gold font-bold uppercase">Adicionar +</button>
+                    <span className="text-[10px] font-black uppercase text-[var(--text-secondary)]">Outros Fixos</span>
+                    <button type="button" onClick={() => setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: [...(data.cashFlow.fixed.others || []), { label: '', value: '' }] } } })} className="text-[10px] text-gold font-bold uppercase">Adicionar +</button>
                   </div>
                   {(data.cashFlow.fixed.others || []).map((oth, idx) => (
                     <div key={idx} className="flex gap-2">
@@ -900,16 +900,16 @@ const ClientOnboarding = () => {
                         const newOthers = [...data.cashFlow.fixed.others];
                         newOthers[idx].label = e.target.value;
                         setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: newOthers } } });
-                      }} className="input-premium text-[10px] flex-1" placeholder="Ex: Celular" />
+                      }} className="input-premium text-xs flex-1 py-3" placeholder="Ex: Celular" />
                       <input type="text" value={oth.value} onChange={e => {
                         const newOthers = [...data.cashFlow.fixed.others];
                         newOthers[idx].value = formatCurrency(e.target.value);
                         setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: newOthers } } });
-                      }} className="input-premium text-[10px] w-24" />
+                      }} className="input-premium text-xs w-32 py-3 font-black text-gold" />
                       <button type="button" onClick={() => {
                         const newOthers = data.cashFlow.fixed.others.filter((_, i) => i !== idx);
                         setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: newOthers } } });
-                      }} className="text-red-400"><Trash2 size={14} /></button>
+                      }} className="text-red-400 p-2"><Trash2 size={16} /></button>
                     </div>
                   ))}
                 </div>
@@ -924,19 +924,19 @@ const ClientOnboarding = () => {
                 <div className="grid grid-cols-2 gap-4">
                   {['housing', 'food', 'transport', 'health'].map(field => (
                     <div key={field} className="space-y-1">
-                      <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-1">{
+                      <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)] ml-1">{
                         field === 'housing' ? 'Moradia' :
                           field === 'food' ? 'Alimentação' :
                             field === 'transport' ? 'Transporte' : 'Saúde'
                       }</label>
-                      <input type="text" value={data.cashFlow.variable[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-3 py-2 text-xs" />
+                      <input type="text" value={data.cashFlow.variable[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-4 py-3 text-sm" />
                     </div>
                   ))}
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center bg-[var(--bg-primary)] p-4 rounded-2xl border border-[var(--border-primary)]">
-                    <span className="text-[9px] font-black uppercase text-[var(--text-secondary)]">Outros Variáveis</span>
-                    <button type="button" onClick={() => setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: [...(data.cashFlow.variable.others || []), { label: '', value: '' }] } } })} className="text-[9px] text-gold font-bold uppercase">Adicionar +</button>
+                    <span className="text-[10px] font-black uppercase text-[var(--text-secondary)]">Outros Variáveis</span>
+                    <button type="button" onClick={() => setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: [...(data.cashFlow.variable.others || []), { label: '', value: '' }] } } })} className="text-[10px] text-gold font-bold uppercase">Adicionar +</button>
                   </div>
                   {(data.cashFlow.variable.others || []).map((oth, idx) => (
                     <div key={idx} className="flex gap-2">
@@ -944,16 +944,16 @@ const ClientOnboarding = () => {
                         const newOthers = [...data.cashFlow.variable.others];
                         newOthers[idx].label = e.target.value;
                         setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: newOthers } } });
-                      }} className="input-premium text-[10px] flex-1" placeholder="Ex: Spotify" />
+                      }} className="input-premium text-xs flex-1 py-3" placeholder="Ex: Spotify" />
                       <input type="text" value={oth.value} onChange={e => {
                         const newOthers = [...data.cashFlow.variable.others];
                         newOthers[idx].value = formatCurrency(e.target.value);
                         setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: newOthers } } });
-                      }} className="input-premium text-[10px] w-24" />
+                      }} className="input-premium text-xs w-32 py-3 font-black text-gold" />
                       <button type="button" onClick={() => {
                         const newOthers = data.cashFlow.variable.others.filter((_, i) => i !== idx);
                         setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: newOthers } } });
-                      }} className="text-red-400"><Trash2 size={14} /></button>
+                      }} className="text-red-400 p-2"><Trash2 size={16} /></button>
                     </div>
                   ))}
                 </div>
