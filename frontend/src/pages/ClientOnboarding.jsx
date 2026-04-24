@@ -789,18 +789,18 @@ const ClientOnboarding = () => {
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
             <div className="flex justify-between items-center mb-4">
-              <label className="text-xs font-black uppercase text-gold tracking-widest">Cartões de Crédito</label>
+              <label className="text-xs font-black uppercase text-gold tracking-widest px-2 italic">Gerenciamento de Cartões</label>
               <button
                 type="button"
                 onClick={() => setData({ ...data, cards: { list: [...data.cards.list, { bank: '', annuity: 'Não', miles: 'Não', limit: '', monthlySpend: '' }] } })}
-                className="text-[10px] bg-gold/10 text-gold px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-gold hover:text-white transition-all"
+                className="text-[10px] bg-gold/10 text-gold px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-gold hover:text-white transition-all shadow-sm"
               >
                 <Plus size={14} /> Adicionar Cartão
               </button>
             </div>
             <div className="space-y-4">
               {data.cards.list.map((card, idx) => (
-                <div key={idx} className="card-premium p-6 relative group bg-[var(--bg-secondary)] opacity-90">
+                <div key={idx} className="card-premium p-6 relative group bg-[var(--bg-secondary)] border-2 border-transparent hover:border-gold/20 transition-all">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <input value={card.bank} onChange={e => {
                       const newList = [...data.cards.list];
@@ -809,14 +809,14 @@ const ClientOnboarding = () => {
                     }} className="input-premium text-xs" placeholder="Qual cartão?" />
                     <input value={card.limit} onChange={e => {
                       const newList = [...data.cards.list];
-                      newList[idx].limit = e.target.value;
+                      newList[idx].limit = formatCurrency(e.target.value);
                       setData({ ...data, cards: { list: newList } });
                     }} className="input-premium text-xs font-bold" placeholder="Limite (R$)" />
                     <input value={card.monthlySpend} onChange={e => {
                       const newList = [...data.cards.list];
-                      newList[idx].monthlySpend = e.target.value;
+                      newList[idx].monthlySpend = formatCurrency(e.target.value);
                       setData({ ...data, cards: { list: newList } });
-                    }} className="input-premium text-xs font-bold text-red-500" placeholder="Gasto médio" />
+                    }} className="input-premium text-xs font-black text-red-500" placeholder="Gasto médio" />
                     <div className="flex gap-2">
                       <input value={card.annuity} onChange={e => {
                         const newList = [...data.cards.list];
@@ -838,31 +838,34 @@ const ClientOnboarding = () => {
                 </div>
               ))}
             </div>
-
-            <div className="space-y-6 pt-10 border-t border-[var(--border-primary)]">
-              <label className="text-xs font-black uppercase text-gold tracking-widest px-2">Renda e Fluxo Mensal</label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Salário Líquido (Mensal)</label>
-                  <input type="text" value={data.cashFlow.salaries} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, salaries: formatCurrency(e.target.value) } })} className="input-premium text-xl font-black text-green-600" placeholder="R$ 0,00" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Outras Rendas / Extras</label>
-                  <input type="text" value={data.cashFlow.otherIncome} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, otherIncome: formatCurrency(e.target.value) } })} className="input-premium text-xl font-black text-green-500" placeholder="R$ 0,00" />
-                </div>
-              </div>
-            </div>
           </motion.div>
         );
       case 8:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
+            {/* NOVO BLOCO DE RENDA NO TOPO DOS GASTOS */}
+            <div className="bg-[var(--bg-secondary)] rounded-[2.5rem] p-8 border border-gold/10 shadow-xl space-y-6">
+              <label className="text-xs font-black uppercase text-gold tracking-widest flex items-center gap-2">
+                <DollarSign size={16} /> Renda e Fluxo Mensal
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] ml-2">Salário Líquido (Mensal)</label>
+                  <input type="text" value={data.cashFlow.salaries} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, salaries: formatCurrency(e.target.value) } })} className="input-premium text-2xl font-black text-green-600 py-6" placeholder="R$ 10.000,00" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] ml-2">Outras Rendas / Extras</label>
+                  <input type="text" value={data.cashFlow.otherIncome} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, otherIncome: formatCurrency(e.target.value) } })} className="input-premium text-2xl font-black text-green-500 py-6" placeholder="R$ 0,00" />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               {/* FIXED EXPENSES */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b-2 border-gold/20 pb-4">
-                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black text-xs">1</div>
-                  <h4 className="text-sm font-black uppercase tracking-widest">Gastos Fixos</h4>
+                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black text-xs shadow-sm">1</div>
+                  <h4 className="text-sm font-black uppercase tracking-widest italic">Gastos Fixos</h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {['housing', 'food', 'transport', 'health', 'energy', 'water', 'internet'].map(field => (
@@ -875,7 +878,7 @@ const ClientOnboarding = () => {
                                 field === 'energy' ? 'Energia' :
                                   field === 'water' ? 'Água' : 'Internet'
                       }</label>
-                      <input type="text" value={data.cashFlow.fixed[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-4 py-3 text-sm" />
+                      <input type="text" value={data.cashFlow.fixed[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-4 py-4 text-sm font-bold" />
                     </div>
                   ))}
                 </div>
@@ -890,12 +893,12 @@ const ClientOnboarding = () => {
                         const newOthers = [...data.cashFlow.fixed.others];
                         newOthers[idx].label = e.target.value;
                         setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: newOthers } } });
-                      }} className="input-premium text-xs flex-1 py-3" placeholder="Ex: Celular" />
+                      }} className="input-premium text-xs flex-1 py-4" placeholder="Ex: Celular" />
                       <input type="text" value={oth.value} onChange={e => {
                         const newOthers = [...data.cashFlow.fixed.others];
                         newOthers[idx].value = formatCurrency(e.target.value);
                         setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: newOthers } } });
-                      }} className="input-premium text-xs w-32 py-3 font-black text-gold" />
+                      }} className="input-premium text-xs w-32 py-4 font-black text-gold" />
                       <button type="button" onClick={() => {
                         const newOthers = data.cashFlow.fixed.others.filter((_, i) => i !== idx);
                         setData({ ...data, cashFlow: { ...data.cashFlow, fixed: { ...data.cashFlow.fixed, others: newOthers } } });
@@ -908,8 +911,8 @@ const ClientOnboarding = () => {
               {/* VARIABLE EXPENSES */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b-2 border-gold/20 pb-4">
-                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black text-xs">2</div>
-                  <h4 className="text-sm font-black uppercase tracking-widest">Gastos Variáveis</h4>
+                  <div className="w-8 h-8 bg-gold/10 text-gold rounded-lg flex items-center justify-center font-black text-xs shadow-sm">2</div>
+                  <h4 className="text-sm font-black uppercase tracking-widest italic">Gastos Variáveis</h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {['housing', 'food', 'transport', 'health'].map(field => (
@@ -919,7 +922,7 @@ const ClientOnboarding = () => {
                           field === 'food' ? 'Alimentação' :
                             field === 'transport' ? 'Transporte' : 'Saúde'
                       }</label>
-                      <input type="text" value={data.cashFlow.variable[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-4 py-3 text-sm" />
+                      <input type="text" value={data.cashFlow.variable[field]} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, [field]: formatCurrency(e.target.value) } } })} className="input-premium px-4 py-4 text-sm font-bold" />
                     </div>
                   ))}
                 </div>
@@ -934,12 +937,12 @@ const ClientOnboarding = () => {
                         const newOthers = [...data.cashFlow.variable.others];
                         newOthers[idx].label = e.target.value;
                         setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: newOthers } } });
-                      }} className="input-premium text-xs flex-1 py-3" placeholder="Ex: Spotify" />
+                      }} className="input-premium text-xs flex-1 py-4" placeholder="Ex: Spotify" />
                       <input type="text" value={oth.value} onChange={e => {
                         const newOthers = [...data.cashFlow.variable.others];
                         newOthers[idx].value = formatCurrency(e.target.value);
                         setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: newOthers } } });
-                      }} className="input-premium text-xs w-32 py-3 font-black text-gold" />
+                      }} className="input-premium text-xs w-32 py-4 font-black text-gold" />
                       <button type="button" onClick={() => {
                         const newOthers = data.cashFlow.variable.others.filter((_, i) => i !== idx);
                         setData({ ...data, cashFlow: { ...data.cashFlow, variable: { ...data.cashFlow.variable, others: newOthers } } });
@@ -960,18 +963,56 @@ const ClientOnboarding = () => {
                 <h4 className="text-lg font-black italic border-l-4 border-navy-900 dark:border-gold pl-4 uppercase tracking-tighter text-[var(--text-primary)]">Realidade Atual</h4>
                 <div className="space-y-4">
                   {[
-                    { label: 'Receitas', val: calculatedTotals.incomeTotal, color: 'text-green-600', perc: 100 },
-                    { label: 'Gastos Fixos', val: calculatedTotals.fixedTotal, color: 'text-red-600', perc: (calculatedTotals.fixedTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
-                    { label: 'Gastos Variáveis', val: calculatedTotals.variableTotal, color: 'text-orange-500', perc: (calculatedTotals.variableTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
-                    { label: 'Investimentos', val: 0, color: 'text-blue-500', perc: 0 },
-                    { label: 'Resultado', val: calculatedTotals.result, color: 'text-[var(--text-primary)] bg-[var(--bg-primary)] p-4 rounded-xl', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                    { key: 'income', label: 'Receitas', val: calculatedTotals.incomeTotal, color: 'text-green-600', perc: 100 },
+                    { key: 'fixed', label: 'Gastos Fixos', val: calculatedTotals.fixedTotal, color: 'text-red-600', perc: (calculatedTotals.fixedTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                    { key: 'variable', label: 'Gastos Variáveis', val: calculatedTotals.variableTotal, color: 'text-orange-500', perc: (calculatedTotals.variableTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                    { key: 'invest', label: 'Investimentos', val: 0, color: 'text-blue-500', perc: 0 },
+                    { key: 'result', label: 'Resultado', val: calculatedTotals.result, color: 'text-[var(--text-primary)] bg-[var(--bg-primary)] p-4 rounded-xl', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                   ].map(item => (
-                    <div key={item.label} className={`flex justify-between items-center ${item.label === 'Resultado' ? '' : 'pb-2 border-b border-[var(--border-primary)]'}`}>
-                      <div>
-                        <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{item.label}</div>
-                        <div className={`text-lg font-black ${item.color.includes('text-') ? item.color.split(' ')[0] : 'text-[var(--text-primary)]'}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
+                    <div key={item.key} className="space-y-4">
+                      <div className={`flex justify-between items-center ${item.label === 'Resultado' ? '' : 'pb-2 border-b border-[var(--border-primary)]'}`}>
+                        <div>
+                          <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{item.label}</div>
+                          <div className={`text-lg font-black ${item.color.includes('text-') ? item.color.split(' ')[0] : 'text-[var(--text-primary)]'}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
+                        </div>
+                        <div className="text-right text-xs font-bold text-[var(--text-secondary)] italic">{item.perc}%</div>
                       </div>
-                      <div className="text-right text-xs font-bold text-[var(--text-secondary)] italic">{item.perc}%</div>
+                      
+                      {/* SUB-ITENS DETALHADOS COM CORES DIFERENTES */}
+                      {item.key === 'fixed' && calculatedTotals.fixedTotal > 0 && (
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-red-500/20 mb-4 bg-red-500/5 rounded-r-xl">
+                          {[
+                            { l: 'Moradia', v: data.cashFlow.fixed.housing },
+                            { l: 'Alimentação', v: data.cashFlow.fixed.food },
+                            { l: 'Transporte', v: data.cashFlow.fixed.transport },
+                            { l: 'Saúde', v: data.cashFlow.fixed.health },
+                            { l: 'Básicos (Luz/Água/Net)', v: (parseFloat(data.cashFlow.fixed.energy?.replace(/\D/g,'')||0)/100) + (parseFloat(data.cashFlow.fixed.water?.replace(/\D/g,'')||0)/100) + (parseFloat(data.cashFlow.fixed.internet?.replace(/\D/g,'')||0)/100) },
+                            { l: 'Outros F.', v: data.cashFlow.fixed.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g,'')||0)/100, 0) }
+                          ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g,'')) > 0 : s.v > 0)).map(sub => (
+                            <div key={sub.l} className="flex justify-between items-center">
+                              <span className="text-[11px] font-bold text-red-700/70 dark:text-red-400/70 uppercase tracking-tight">{sub.l}</span>
+                              <span className="text-xs font-black text-red-600 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {item.key === 'variable' && calculatedTotals.variableTotal > 0 && (
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-orange-500/20 mb-4 bg-orange-500/5 rounded-r-xl">
+                          {[
+                            { l: 'Moradia', v: data.cashFlow.variable.housing },
+                            { l: 'Alimentação', v: data.cashFlow.variable.food },
+                            { l: 'Transporte', v: data.cashFlow.variable.transport },
+                            { l: 'Saúde', v: data.cashFlow.variable.health },
+                            { l: 'Outros V.', v: data.cashFlow.variable.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g,'')||0)/100, 0) }
+                          ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g,'')) > 0 : s.v > 0)).map(sub => (
+                            <div key={sub.l} className="flex justify-between items-center">
+                              <span className="text-[11px] font-bold text-orange-700/70 dark:text-orange-400/70 uppercase tracking-tight">{sub.l}</span>
+                              <span className="text-xs font-black text-orange-600 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
