@@ -68,7 +68,7 @@ const ClientDashboard = () => {
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
 
-  const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
+  const years = [2026, 2027, 2028, 2029, 2030];
 
   const getDateRange = (month, year) => {
     const start = new Date(year, month, 1).toISOString().split('T')[0];

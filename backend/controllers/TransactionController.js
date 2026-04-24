@@ -316,18 +316,27 @@ class TransactionController {
         categoryWhere.date = { [Op.between]: [startDate, endDate] };
       }
 
-      const categoryData = await Transaction.findAll({
+      const allDetailedTransactions = await Transaction.findAll({
         where: categoryWhere,
         include: [{
           model: Category,
           attributes: ['name']
-        }]
+        }],
+        order: [['date', 'ASC']]
       });
 
+      // Category Totals
       const categoryTotals = {};
-      categoryData.forEach(t => {
+      const dailyTotals = {};
+      
+      allDetailedTransactions.forEach(t => {
+        // Categories
         const catName = t.Category?.name || 'Outros';
         categoryTotals[catName] = (categoryTotals[catName] || 0) + parseFloat(t.amount || 0);
+
+        // Daily
+        const day = t.date;
+        dailyTotals[day] = (dailyTotals[day] || 0) + parseFloat(t.amount || 0);
       });
 
       const categories = Object.entries(categoryTotals).map(([name, value]) => ({
@@ -335,9 +344,54 @@ class TransactionController {
         value
       })).sort((a, b) => b.value - a.value);
 
+      const dailyData = Object.entries(dailyTotals).map(([date, value]) => ({
+        date,
+        total: value
+      }));
+
+      // Top 5 Expenses
+      const topExpenses = allDetailedTransactions
+        .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
+        .slice(0, 5)
+        .map(t => ({
+          description: t.description,
+          amount: t.amount,
+          date: t.date,
+          category: t.Category?.name || 'Outros'
+        }));
+
+      // MoM Comparison (Current vs Previous Month)
+      const currentMonthStart = new Date();
+      currentMonthStart.setDate(1);
+      const prevMonthStart = new Date(currentMonthStart);
+      prevMonthStart.setMonth(prevMonthStart.getMonth() - 1);
+      const prevMonthEnd = new Date(currentMonthStart);
+      prevMonthEnd.setDate(0);
+
+      const prevMonthTransactions = await Transaction.findAll({
+        where: {
+          user_id: targetUserId,
+          type: 'expense',
+          date: {
+            [Op.between]: [prevMonthStart.toISOString().split('T')[0], prevMonthEnd.toISOString().split('T')[0]]
+          }
+        }
+      });
+
+      const currentMonthExpense = allDetailedTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const prevMonthExpense = prevMonthTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
       return res.json({
         monthlyData,
-        categoryData: categories
+        categoryData: categories,
+        dailyData,
+        topExpenses,
+        comparison: {
+          current: currentMonthExpense,
+          previous: prevMonthExpense,
+          diff: currentMonthExpense - prevMonthExpense,
+          percent: prevMonthExpense > 0 ? ((currentMonthExpense - prevMonthExpense) / prevMonthExpense) * 100 : 0
+        }
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
