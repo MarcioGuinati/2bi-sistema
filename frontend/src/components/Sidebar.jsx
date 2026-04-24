@@ -77,11 +77,13 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
           <img
             src="/logo_2bi.png"
             alt="2BI Planejamento"
-            className="w-full max-w-[180px] h-auto object-contain drop-shadow-xl"
+            className="w-full max-w-[130px] h-auto object-contain drop-shadow-xl brightness-110"
           />
         </Link>
         {isCollapsed && (
-          <div className="hidden lg:flex w-10 h-10 bg-gold rounded-xl items-center justify-center text-navy-900 font-black text-xl mx-auto shadow-lg shadow-gold/20">2B</div>
+          <div className="hidden lg:flex w-10 h-10 bg-gold rounded-xl items-center justify-center text-navy-900 font-black text-xl mx-auto shadow-lg shadow-gold/20 hover:scale-105 transition-transform cursor-pointer">
+            <img src="/logo_2bi.png" alt="2B" className="w-6 h-6 object-contain" />
+          </div>
         )}
 
         {/* Toggle Button for Desktop */}
