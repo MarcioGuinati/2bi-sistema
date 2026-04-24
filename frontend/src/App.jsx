@@ -67,8 +67,9 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
         <Routes>
-          {/* Public Route */}
-          <Route path="/" element={<Institutional />} />
+          {/* Public Routes */}
+          <Route path="/" element={<DashboardRedirect />} />
+          <Route path="/home" element={<Institutional />} />
           <Route path="/login" element={<Login />} />
 
           {/* Admin Protected Routes */}
