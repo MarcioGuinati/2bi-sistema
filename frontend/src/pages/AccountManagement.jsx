@@ -32,9 +32,9 @@ const AccountManagement = () => {
   const [editingAcc, setEditingAcc] = useState(null);
   const [importingAccId, setImportingAccId] = useState(null);
   const fileInputRef = React.useRef(null);
-  const [form, setForm] = useState({ 
-    name: '', 
-    type: 'Corrente', 
+  const [form, setForm] = useState({
+    name: '',
+    type: 'Corrente',
     initial_balance: maskCurrency('0'),
     credit_limit: maskCurrency('0'),
     invoice_closing_day: '',
@@ -49,7 +49,7 @@ const AccountManagement = () => {
   const [invoicePage, setInvoicePage] = useState(1);
   const [invoiceTotalPages, setInvoiceTotalPages] = useState(1);
   const [invoiceMonthOffset, setInvoiceMonthOffset] = useState(0);
-  
+
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewTransactions, setPreviewTransactions] = useState([]);
   const [selectedTxIds, setSelectedTxIds] = useState([]);
@@ -73,14 +73,14 @@ const AccountManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = { 
-        ...form, 
+      const payload = {
+        ...form,
         initial_balance: sanitizeValue(form.initial_balance),
         credit_limit: sanitizeValue(form.credit_limit),
         invoice_closing_day: form.type === 'Cartão de Crédito' ? form.invoice_closing_day : null,
         due_day: form.type === 'Cartão de Crédito' ? form.due_day : null
       };
-      
+
       if (editingAcc) {
         await api.put(`/accounts/${editingAcc.id}`, payload);
       } else {
@@ -88,9 +88,9 @@ const AccountManagement = () => {
       }
       setShowModal(false);
       setEditingAcc(null);
-      setForm({ 
-        name: '', 
-        type: 'Corrente', 
+      setForm({
+        name: '',
+        type: 'Corrente',
         initial_balance: maskCurrency('0'),
         credit_limit: maskCurrency('0'),
         invoice_closing_day: '',
@@ -119,9 +119,9 @@ const AccountManagement = () => {
 
   const handleOpenEdit = (acc) => {
     setEditingAcc(acc);
-    setForm({ 
-      name: acc.name, 
-      type: acc.type, 
+    setForm({
+      name: acc.name,
+      type: acc.type,
       initial_balance: maskCurrency(acc.initial_balance),
       credit_limit: maskCurrency(acc.credit_limit || '0'),
       invoice_closing_day: acc.invoice_closing_day || '',
@@ -149,13 +149,13 @@ const AccountManagement = () => {
       const response = await api.post('/import/ofx-preview', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
+
       setPreviewTransactions(response.data);
       // Pre-select all that are NOT duplicates
       const nonDuplicates = response.data
         .map((t, idx) => t.isDuplicate ? null : idx)
         .filter(idx => idx !== null);
-      
+
       setSelectedTxIds(nonDuplicates);
       setShowPreviewModal(true);
     } catch (err) {
@@ -213,20 +213,20 @@ const AccountManagement = () => {
     setInvoiceLoading(true);
     setInvoicePage(page);
     setInvoiceMonthOffset(offset);
-    
+
     try {
       const now = new Date();
       // Lógica de datas mais robusta
       const targetDate = new Date();
       targetDate.setMonth(targetDate.getMonth() + offset);
       const closingDay = parseInt(acc.invoice_closing_day) || 30;
-      
+
       const startDate = new Date(targetDate.getFullYear(), targetDate.getMonth() - 1, closingDay + 1);
       const endDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), closingDay);
-      
+
       // Ajuste para evitar bugs de virada de mês/ano
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-         throw new Error("Data inválida");
+        throw new Error("Data inválida");
       }
 
       const response = await api.get('/transactions', {
@@ -238,7 +238,7 @@ const AccountManagement = () => {
           page
         }
       });
-      
+
       setInvoiceTransactions(response.data.rows);
       setInvoiceTotalPages(response.data.pages);
     } catch (err) {
@@ -254,20 +254,20 @@ const AccountManagement = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold font-heading">Contas Bancárias</h1>
+            <h1 className="text-3xl font-bold font-heading">Contas e Cartões</h1>
             <p className="text-[var(--text-secondary)] font-medium tracking-tight">Gerencie seus ativos e disponibilidades financeiras.</p>
           </div>
           <button
-            onClick={() => { 
-              setEditingAcc(null); 
-              setForm({ 
-                name: '', 
-                type: 'Corrente', 
+            onClick={() => {
+              setEditingAcc(null);
+              setForm({
+                name: '',
+                type: 'Corrente',
                 initial_balance: maskCurrency('0'),
                 credit_limit: maskCurrency('0'),
                 invoice_closing_day: ''
-              }); 
-              setShowModal(true); 
+              });
+              setShowModal(true);
             }}
             className="btn-primary flex items-center gap-2"
           >
@@ -293,13 +293,13 @@ const AccountManagement = () => {
             <h2 className="text-xl font-black font-heading uppercase tracking-widest text-[var(--text-primary)]">Meus Cartões</h2>
             <div className="h-[1px] flex-1 bg-[var(--border-primary)]" />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {accounts.filter(a => a.type === 'Cartão de Crédito').length > 0 ? (
               accounts.filter(a => a.type === 'Cartão de Crédito').map(acc => (
-                <CreditCardComponent 
-                  key={acc.id} 
-                  account={acc} 
+                <CreditCardComponent
+                  key={acc.id}
+                  account={acc}
                   onClick={() => handleOpenInvoice(acc)}
                   onEdit={handleOpenEdit}
                   onDelete={handleDelete}
@@ -347,7 +347,7 @@ const AccountManagement = () => {
                     </td>
                     <td className="px-8 py-5">
                       <div className={`font-black text-sm ${Number(acc.current_balance) < 0 ? 'text-red-600' : 'text-[var(--text-primary)]'}`}>
-                         R$ {Number(acc.current_balance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {Number(acc.current_balance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </div>
                     </td>
                     <td className="px-8 py-5 text-right">
@@ -386,16 +386,16 @@ const AccountManagement = () => {
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, y: 50 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
               className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border-primary)] flex flex-col"
             >
               <div className="bg-navy-900 p-6 text-white flex justify-between items-center sticky top-0 z-20 shrink-0">
                 <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingAcc ? 'Editar Conta' : 'Nova Conta'}</h3>
-                <button 
-                  onClick={() => setShowModal(false)} 
+                <button
+                  onClick={() => setShowModal(false)}
                   className="p-2 hover:bg-white/10 rounded-full transition-all"
                 >
                   <X size={24} />
@@ -404,150 +404,150 @@ const AccountManagement = () => {
               <div className="flex-1 overflow-y-auto">
                 <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-4">
                   <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400">Nome da Conta / Banco</label>
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
-                    placeholder="Ex: Banco Inter"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Tipo</label>
-                    <select
-                      value={form.type}
-                      onChange={e => setForm({ ...form, type: e.target.value })}
-                      className="select-premium font-bold"
-                    >
-                      <option value="Corrente">Corrente</option>
-                      <option value="Cartão de Crédito">Cartão de Crédito</option>
-                      <option value="Poupança">Poupança</option>
-                      <option value="Carteira">Carteira</option>
-                      <option value="Investimento">Investimento</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Saldo Inicial</label>
+                    <label className="text-[10px] uppercase font-black text-slate-400">Nome da Conta / Banco</label>
                     <input
                       type="text"
                       required
-                      value={form.initial_balance}
-                      onChange={e => setForm({ ...form, initial_balance: maskCurrency(e.target.value) })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
+                      placeholder="Ex: Banco Inter"
                     />
                   </div>
-                </div>
-                {form.type === 'Cartão de Crédito' && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-4 pt-2"
-                  >
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400">Limite de Crédito</label>
+                      <label className="text-[10px] uppercase font-black text-slate-400">Tipo</label>
+                      <select
+                        value={form.type}
+                        onChange={e => setForm({ ...form, type: e.target.value })}
+                        className="select-premium font-bold"
+                      >
+                        <option value="Corrente">Corrente</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        <option value="Poupança">Poupança</option>
+                        <option value="Carteira">Carteira</option>
+                        <option value="Investimento">Investimento</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Saldo Inicial</label>
                       <input
                         type="text"
                         required
-                        value={form.credit_limit}
-                        onChange={e => setForm({ ...form, credit_limit: maskCurrency(e.target.value) })}
+                        value={form.initial_balance}
+                        onChange={e => setForm({ ...form, initial_balance: maskCurrency(e.target.value) })}
                         className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                  </div>
+                  {form.type === 'Cartão de Crédito' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4 pt-2"
+                    >
                       <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-black text-slate-400">Dia Fechamento</label>
+                        <label className="text-[10px] uppercase font-black text-slate-400">Limite de Crédito</label>
                         <input
-                          type="number" min="1" max="31" required
-                          value={form.invoice_closing_day}
-                          onChange={e => setForm({ ...form, invoice_closing_day: e.target.value })}
+                          type="text"
+                          required
+                          value={form.credit_limit}
+                          onChange={e => setForm({ ...form, credit_limit: maskCurrency(e.target.value) })}
                           className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-black text-slate-400">Dia Vencimento</label>
-                        <input
-                          type="number" min="1" max="31" required
-                          value={form.due_day}
-                          onChange={e => setForm({ ...form, due_day: e.target.value })}
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
-                        />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] uppercase font-black text-slate-400">Dia Fechamento</label>
+                          <input
+                            type="number" min="1" max="31" required
+                            value={form.invoice_closing_day}
+                            onChange={e => setForm({ ...form, invoice_closing_day: e.target.value })}
+                            className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] uppercase font-black text-slate-400">Dia Vencimento</label>
+                          <input
+                            type="number" min="1" max="31" required
+                            value={form.due_day}
+                            onChange={e => setForm({ ...form, due_day: e.target.value })}
+                            className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                       <label className="text-[10px] uppercase font-black text-slate-400">Cor do Cartão</label>
-                       <div className="flex flex-wrap gap-3">
-                       {['#1e293b', '#FF6600', '#8A05BE', '#F7D116', '#004B8D', '#003399', '#ED1C24'].map(c => {
-                          const labels = {
-                            '#FF6600': 'Inter',
-                            '#8A05BE': 'Nubank',
-                            '#F7D116': 'BB',
-                            '#004B8D': 'Bradesco',
-                            '#003399': 'Caixa',
-                            '#ED1C24': 'Santander',
-                            '#1e293b': 'Padrão'
-                          };
-                          return (
-                            <button
-                              key={c}
-                              type="button"
-                              onClick={() => setForm({ ...form, color: c })}
-                              className={`w-10 h-10 rounded-full border-4 transition-all relative group ${form.color === c ? 'border-gold scale-110 shadow-lg' : 'border-transparent opacity-60'}`}
-                              style={{ backgroundColor: c }}
-                            >
-                               <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase hidden group-hover:block whitespace-nowrap bg-navy-900 text-white px-1 rounded">{labels[c]}</span>
-                            </button>
-                          );
-                       })}
-                          <input 
-                            type="color" 
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase font-black text-slate-400">Cor do Cartão</label>
+                        <div className="flex flex-wrap gap-3">
+                          {['#1e293b', '#FF6600', '#8A05BE', '#F7D116', '#004B8D', '#003399', '#ED1C24'].map(c => {
+                            const labels = {
+                              '#FF6600': 'Inter',
+                              '#8A05BE': 'Nubank',
+                              '#F7D116': 'BB',
+                              '#004B8D': 'Bradesco',
+                              '#003399': 'Caixa',
+                              '#ED1C24': 'Santander',
+                              '#1e293b': 'Padrão'
+                            };
+                            return (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => setForm({ ...form, color: c })}
+                                className={`w-10 h-10 rounded-full border-4 transition-all relative group ${form.color === c ? 'border-gold scale-110 shadow-lg' : 'border-transparent opacity-60'}`}
+                                style={{ backgroundColor: c }}
+                              >
+                                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[8px] font-black uppercase hidden group-hover:block whitespace-nowrap bg-navy-900 text-white px-1 rounded">{labels[c]}</span>
+                              </button>
+                            );
+                          })}
+                          <input
+                            type="color"
                             value={form.color}
                             onChange={e => setForm({ ...form, color: e.target.value })}
                             className="w-10 h-10 rounded-full bg-transparent border-none cursor-pointer"
                           />
-                       </div>
-                    </div>
-                  </motion.div>
-                )}
-                <div className="pt-4 space-y-3">
-                  <button type="submit" className="w-full btn-primary py-4 font-black">
-                    {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowModal(false)}
-                    className="w-full sm:hidden py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest"
-                  >
-                    Cancelar e Voltar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </motion.div>
-        </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  <div className="pt-4 space-y-3">
+                    <button type="submit" className="w-full btn-primary py-4 font-black">
+                      {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(false)}
+                      className="w-full sm:hidden py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest"
+                    >
+                      Cancelar e Voltar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
- 
+
       {/* Invoice Details Modal */}
       <AnimatePresence>
         {showInvoiceModal && selectedAccInvoice && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[110] flex items-center justify-center sm:p-4">
-            <motion.div 
-              initial={{ opacity: 0, y: 100 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, y: 100 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
               className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-lg h-full sm:h-auto overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
             >
               <div className="bg-navy-900 p-6 text-white relative shrink-0">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2 text-gold mb-2">
-                       <CreditCard size={20} />
-                       <span className="text-[10px] uppercase font-black tracking-widest text-gold">
-                         {invoiceMonthOffset === 0 ? 'Fatura em Aberto' : invoiceMonthOffset < 0 ? 'Fatura Retroativa' : 'Fatura Futura'}
-                       </span>
+                      <CreditCard size={20} />
+                      <span className="text-[10px] uppercase font-black tracking-widest text-gold">
+                        {invoiceMonthOffset === 0 ? 'Fatura em Aberto' : invoiceMonthOffset < 0 ? 'Fatura Retroativa' : 'Fatura Futura'}
+                      </span>
                     </div>
                     <h3 className="text-3xl font-black font-heading tracking-tight !text-white">{selectedAccInvoice.name}</h3>
                     <p className="text-white/50 text-[10px] font-black uppercase tracking-widest mt-1">
@@ -555,28 +555,28 @@ const AccountManagement = () => {
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                     <button onClick={() => setShowInvoiceModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all">
-                       <X size={20} />
-                     </button>
-                     <div className="flex gap-2">
-                        <button 
-                          onClick={() => handleOpenInvoice(selectedAccInvoice, 1, invoiceMonthOffset - 1)}
-                          className="bg-white/5 p-2 rounded-lg hover:bg-gold transition-colors text-white"
-                          title="Mês Anterior"
-                        >
-                          <ChevronLeft size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleOpenInvoice(selectedAccInvoice, 1, invoiceMonthOffset + 1)}
-                          className="bg-white/5 p-2 rounded-lg hover:bg-gold transition-colors text-white"
-                          title="Próximo Mês"
-                        >
-                          <ChevronRight size={16} />
-                        </button>
-                     </div>
+                    <button onClick={() => setShowInvoiceModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all">
+                      <X size={20} />
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleOpenInvoice(selectedAccInvoice, 1, invoiceMonthOffset - 1)}
+                        className="bg-white/5 p-2 rounded-lg hover:bg-gold transition-colors text-white"
+                        title="Mês Anterior"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleOpenInvoice(selectedAccInvoice, 1, invoiceMonthOffset + 1)}
+                        className="bg-white/5 p-2 rounded-lg hover:bg-gold transition-colors text-white"
+                        title="Próximo Mês"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
- 
+
                 <div className="mt-6 bg-white/5 rounded-2xl p-5 border border-white/10">
                   <div className="text-[10px] uppercase font-black text-gold mb-1">Total da Fatura Atual</div>
                   <div className="text-3xl font-black italic">
@@ -584,13 +584,13 @@ const AccountManagement = () => {
                   </div>
                 </div>
               </div>
- 
+
               <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="flex justify-between items-center mb-6">
                   <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Lançamentos do Ciclo</h4>
                   <div className="h-[1px] flex-1 bg-[var(--border-primary)] mx-4" />
                 </div>
- 
+
                 <div className="space-y-3">
                   {invoiceLoading ? (
                     <div className="py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest text-[10px]">Carregando lançamentos...</div>
@@ -615,10 +615,10 @@ const AccountManagement = () => {
                     </div>
                   ))}
                 </div>
- 
+
                 {invoiceTotalPages > 1 && (
                   <div className="flex items-center justify-between mt-6 bg-slate-50 p-2 rounded-2xl border border-slate-100">
-                    <button 
+                    <button
                       disabled={invoicePage === 1}
                       onClick={() => handleOpenInvoice(selectedAccInvoice, invoicePage - 1)}
                       className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-30 text-navy-900"
@@ -628,7 +628,7 @@ const AccountManagement = () => {
                     <div className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
                       Página {invoicePage} de {invoiceTotalPages}
                     </div>
-                    <button 
+                    <button
                       disabled={invoicePage === invoiceTotalPages}
                       onClick={() => handleOpenInvoice(selectedAccInvoice, invoicePage + 1)}
                       className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-30 text-navy-900"
@@ -637,15 +637,15 @@ const AccountManagement = () => {
                     </button>
                   </div>
                 )}
- 
+
                 <div className="mt-8 pt-6 border-t border-[var(--border-primary)] flex justify-between items-center">
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Limite Disponível</div>
                   <div className="text-sm font-black text-[var(--text-primary)] italic">
                     R$ {(selectedAccInvoice.credit_limit - (selectedAccInvoice.used_limit || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
                 </div>
- 
-                <button 
+
+                <button
                   onClick={() => setShowInvoiceModal(false)}
                   className="w-full mt-6 bg-navy-900 sm:bg-gold text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gold transition-all shadow-lg"
                 >
@@ -664,8 +664,8 @@ const AccountManagement = () => {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
               <div className="bg-navy-900 p-6 md:p-8 text-white flex justify-between items-center">
                 <div>
-                   <h3 className="text-xl md:text-2xl font-black font-heading tracking-tight !text-white">Revisar Importação</h3>
-                   <p className="text-white/50 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1">Selecione os lançamentos para inclusão</p>
+                  <h3 className="text-xl md:text-2xl font-black font-heading tracking-tight !text-white">Revisar Importação</h3>
+                  <p className="text-white/50 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1">Selecione os lançamentos para inclusão</p>
                 </div>
                 <button onClick={() => setShowPreviewModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all shrink-0">
                   <X size={20} />
@@ -675,13 +675,13 @@ const AccountManagement = () => {
               <div className="p-6 md:p-8 flex-1 overflow-hidden flex flex-col">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                   <div className="flex gap-4">
-                    <button 
+                    <button
                       onClick={() => setSelectedTxIds(previewTransactions.map((_, i) => i))}
                       className="text-[10px] font-black uppercase text-gold hover:underline"
                     >
                       Selecionar Todos
                     </button>
-                    <button 
+                    <button
                       onClick={() => setSelectedTxIds([])}
                       className="text-[10px] font-black uppercase text-slate-400 hover:underline"
                     >
@@ -695,22 +695,21 @@ const AccountManagement = () => {
 
                 <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                   {previewTransactions.map((t, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-4 rounded-2xl border transition-all ${
-                        selectedTxIds.includes(idx) 
-                          ? 'border-gold bg-gold/5 shadow-sm' 
+                    <div
+                      key={idx}
+                      className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-4 rounded-2xl border transition-all ${selectedTxIds.includes(idx)
+                          ? 'border-gold bg-gold/5 shadow-sm'
                           : 'border-[var(--border-primary)] bg-[var(--bg-primary)] opacity-60'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <input 
+                        <input
                           type="checkbox"
                           checked={selectedTxIds.includes(idx)}
                           onChange={() => toggleTxSelection(idx)}
                           className="w-5 h-5 rounded-lg border-2 border-slate-300 checked:bg-gold checked:border-gold transition-all shrink-0"
                         />
-                        
+
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-navy-900 font-black text-xs shrink-0">
                           {new Date(t.date).getUTCDate()}
                         </div>
@@ -741,7 +740,7 @@ const AccountManagement = () => {
                       </div>
 
                       <div className="flex justify-end w-full sm:w-auto border-t sm:border-t-0 border-slate-100 mt-2 sm:mt-0 pt-2 sm:pt-0">
-                        <button 
+                        <button
                           onClick={() => removeTxFromPreview(idx)}
                           className="p-1 px-3 sm:p-2 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 sm:block"
                           title="Remover da lista"
@@ -755,13 +754,13 @@ const AccountManagement = () => {
                 </div>
 
                 <div className="mt-8 flex flex-col md:flex-row gap-3 md:gap-4">
-                  <button 
+                  <button
                     onClick={() => setShowPreviewModal(false)}
                     className="order-2 md:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs"
                   >
                     Cancelar
                   </button>
-                  <button 
+                  <button
                     onClick={handleConfirmImport}
                     disabled={selectedTxIds.length === 0}
                     className="order-1 md:order-2 flex-[2] py-4 bg-navy-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold disabled:opacity-50 transition-all shadow-xl shadow-navy-900/10 flex items-center justify-center gap-2 text-xs"
@@ -775,12 +774,12 @@ const AccountManagement = () => {
         )}
       </AnimatePresence>
 
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={onFileChange} 
-        accept=".ofx" 
-        style={{ display: 'none' }} 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={onFileChange}
+        accept=".ofx"
+        style={{ display: 'none' }}
       />
     </SystemLayout>
   );

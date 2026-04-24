@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  Calendar, 
+import {
+  LayoutDashboard,
+  Wallet,
+  Calendar,
   LogOut,
   TrendingUp,
   Layers,
@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Dashboard Estratégico', path: '/dashboard?tab=dashboard', icon: PieChart },
     { name: 'Relatórios PDF', path: '/reports', icon: FileText },
     { name: 'Extrato Financeiro', path: '/finance', icon: Wallet },
-    { name: 'Contas Bancárias', path: '/accounts', icon: CreditCard },
+    { name: 'Contas e Cartões', path: '/accounts', icon: CreditCard },
     { name: 'Categorias', path: '/categories', icon: Layers },
     { name: 'Metas e Orçamentos', path: '/budgets', icon: Target },
     { name: 'Insights de IA', path: '/insights', icon: Zap },
@@ -74,18 +74,18 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     `}>
       <div className={`p-8 pb-10 flex items-center justify-between ${isCollapsed ? 'px-8 lg:px-4' : 'px-8'}`}>
         <Link to="/panel" className={`block transform hover:scale-[1.02] transition-all duration-300 ${isCollapsed ? 'lg:hidden' : 'block'}`}>
-          <img 
-            src="/logo_2bi.png" 
-            alt="2BI Planejamento" 
+          <img
+            src="/logo_2bi.png"
+            alt="2BI Planejamento"
             className="w-full max-w-[180px] h-auto object-contain drop-shadow-xl"
           />
         </Link>
         {isCollapsed && (
-             <div className="hidden lg:flex w-10 h-10 bg-gold rounded-xl items-center justify-center text-navy-900 font-black text-xl mx-auto shadow-lg shadow-gold/20">2B</div>
+          <div className="hidden lg:flex w-10 h-10 bg-gold rounded-xl items-center justify-center text-navy-900 font-black text-xl mx-auto shadow-lg shadow-gold/20">2B</div>
         )}
-        
+
         {/* Toggle Button for Desktop */}
-        <button 
+        <button
           onClick={toggleCollapse}
           className="hidden lg:flex absolute -right-4 top-10 w-8 h-8 bg-gold rounded-full items-center justify-center text-navy-900 shadow-xl hover:scale-110 transition-all border-4 border-navy-900"
         >
@@ -97,7 +97,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
       <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
         {links.map((link) => (
           link.external ? (
-            <a 
+            <a
               key={link.name}
               href={link.path}
               target="_blank"
@@ -147,26 +147,26 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
             <div className="text-[10px] text-gold font-black uppercase tracking-widest">{user?.role}</div>
           </div>
         </div>
-        
+
         <div className={`flex gap-2 mb-4 ${isCollapsed ? 'lg:hidden' : 'flex'}`}>
-            <button 
-                onClick={toggleTheme}
-                className="flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-gold hover:border-gold/50 transition-all font-bold text-[10px] uppercase tracking-widest shadow-sm"
-            >
-                {theme === 'light' ? (
-                    <><Moon size={14} className="text-gold" /> Escuro</>
-                ) : (
-                    <><Sun size={14} className="text-gold" /> Claro</>
-                )}
-            </button>
+          <button
+            onClick={toggleTheme}
+            className="flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-gold hover:border-gold/50 transition-all font-bold text-[10px] uppercase tracking-widest shadow-sm"
+          >
+            {theme === 'light' ? (
+              <><Moon size={14} className="text-gold" /> Escuro</>
+            ) : (
+              <><Sun size={14} className="text-gold" /> Claro</>
+            )}
+          </button>
         </div>
 
-        <button 
+        <button
           onClick={logout}
           title={isCollapsed ? 'Sair' : ''}
           className={`flex items-center rounded-2xl text-red-400 hover:bg-red-400/10 transition-all font-black text-xs uppercase tracking-widest gap-4 px-6 py-4 w-full ${isCollapsed ? 'lg:justify-center lg:p-4' : ''}`}
         >
-          <LogOut size={18} className="shrink-0" /> 
+          <LogOut size={18} className="shrink-0" />
           <span className={`${isCollapsed ? 'lg:hidden' : 'block'}`}>Sair da Conta</span>
         </button>
       </div>
