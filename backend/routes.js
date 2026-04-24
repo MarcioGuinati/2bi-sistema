@@ -32,6 +32,7 @@ routes.use(authMiddleware);
 
 // Profile
 routes.put('/profile', AuthController.updateProfile);
+routes.get('/profile/onboarding', AuthController.getOnboardingData);
 
 // 2FA Management
 routes.get('/2fa/status', AuthController.get2FAStatus);

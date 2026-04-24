@@ -30,6 +30,7 @@ import html2canvas from 'html2canvas';
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 
 const steps = [
   { id: 1, title: 'Apresentação', icon: FileText },
@@ -44,11 +45,12 @@ const steps = [
   { id: 10, title: 'Fechamento', icon: FileText },
 ];
 
-const ClientOnboarding = () => {
+const ClientOnboarding = ({ isReadOnly = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { success, error } = useNotification();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(isReadOnly ? 2 : 1);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPDFMaximized, setIsPDFMaximized] = useState(false);
@@ -109,6 +111,24 @@ const ClientOnboarding = () => {
   };
 
   useEffect(() => {
+    if (isReadOnly) {
+      const fetchMyOnboarding = async () => {
+        try {
+          const res = await api.get('/profile/onboarding');
+          if (res.data) {
+            setData(prev => ({ ...prev, ...res.data }));
+          }
+          setClient(user);
+        } catch (err) {
+          error('Erro ao carregar seu planejamento');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchMyOnboarding();
+      return;
+    }
+
     const fetchClient = async () => {
       try {
         const res = await api.get('/clients');
@@ -130,8 +150,10 @@ const ClientOnboarding = () => {
         setLoading(false);
       }
     };
-    fetchClient();
-  }, [id]);
+    if (!isReadOnly && id) {
+      fetchClient();
+    }
+  }, [id, isReadOnly, user]);
 
   // Handle Strategic Projection Overlap (Revenue update -> 60/30/10 Calculation)
   useEffect(() => {
@@ -197,7 +219,10 @@ const ClientOnboarding = () => {
   };
 
   const nextStep = () => currentStep < steps.length && setCurrentStep(currentStep + 1);
-  const prevStep = () => currentStep > 1 && setCurrentStep(currentStep - 1);
+  const prevStep = () => {
+    const minStep = isReadOnly ? 2 : 1;
+    if (currentStep > minStep) setCurrentStep(currentStep - 1);
+  };
 
   // Calculations
   const calculatedTotals = useMemo(() => {
@@ -1134,51 +1159,53 @@ const ClientOnboarding = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-gold/10 to-gold/5 animate-shimmer"></div>
                 )}
 
-                <div className="p-8 md:p-12 text-center relative z-10">
-                  <motion.h4
-                    layout="position"
-                    className={`text-gold font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all ${!showFee ? 'text-xs md:text-sm' : 'text-[10px] mb-6'}`}
-                  >
-                    Investimento para Implementação
-                    <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
-                      <ChevronRight size={!showFee ? 20 : 14} />
-                    </motion.div>
-                  </motion.h4>
+                {!isReadOnly && (
+                  <div className="p-8 md:p-12 text-center relative z-10">
+                    <motion.h4
+                      layout="position"
+                      className={`text-gold font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all ${!showFee ? 'text-xs md:text-sm' : 'text-[10px] mb-6'}`}
+                    >
+                      Investimento para Implementação
+                      <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
+                        <ChevronRight size={!showFee ? 20 : 14} />
+                      </motion.div>
+                    </motion.h4>
 
-                  <AnimatePresence mode="wait">
-                    {showFee ? (
-                      <motion.div
-                        key="opened"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="space-y-6"
-                      >
-                        <div className="text-5xl md:text-8xl font-black text-white italic tracking-tighter leading-none">
-                          R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="h-[2px] w-24 bg-gold/40 rounded-full"></div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-gold font-black text-2xl md:text-4xl italic tracking-tighter">R$ 49,90</span>
-                            <span className="text-white/60 text-xs uppercase font-black tracking-[0.2em]">/ mensal</span>
+                    <AnimatePresence mode="wait">
+                      {showFee ? (
+                        <motion.div
+                          key="opened"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className="space-y-6"
+                        >
+                          <div className="text-5xl md:text-8xl font-black text-white italic tracking-tighter leading-none">
+                            R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </div>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="closed"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="pt-6"
-                      >
-                        <div className="inline-block px-8 py-3 bg-gold text-navy-900 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-all">
-                          Clique aqui para Visualizar a Proposta
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="h-[2px] w-24 bg-gold/40 rounded-full"></div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-gold font-black text-2xl md:text-4xl italic tracking-tighter">R$ 49,90</span>
+                              <span className="text-white/60 text-xs uppercase font-black tracking-[0.2em]">/ mensal</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="closed"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="pt-6"
+                        >
+                          <div className="inline-block px-8 py-3 bg-gold text-navy-900 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-all">
+                            Clique aqui para Visualizar a Proposta
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
               </motion.div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -1303,14 +1330,16 @@ const ClientOnboarding = () => {
               </div>
             </div>
 
-            <div className="flex justify-center pt-6">
-              <button
-                onClick={generatePDF}
-                className="bg-navy-900 text-white px-12 py-5 rounded-2xl flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95"
-              >
-                <FileText size={24} /> Imprimir Proposta Estratégica
-              </button>
-            </div>
+            {!isReadOnly && (
+              <div className="flex justify-center pt-6">
+                <button
+                  onClick={generatePDF}
+                  className="bg-navy-900 text-white px-12 py-5 rounded-2xl flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95"
+                >
+                  <FileText size={24} /> Imprimir Proposta Estratégica
+                </button>
+              </div>
+            )}
           </motion.div>
         );
       default:
@@ -1333,38 +1362,42 @@ const ClientOnboarding = () => {
             </h1>
             <p className="text-[var(--text-secondary)] font-medium max-w-xl mt-2 tracking-tight text-xs">Análise profunda do ecossistema financeiro para o sócio <span className="text-[var(--text-primary)] font-bold">{client?.name}</span>.</p>
           </div>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="btn-primary px-8 py-4 flex items-center gap-3 shadow-2xl shadow-gold/30 font-black text-sm transition-all active:scale-95"
-          >
-            <Save size={20} /> Salvar
-          </button>
+          {!isReadOnly && (
+            <button
+              type="button"
+              onClick={handleSave}
+              className="btn-primary px-8 py-4 flex items-center gap-3 shadow-2xl shadow-gold/30 font-black text-sm transition-all active:scale-95"
+            >
+              <Save size={20} /> Salvar
+            </button>
+          )}
         </div>
 
         {/* Stepper Navigation */}
         <div className="flex flex-nowrap gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
-          {steps.map((step) => {
-            const Icon = step.icon;
-            const active = currentStep === step.id;
-            const completed = currentStep > step.id;
-            return (
-              <div
-                key={step.id}
-                onClick={() => setCurrentStep(step.id)}
-                className={`flex-1 min-w-[120px] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer transition-all border-2 relative ${active ? 'bg-navy-900 text-white border-navy-900 scale-105 shadow-xl' : completed ? 'bg-gold/10 text-gold border-gold/20' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-primary)] opacity-60'}`}
-              >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border-2 ${active ? 'bg-gold border-gold text-navy-900' : 'bg-[var(--bg-primary)] border-transparent'}`}>
-                  {completed ? <CheckCircle2 size={16} className="text-green-600" /> : <Icon size={16} />}
+          {steps
+            .filter(s => !(isReadOnly && s.id === 1))
+            .map((step) => {
+              const Icon = step.icon;
+              const active = currentStep === step.id;
+              const completed = currentStep > step.id;
+              return (
+                <div
+                  key={step.id}
+                  onClick={() => setCurrentStep(step.id)}
+                  className={`flex-1 min-w-[120px] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer transition-all border-2 relative ${active ? 'bg-navy-900 text-white border-navy-900 scale-105 shadow-xl' : completed ? 'bg-gold/10 text-gold border-gold/20' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-primary)] opacity-60'}`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border-2 ${active ? 'bg-gold border-gold text-navy-900' : 'bg-[var(--bg-primary)] border-transparent'}`}>
+                    {completed ? <CheckCircle2 size={16} className="text-green-600" /> : <Icon size={16} />}
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-[7px] uppercase font-black tracking-widest ${active ? 'text-gold' : 'text-[var(--text-secondary)]'}`}>Passo 0{step.id}</p>
+                    <p className="text-[9px] font-black uppercase whitespace-nowrap">{step.title}</p>
+                  </div>
+                  {active && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-navy-900 rotate-45"></div>}
                 </div>
-                <div className="text-center">
-                  <p className={`text-[7px] uppercase font-black tracking-widest ${active ? 'text-gold' : 'text-[var(--text-secondary)]'}`}>Passo 0{step.id}</p>
-                  <p className="text-[9px] font-black uppercase whitespace-nowrap">{step.title}</p>
-                </div>
-                {active && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-navy-900 rotate-45"></div>}
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
 
         {/* Form Content Area */}
@@ -1372,7 +1405,9 @@ const ClientOnboarding = () => {
           <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
 
           <AnimatePresence mode="wait">
-            {renderStep()}
+            <div className={isReadOnly ? 'pointer-events-none' : ''}>
+              {renderStep()}
+            </div>
           </AnimatePresence>
 
           <div className="mt-14 pt-10 border-t border-[var(--border-primary)] flex flex-col md:flex-row justify-between gap-6">
@@ -1397,18 +1432,20 @@ const ClientOnboarding = () => {
                       onClick={() => setCurrentStep(10)}
                       className="bg-gold text-navy-900 px-6 py-4 rounded-xl flex items-center gap-2 text-[10px] uppercase font-black tracking-[0.2em] hover:bg-gold/90 transition-all shadow-lg"
                     >
-                      Ver Proposta <ChevronRight size={16} />
+                      {isReadOnly ? 'Ver Fechamento' : 'Ver Proposta'} <ChevronRight size={16} />
                     </button>
                   )}
                 </div>
               ) : (
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => navigate('/admin')} className="btn-secondary px-6 py-4 text-[9px] uppercase font-black tracking-widest text-[var(--text-primary)]">
+                  <button type="button" onClick={() => navigate(isReadOnly ? '/panel' : '/admin')} className="btn-secondary px-6 py-4 text-[9px] uppercase font-black tracking-widest text-[var(--text-primary)]">
                     Sair
                   </button>
-                  <button type="button" onClick={handleSave} className="bg-navy-900 text-white px-10 py-4 rounded-xl flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95 dark:border dark:border-gold/30">
-                    Finalizar <CheckCircle2 size={16} />
-                  </button>
+                  {!isReadOnly && (
+                    <button type="button" onClick={handleSave} className="bg-navy-900 text-white px-10 py-4 rounded-xl flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95 dark:border dark:border-gold/30">
+                      Finalizar <CheckCircle2 size={16} />
+                    </button>
+                  )}
                 </div>
               )}
             </div>

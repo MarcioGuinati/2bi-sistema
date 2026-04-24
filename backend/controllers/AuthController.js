@@ -510,6 +510,18 @@ class AuthController {
       return res.status(500).json({ error: 'Erro ao atualizar perfil' });
     }
   }
+
+  async getOnboardingData(req, res) {
+    try {
+      const user = await User.findByPk(req.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+      return res.json(user.onboardingData || {});
+    } catch (err) {
+      return res.status(500).json({ error: 'Erro ao buscar dados de onboarding' });
+    }
+  }
 }
 
 module.exports = new AuthController();

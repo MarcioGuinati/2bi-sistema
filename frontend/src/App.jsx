@@ -166,6 +166,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/my-planning" 
+            element={
+              <ProtectedRoute role="client">
+                <ClientOnboarding isReadOnly={true} />
+              </ProtectedRoute>
+            } 
+          />
           {/* Catch-all/Redirect */}
           <Route 
             path="/panel" 

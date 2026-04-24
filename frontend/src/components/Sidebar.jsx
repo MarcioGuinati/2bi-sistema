@@ -42,7 +42,8 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Categorias', path: '/categories', icon: Layers },
     { name: 'Metas e Orçamentos', path: '/budgets', icon: Target },
     { name: 'Insights de IA', path: '/insights', icon: Zap },
-    { name: 'Agendar Metoria', path: '/mentoria', icon: Calendar },
+    { name: 'Meu Planejamento', path: '/my-planning', icon: ShieldCheck },
+    { name: 'Agendar Mentoria', path: '/mentoria', icon: Calendar },
   ];
 
   const partnerLinks = [
