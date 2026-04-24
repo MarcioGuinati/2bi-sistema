@@ -25,6 +25,8 @@ const routes = new Router();
 routes.post('/login', AuthController.login);
 routes.post('/2fa/verify-login', AuthController.verify2FALogin);
 routes.post('/register-lead', AuthController.registerLead);
+routes.post('/forgot-password', AuthController.forgotPassword);
+routes.post('/reset-password', AuthController.resetPassword);
 routes.post('/logout', authMiddleware, AuthController.logout);
 
 // Protected routes

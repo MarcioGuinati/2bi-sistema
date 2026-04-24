@@ -37,6 +37,7 @@ import Reports from './pages/Reports';
 import AdminReports from './pages/AdminReports';
 import UserProfile from './pages/UserProfile';
 import AppLandingPage from './pages/AppLandingPage';
+import ForgotPassword from './pages/ForgotPassword';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -73,6 +74,7 @@ function App() {
           <Route path="/home" element={<Institutional />} />
           <Route path="/app" element={<AppLandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Admin Protected Routes */}
           <Route 

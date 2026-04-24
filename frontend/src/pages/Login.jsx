@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
@@ -301,7 +301,7 @@ const Login = () => {
                                 <input type="checkbox" className="w-4 h-4 rounded border-[var(--border-primary)] bg-[var(--bg-primary)] text-gold focus:ring-gold transition-all" />
                                 Lembrar neste dispositivo
                             </label>
-                            <button type="button" className="text-[var(--text-primary)] font-black uppercase tracking-widest hover:text-gold transition-colors">Solicitar Nova Senha</button>
+                            <Link to="/forgot-password" size={14} className="text-[11px] text-[var(--text-primary)] font-black uppercase tracking-widest hover:text-gold transition-colors">Solicitar Nova Senha</Link>
                         </div>
                     </>
                 ) : (
