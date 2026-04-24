@@ -142,7 +142,7 @@ const ClientOnboarding = () => {
     };
 
     const totalIncome = parseCurrency(data.cashFlow.salaries) + parseCurrency(data.cashFlow.otherIncome);
-    
+
     if (totalIncome > 0) {
       const fixedLimit = totalIncome * 0.60;
       const variableLimit = totalIncome * 0.30;
@@ -162,6 +162,29 @@ const ClientOnboarding = () => {
       }));
     }
   }, [data.cashFlow.salaries, data.cashFlow.otherIncome]);
+
+  // Handle Automatic Average for Poupar Mensal
+  useEffect(() => {
+    const parseCurrency = (val) => {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      return parseFloat(val.toString().replace(/\D/g, '') || 0) / 100;
+    };
+
+    const min = parseCurrency(data.investimentoMensal.valorMinimo);
+    const max = parseCurrency(data.investimentoMensal.valorMaximo);
+
+    if (min > 0 || max > 0) {
+      const avg = (min + max) / 2;
+      setData(prev => ({
+        ...prev,
+        investimentoMensal: {
+          ...prev.investimentoMensal,
+          valorMedio: formatCurrency(avg * 100)
+        }
+      }));
+    }
+  }, [data.investimentoMensal.valorMinimo, data.investimentoMensal.valorMaximo]);
 
   const handleSave = async () => {
     try {
@@ -215,7 +238,7 @@ const ClientOnboarding = () => {
   };
 
   const getProjectionData = () => {
-    const rawSaving = data.cashFlow.expected.investments || '0';
+    const rawSaving = data.investimentoMensal.valorMedio || '0';
     const monthlySaving = parseFloat(rawSaving.replace(/\D/g, '') || 0) / 100;
     const years = 20;
     const projection = [];
@@ -464,12 +487,12 @@ const ClientOnboarding = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] uppercase font-black text-gold ml-4 italic">Valor Médio</label>
+                      <label className="text-[9px] uppercase font-black text-gold ml-4 italic">Valor Médio (Calculado)</label>
                       <input
                         type="text"
+                        readOnly
                         value={data.investimentoMensal.valorMedio}
-                        onChange={e => setData({ ...data, investimentoMensal: { ...data.investimentoMensal, valorMedio: formatCurrency(e.target.value) } })}
-                        className="input-premium text-xl font-black text-gold text-center py-5 border-gold/30"
+                        className="input-premium text-xl font-black text-gold text-center py-5 border-gold/30 bg-gold/5 cursor-not-allowed"
                         placeholder="Média"
                       />
                     </div>
@@ -748,11 +771,10 @@ const ClientOnboarding = () => {
                     key={prot.key}
                     type="button"
                     onClick={() => setData({ ...data, protections: { ...data.protections, [prot.key]: !data.protections[prot.key] } })}
-                    className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all duration-300 ${
-                      data.protections[prot.key] 
-                        ? 'border-green-500 bg-green-500/10 text-green-600 dark:text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.15)] scale-[1.02]' 
+                    className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all duration-300 ${data.protections[prot.key]
+                        ? 'border-green-500 bg-green-500/10 text-green-600 dark:text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.15)] scale-[1.02]'
                         : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)] opacity-60 hover:opacity-100'
-                    }`}
+                      }`}
                   >
                     <span className="font-bold text-xs uppercase tracking-tight">{prot.label}</span>
                     <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${data.protections[prot.key] ? 'border-green-500 bg-green-600 shadow-lg shadow-green-500/30' : 'border-slate-300 dark:border-white/10'}`}>
@@ -1017,7 +1039,7 @@ const ClientOnboarding = () => {
                         </div>
                         <div className="text-right text-xs font-bold text-[var(--text-secondary)] italic">{item.perc}%</div>
                       </div>
-                      
+
                       {/* SUB-ITENS DETALHADOS EM TONS NEUTROS */}
                       {item.key === 'fixed' && calculatedTotals.fixedTotal > 0 && (
                         <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-slate-500/20 mb-4 bg-slate-500/5 rounded-r-xl">
@@ -1026,12 +1048,12 @@ const ClientOnboarding = () => {
                             { l: 'Alimentação', v: data.cashFlow.fixed.food },
                             { l: 'Transporte', v: data.cashFlow.fixed.transport },
                             { l: 'Saúde', v: data.cashFlow.fixed.health },
-                            { l: 'Básicos (Luz/Água/Net)', v: (parseFloat(data.cashFlow.fixed.energy?.replace(/\D/g,'')||0)/100) + (parseFloat(data.cashFlow.fixed.water?.replace(/\D/g,'')||0)/100) + (parseFloat(data.cashFlow.fixed.internet?.replace(/\D/g,'')||0)/100) },
-                            { l: 'Outros F.', v: data.cashFlow.fixed.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g,'')||0)/100, 0) }
-                          ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g,'')) > 0 : s.v > 0)).map(sub => (
+                            { l: 'Básicos (Luz/Água/Net)', v: (parseFloat(data.cashFlow.fixed.energy?.replace(/\D/g, '') || 0) / 100) + (parseFloat(data.cashFlow.fixed.water?.replace(/\D/g, '') || 0) / 100) + (parseFloat(data.cashFlow.fixed.internet?.replace(/\D/g, '') || 0) / 100) },
+                            { l: 'Outros F.', v: data.cashFlow.fixed.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g, '') || 0) / 100, 0) }
+                          ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g, '')) > 0 : s.v > 0)).map(sub => (
                             <div key={sub.l} className="flex justify-between items-center">
                               <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-tight">{sub.l}</span>
-                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g, '') || 0) / 100 : sub.v).toLocaleString('pt-BR')}</span>
                             </div>
                           ))}
                         </div>
@@ -1044,11 +1066,11 @@ const ClientOnboarding = () => {
                             { l: 'Alimentação', v: data.cashFlow.variable.food },
                             { l: 'Transporte', v: data.cashFlow.variable.transport },
                             { l: 'Saúde', v: data.cashFlow.variable.health },
-                            { l: 'Outros V.', v: data.cashFlow.variable.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g,'')||0)/100, 0) }
-                          ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g,'')) > 0 : s.v > 0)).map(sub => (
+                            { l: 'Outros V.', v: data.cashFlow.variable.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g, '') || 0) / 100, 0) }
+                          ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g, '')) > 0 : s.v > 0)).map(sub => (
                             <div key={sub.l} className="flex justify-between items-center">
                               <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-tight">{sub.l}</span>
-                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g, '') || 0) / 100 : sub.v).toLocaleString('pt-BR')}</span>
                             </div>
                           ))}
                         </div>
@@ -1078,9 +1100,9 @@ const ClientOnboarding = () => {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-black text-white/30">Meta Investimento (10%)</label>
+                    <label className="text-[9px] uppercase font-black text-white/30">Valor para Investimento (Média Poupar)</label>
                     <div className="bg-gold/10 border border-gold/20 w-full p-5 rounded-2xl font-black text-gold text-center text-2xl shadow-lg">
-                      {data.cashFlow.expected.investments}
+                      {data.investimentoMensal.valorMedio || 'R$ 0,00'}
                     </div>
                   </div>
                 </div>
@@ -1102,7 +1124,7 @@ const ClientOnboarding = () => {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
             <div id="strategic-proposal" className="bg-[var(--bg-primary)] p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-[var(--border-primary)] space-y-12 transition-colors">
               {/* FEE HEADER - EYE-CATCHING REVEAL */}
-              <motion.div 
+              <motion.div
                 layout
                 onClick={() => setShowFee(!showFee)}
                 className={`relative overflow-hidden rounded-[2.5rem] transition-all duration-500 cursor-pointer border-2 ${!showFee ? 'bg-navy-900 border-gold shadow-[0_0_30px_rgba(197,160,89,0.3)] animate-pulse-subtle' : 'bg-navy-900 border-gold/40 shadow-2xl'}`}
@@ -1113,7 +1135,7 @@ const ClientOnboarding = () => {
                 )}
 
                 <div className="p-8 md:p-12 text-center relative z-10">
-                  <motion.h4 
+                  <motion.h4
                     layout="position"
                     className={`text-gold font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all ${!showFee ? 'text-xs md:text-sm' : 'text-[10px] mb-6'}`}
                   >
@@ -1122,7 +1144,7 @@ const ClientOnboarding = () => {
                       <ChevronRight size={!showFee ? 20 : 14} />
                     </motion.div>
                   </motion.h4>
-                  
+
                   <AnimatePresence mode="wait">
                     {showFee ? (
                       <motion.div
@@ -1144,7 +1166,7 @@ const ClientOnboarding = () => {
                         </div>
                       </motion.div>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         key="closed"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -1223,12 +1245,12 @@ const ClientOnboarding = () => {
                     <LineChart data={projectionData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-primary)" />
                       <XAxis dataKey="year" fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
-                      <YAxis 
-                        fontSize={10} 
-                        tickLine={false} 
-                        axisLine={false} 
-                        tickFormatter={v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v)} 
-                        stroke="var(--text-secondary)" 
+                      <YAxis
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v)}
+                        stroke="var(--text-secondary)"
                         width={80}
                       />
                       <Tooltip
