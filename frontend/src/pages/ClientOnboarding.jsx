@@ -215,7 +215,7 @@ const ClientOnboarding = () => {
   };
 
   const getProjectionData = () => {
-    const rawSaving = data.planning.monthlyInvest || '0';
+    const rawSaving = data.cashFlow.expected.investments || '0';
     const monthlySaving = parseFloat(rawSaving.replace(/\D/g, '') || 0) / 100;
     const years = 20;
     const projection = [];
@@ -226,8 +226,8 @@ const ClientOnboarding = () => {
       const r8 = 0.08 / 12;
       const r10 = 0.10 / 12;
 
-      const v8 = monthlySaving * ((Math.pow(1 + r8, months) - 1) / r8);
-      const v10 = monthlySaving * ((Math.pow(1 + r10, months) - 1) / r10);
+      const v8 = months === 0 ? 0 : monthlySaving * ((Math.pow(1 + r8, months) - 1) / r8);
+      const v10 = months === 0 ? 0 : monthlySaving * ((Math.pow(1 + r10, months) - 1) / r10);
 
       projection.push({
         year: `Ano ${year}`,
