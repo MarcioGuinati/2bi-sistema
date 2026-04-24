@@ -533,12 +533,12 @@ const AccountManagement = () => {
       {/* Invoice Details Modal */}
       <AnimatePresence>
         {showInvoiceModal && selectedAccInvoice && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[110] flex items-center justify-center sm:p-4">
+          <div className="fixed inset-0 bg-navy-900/80 backdrop-blur-md z-[110] flex items-center justify-center p-0 sm:p-4">
             <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-lg h-full sm:h-auto overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-xl h-full sm:h-auto sm:max-h-[85vh] overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
             >
               <div className="bg-navy-900 p-6 text-white relative shrink-0">
                 <div className="flex justify-between items-start">
@@ -577,79 +577,82 @@ const AccountManagement = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 bg-white/5 rounded-2xl p-5 border border-white/10">
-                  <div className="text-[10px] uppercase font-black text-gold mb-1">Total da Fatura Atual</div>
-                  <div className="text-3xl font-black italic">
-                    R$ {invoiceTransactions.reduce((acc, t) => acc + Number(t.amount), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="text-[9px] uppercase font-black text-gold mb-0.5">Total da Fatura</div>
+                      <div className="text-2xl font-black italic">
+                        R$ {invoiceTransactions.reduce((acc, t) => acc + Number(t.amount), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <div className="text-[9px] uppercase font-black text-white/40">Limite Disp.</div>
+                       <div className="text-sm font-bold">R$ {(selectedAccInvoice.credit_limit - (selectedAccInvoice.used_limit || 0)).toLocaleString('pt-BR')}</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="flex justify-between items-center mb-6">
-                  <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400">Lançamentos do Ciclo</h4>
-                  <div className="h-[1px] flex-1 bg-[var(--border-primary)] mx-4" />
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[var(--bg-primary)]/30 custom-scrollbar">
+                <div className="flex items-center gap-4 mb-4">
+                  <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">Lançamentos do Ciclo</h4>
+                  <div className="h-[1px] flex-1 bg-[var(--border-primary)]" />
                 </div>
-
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {invoiceLoading ? (
-                    <div className="py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest text-[10px]">Carregando lançamentos...</div>
+                    <div className="py-20 text-center animate-pulse text-slate-400 font-bold uppercase tracking-widest text-[10px]">Aguarde...</div>
                   ) : invoiceTransactions.length === 0 ? (
-                    <div className="py-20 text-center text-slate-400 italic text-sm">Nenhum lançamento encontrado.</div>
+                    <div className="py-20 text-center text-slate-400 italic text-sm">Sem lançamentos.</div>
                   ) : invoiceTransactions.map(t => (
-                    <div key={t.id} className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] hover:border-gold/30 transition-all group">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center text-[var(--text-primary)] font-black text-xs border border-[var(--border-primary)]">
+                    <div key={t.id} className="flex items-center justify-between p-3.5 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-primary)] hover:border-gold/30 transition-all shadow-sm">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 bg-navy-900 text-white rounded-lg flex items-center justify-center font-black text-xs shrink-0">
                           {new Date(t.date).getUTCDate()}
                         </div>
                         <div className="min-w-0">
                           <div className="font-bold text-sm text-[var(--text-primary)] truncate">{t.description}</div>
-                          <div className="text-[9px] text-slate-400 uppercase font-black tracking-tighter">
-                            {new Date(t.date).toLocaleDateString('pt-BR', { month: 'short' })}
+                          <div className="text-[9px] text-slate-400 font-bold">
+                            {new Date(t.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-black text-sm text-red-600">- R$ {Number(t.amount).toLocaleString('pt-BR')}</div>
+                      <div className="text-right shrink-0 ml-4">
+                        <div className="font-black text-sm text-red-600">R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                       </div>
                     </div>
                   ))}
                 </div>
+              </div>
 
+              {/* Footer Fixo */}
+              <div className="p-4 sm:p-6 bg-[var(--bg-secondary)] border-t border-[var(--border-primary)] shrink-0">
                 {invoiceTotalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 bg-slate-50 p-2 rounded-2xl border border-slate-100">
+                  <div className="flex items-center justify-between mb-4 bg-[var(--bg-primary)] p-2 rounded-xl border border-[var(--border-primary)]">
                     <button
                       disabled={invoicePage === 1}
-                      onClick={() => handleOpenInvoice(selectedAccInvoice, invoicePage - 1)}
-                      className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-30 text-navy-900"
+                      onClick={() => handleOpenInvoice(selectedAccInvoice, invoicePage - 1, invoiceMonthOffset)}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-all disabled:opacity-20"
                     >
-                      <ChevronLeft size={20} />
+                      <ChevronLeft size={18} />
                     </button>
-                    <div className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
+                    <div className="text-[9px] uppercase font-black text-slate-400">
                       Página {invoicePage} de {invoiceTotalPages}
                     </div>
                     <button
                       disabled={invoicePage === invoiceTotalPages}
-                      onClick={() => handleOpenInvoice(selectedAccInvoice, invoicePage + 1)}
-                      className="p-2 hover:bg-white rounded-xl transition-all disabled:opacity-30 text-navy-900"
+                      onClick={() => handleOpenInvoice(selectedAccInvoice, invoicePage + 1, invoiceMonthOffset)}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-all disabled:opacity-20"
                     >
-                      <ChevronRight size={20} />
+                      <ChevronRight size={18} />
                     </button>
                   </div>
                 )}
-
-                <div className="mt-8 pt-6 border-t border-[var(--border-primary)] flex justify-between items-center">
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Limite Disponível</div>
-                  <div className="text-sm font-black text-[var(--text-primary)] italic">
-                    R$ {(selectedAccInvoice.credit_limit - (selectedAccInvoice.used_limit || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </div>
-                </div>
-
+ 
                 <button
                   onClick={() => setShowInvoiceModal(false)}
-                  className="w-full mt-6 bg-navy-900 sm:bg-gold text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gold transition-all shadow-lg"
+                  className="w-full bg-navy-900 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-gold transition-all shadow-xl"
                 >
-                  Fechar Detalhes
+                  Fechar Extrato
                 </button>
               </div>
             </motion.div>
