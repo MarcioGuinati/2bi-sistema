@@ -30,6 +30,9 @@ routes.post('/logout', authMiddleware, AuthController.logout);
 // Protected routes
 routes.use(authMiddleware);
 
+// Profile
+routes.put('/profile', AuthController.updateProfile);
+
 // 2FA Management
 routes.get('/2fa/status', AuthController.get2FAStatus);
 routes.post('/2fa/setup', AuthController.setup2FA);

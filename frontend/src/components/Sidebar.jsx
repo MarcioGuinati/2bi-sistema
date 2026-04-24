@@ -138,15 +138,23 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
 
       {/* User & Logout */}
       <div className={`border-t border-white/5 bg-navy-950/40 transition-all p-6 ${isCollapsed ? 'lg:p-2' : ''}`}>
-        <div className={`flex items-center gap-4 mb-6 px-2 ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}>
-          <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-black shrink-0">
-            {user?.name.charAt(0)}
-          </div>
+        <Link to="/profile" className={`flex items-center gap-4 mb-6 px-2 hover:bg-white/5 py-3 rounded-2xl transition-all group ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}>
+          {user?.avatar_url ? (
+            <img 
+              src={user.avatar_url} 
+              alt={user.name} 
+              className="w-10 h-10 rounded-xl object-cover border border-gold/20 shrink-0 group-hover:scale-110 transition-transform" 
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-black shrink-0 group-hover:scale-110 transition-transform">
+              {user?.name.charAt(0)}
+            </div>
+          )}
           <div className={`overflow-hidden ${isCollapsed ? 'lg:hidden' : 'block'}`}>
-            <div className="text-white text-xs font-black truncate">{user?.name}</div>
+            <div className="text-white text-xs font-black truncate group-hover:text-gold transition-colors">{user?.name}</div>
             <div className="text-[10px] text-gold font-black uppercase tracking-widest">{user?.role}</div>
           </div>
-        </div>
+        </Link>
 
         <div className={`flex gap-2 mb-4 ${isCollapsed ? 'lg:hidden' : 'flex'}`}>
           <button

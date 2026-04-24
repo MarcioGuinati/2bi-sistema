@@ -43,7 +43,7 @@ class AuthController {
       await AuditService.log(user.id, 'LOGIN_SUCCESS', 'Auth', { email, role }, req.ip);
 
       return res.json({
-        user: { id, name, email, role },
+        user: { id, name, email, role, avatar_url: user.avatar_url },
         token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
           expiresIn: '7d',
         }),
@@ -460,6 +460,54 @@ class AuthController {
       return res.status(200).json({ message: 'Logout realizado com sucesso' });
     } catch (err) {
       return res.status(500).json({ error: 'Erro ao realizar logout' });
+    }
+  }
+
+  async updateProfile(req, res) {
+    try {
+      const { name, email, current_password, new_password, avatar_url } = req.body;
+      const user = await User.findByPk(req.userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+
+      const updateData = {};
+
+      if (name) updateData.name = name;
+      if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+
+      if (email && email !== user.email) {
+        const emailExists = await User.findOne({ where: { email } });
+        if (emailExists) {
+          return res.status(400).json({ error: 'E-mail selecionado já está em uso' });
+        }
+        updateData.email = email;
+      }
+
+      if (new_password) {
+        if (!current_password) {
+          return res.status(400).json({ error: 'Senha atual é obrigatória para definir uma nova' });
+        }
+        if (!(await bcrypt.compare(current_password, user.password))) {
+          return res.status(401).json({ error: 'Senha atual incorreta' });
+        }
+        updateData.password = await bcrypt.hash(new_password, 8);
+      }
+
+      await user.update(updateData);
+
+      const { id, role, avatar_url: updatedAvatar } = user;
+      
+      return res.json({
+        user: { id, name: user.name, email: user.email, role, avatar_url: updatedAvatar },
+        token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
+          expiresIn: '7d',
+        }),
+      });
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      return res.status(500).json({ error: 'Erro ao atualizar perfil' });
     }
   }
 }

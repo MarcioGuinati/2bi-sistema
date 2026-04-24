@@ -80,6 +80,10 @@ module.exports = (sequelize, DataTypes) => {
     twoFactorEnabled: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    avatar_url: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   });
 

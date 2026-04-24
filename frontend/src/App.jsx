@@ -35,6 +35,7 @@ import SecuritySettings from './pages/SecuritySettings';
 import AuditLogs from './pages/AuditLogs';
 import Reports from './pages/Reports';
 import AdminReports from './pages/AdminReports';
+import UserProfile from './pages/UserProfile';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -216,6 +217,14 @@ function App() {
             element={
               <ProtectedRoute role="admin">
                 <AdminReports />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <UserProfile />
               </ProtectedRoute>
             } 
           />

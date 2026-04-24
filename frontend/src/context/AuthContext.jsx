@@ -72,6 +72,11 @@ export const AuthProvider = ({ children }) => {
     setUser(clientData);
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('@2BI:user', JSON.stringify(userData));
+  };
+
   const stopImpersonating = () => {
     const adminToken = sessionStorage.getItem('@2BI:admin_backup_token');
     const adminUser = sessionStorage.getItem('@2BI:admin_backup_user');
@@ -98,6 +103,7 @@ export const AuthProvider = ({ children }) => {
       logout, 
       impersonate, 
       stopImpersonating,
+      updateUser,
       isImpersonating,
       loading 
     }}>
