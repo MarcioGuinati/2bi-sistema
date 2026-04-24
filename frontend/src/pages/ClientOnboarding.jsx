@@ -1105,8 +1105,10 @@ const ClientOnboarding = () => {
                           borderColor: 'var(--border-primary)',
                           borderRadius: '16px',
                           color: 'var(--text-primary)',
-                          fontSize: '12px'
+                          fontSize: '12px',
+                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                         }}
+                        itemStyle={{ color: 'var(--text-primary)' }}
                       />
                       <Line type="monotone" dataKey="Rentabilidade 8%" stroke="#64748b" strokeWidth={3} dot={false} />
                       <Line type="monotone" dataKey="Rentabilidade 10%" stroke="#c5a059" strokeWidth={4} dot={false} />
@@ -1129,8 +1131,11 @@ const ClientOnboarding = () => {
                           borderColor: 'var(--border-primary)',
                           borderRadius: '16px',
                           color: 'var(--text-primary)',
-                          fontSize: '12px'
+                          fontSize: '12px',
+                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                         }}
+                        itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
+                        formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                       />
                       <Bar dataKey="value" radius={[10, 10, 0, 0]}>
                         {cashFlowData.map((entry, index) => (
