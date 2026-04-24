@@ -133,6 +133,36 @@ const ClientOnboarding = () => {
     fetchClient();
   }, [id]);
 
+  // Handle Strategic Projection Overlap (Revenue update -> 60/30/10 Calculation)
+  useEffect(() => {
+    const parseCurrency = (val) => {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      return parseFloat(val.toString().replace(/\D/g, '') || 0) / 100;
+    };
+
+    const totalIncome = parseCurrency(data.cashFlow.salaries) + parseCurrency(data.cashFlow.otherIncome);
+    
+    if (totalIncome > 0) {
+      const fixedLimit = totalIncome * 0.60;
+      const variableLimit = totalIncome * 0.30;
+      const investmentLimit = totalIncome * 0.10;
+
+      setData(prev => ({
+        ...prev,
+        cashFlow: {
+          ...prev.cashFlow,
+          expected: {
+            income: formatCurrency(totalIncome * 100),
+            fixed: formatCurrency(fixedLimit * 100),
+            variable: formatCurrency(variableLimit * 100),
+            investments: formatCurrency(investmentLimit * 100)
+          }
+        }
+      }));
+    }
+  }, [data.cashFlow.salaries, data.cashFlow.otherIncome]);
+
   const handleSave = async () => {
     try {
       await api.put(`/clients/${id}`, { onboardingData: data });
@@ -1034,22 +1064,24 @@ const ClientOnboarding = () => {
                 <h4 className="text-lg font-black italic border-l-4 border-gold pl-4 uppercase tracking-tighter text-white">Projeção Estratégica</h4>
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-black text-white/30">Receita Esperada</label>
-                    <input type="text" value={data.cashFlow.expected.income} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, expected: { ...data.cashFlow.expected, income: formatCurrency(e.target.value) } } })} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
+                    <label className="text-[9px] uppercase font-black text-white/30">Receita Esperada (Calculado)</label>
+                    <input type="text" readOnly value={data.cashFlow.expected.income} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none font-black text-white/80 cursor-not-allowed" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-black text-white/30">Meta Fixa (R$)</label>
-                      <input type="text" value={data.cashFlow.expected.fixed} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, expected: { ...data.cashFlow.expected, fixed: formatCurrency(e.target.value) } } })} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
+                      <label className="text-[9px] uppercase font-black text-white/30">Meta Fixa (60%)</label>
+                      <input type="text" readOnly value={data.cashFlow.expected.fixed} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none font-black text-white/60 cursor-not-allowed" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-black text-white/30">Meta Variável (R$)</label>
-                      <input type="text" value={data.cashFlow.expected.variable} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, expected: { ...data.cashFlow.expected, variable: formatCurrency(e.target.value) } } })} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black" />
+                      <label className="text-[9px] uppercase font-black text-white/30">Meta Variável (30%)</label>
+                      <input type="text" readOnly value={data.cashFlow.expected.variable} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none font-black text-white/60 cursor-not-allowed" />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase font-black text-white/30">Meta Investimento (R$)</label>
-                    <input type="text" value={data.cashFlow.expected.investments} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, expected: { ...data.cashFlow.expected, investments: formatCurrency(e.target.value) } } })} className="bg-white/5 border-white/10 w-full p-4 rounded-2xl outline-none focus:border-gold font-black text-gold text-center text-xl" />
+                    <label className="text-[9px] uppercase font-black text-white/30">Meta Investimento (10%)</label>
+                    <div className="bg-gold/10 border border-gold/20 w-full p-5 rounded-2xl font-black text-gold text-center text-2xl shadow-lg">
+                      {data.cashFlow.expected.investments}
+                    </div>
                   </div>
                 </div>
               </div>

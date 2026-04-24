@@ -716,8 +716,8 @@ const AdminDashboard = () => {
               <div className="bg-gradient-to-r from-navy-900 to-navy-800 p-10 text-white flex justify-between items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
                 <div className="relative z-10">
-                  <h3 className="text-3xl font-black font-heading tracking-tight italic">{editingClient ? 'Ajustar Perfil' : 'Novo Alinhamento'}</h3>
-                  <p className="text-gold/60 text-[10px] font-black uppercase tracking-[0.4em] mt-1">Estratégia e Patrimônio 2BI</p>
+                  <h3 className="text-3xl font-black font-heading tracking-tight italic text-white">{editingClient ? 'Ajustar Perfil' : 'Novo Alinhamento'}</h3>
+                  <p className="text-gold font-black uppercase tracking-[0.4em] mt-1 opacity-70" style={{ fontSize: '10px' }}>Estratégia e Patrimônio 2BI</p>
                 </div>
                 <button onClick={() => setShowRegModal(false)} className="bg-white/10 hover:bg-white/20 p-3 rounded-2xl transition-all"><X size={20} /></button>
               </div>
