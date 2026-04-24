@@ -706,20 +706,6 @@ const ClientOnboarding = () => {
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
             <div className="space-y-6">
-              <label className="text-xs font-black uppercase text-gold tracking-widest px-2">Planejamento Financeiro & Proteções</label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Quanto investe mensalmente? (Geral)</span>
-                  <input type="text" value={data.planning.monthlyInvest} onChange={e => setData({ ...data, planning: { ...data.planning, monthlyInvest: formatCurrency(e.target.value) } })} className="input-premium" placeholder="R$ 0,00" />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-[var(--text-secondary)]">Mudança prevista (próximos meses)?</span>
-                  <input type="text" value={data.planning.futureChanges} onChange={e => setData({ ...data, planning: { ...data.planning, futureChanges: e.target.value } })} className="input-premium" placeholder="Ex: Aumento de salário" />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 border-t border-[var(--border-primary)] pt-10">
               <label className="text-xs font-black uppercase text-gold tracking-widest px-2">Proteções Atuais</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
@@ -731,11 +717,15 @@ const ClientOnboarding = () => {
                     key={prot.key}
                     type="button"
                     onClick={() => setData({ ...data, protections: { ...data.protections, [prot.key]: !data.protections[prot.key] } })}
-                    className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all ${data.protections[prot.key] ? 'border-green-500 bg-green-50/50 text-green-700' : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)]'}`}
+                    className={`p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all duration-300 ${
+                      data.protections[prot.key] 
+                        ? 'border-green-500 bg-green-500/10 text-green-600 dark:text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.15)] scale-[1.02]' 
+                        : 'border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)] opacity-60 hover:opacity-100'
+                    }`}
                   >
-                    <span className="font-bold text-xs">{prot.label}</span>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${data.protections[prot.key] ? 'border-green-500 bg-green-600' : 'border-slate-300'}`}>
-                      {data.protections[prot.key] && <CheckCircle2 size={14} className="text-white" />}
+                    <span className="font-bold text-xs uppercase tracking-tight">{prot.label}</span>
+                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${data.protections[prot.key] ? 'border-green-500 bg-green-600 shadow-lg shadow-green-500/30' : 'border-slate-300 dark:border-white/10'}`}>
+                      {data.protections[prot.key] && <CheckCircle2 size={16} className="text-white" />}
                     </div>
                   </button>
                 ))}
