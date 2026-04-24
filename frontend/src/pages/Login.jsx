@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
-import { Shield, Lock, Mail, ArrowRight, Eye, EyeOff, Smartphone, TrendingUp, Zap } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowRight, Eye, EyeOff, Smartphone, TrendingUp, Zap, Sun, Moon } from 'lucide-react';
 import heroImage from '../assets/login-hero-premium.png';
 
 const Login = () => {
@@ -17,6 +18,7 @@ const Login = () => {
   const [twoFactorCode, setTwoFactorCode] = useState('');
   
   const { login, verify2FALogin } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   // Auto-slide every 6 seconds
@@ -220,7 +222,17 @@ const Login = () => {
             className="max-w-md w-full relative z-10"
         >
             <div className="lg:hidden flex justify-center mb-12">
-                 <img src="/logo_2bi.png" alt="2BI" className="w-32 h-auto" />
+                 <img src="/logo_2bi.png" alt="2BI" className="w-32 h-auto dark:brightness-0 dark:invert" />
+            </div>
+
+            {/* Theme Toggle */}
+            <div className="absolute top-8 right-8 z-20">
+                <button
+                    onClick={toggleTheme}
+                    className="p-3 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-primary)] text-[var(--text-primary)] hover:bg-gold hover:text-navy-900 transition-all shadow-sm group"
+                >
+                    {theme === 'dark' ? <Sun size={20} className="group-hover:rotate-45 transition-transform" /> : <Moon size={20} className="group-hover:-rotate-12 transition-transform" />}
+                </button>
             </div>
 
             <div className="mb-10 text-center lg:text-left">
@@ -228,8 +240,8 @@ const Login = () => {
                     <div className="w-2 h-2 bg-gold rounded-full animate-pulse"></div>
                     <span className="text-[10px] font-black text-gold uppercase tracking-[0.3em]">Ambiente Seguro</span>
                 </div>
-                <h3 className="text-4xl font-black text-navy-900 font-heading tracking-tighter italic">Autenticação</h3>
-                <p className="text-slate-400 font-semibold text-sm mt-1">Conecte-se para gerenciar seus ativos de alto valor.</p>
+                <h3 className="text-4xl font-black text-[var(--text-primary)] font-heading tracking-tighter italic">Autenticação</h3>
+                <p className="text-[var(--text-secondary)] font-semibold text-sm mt-1">Conecte-se para gerenciar seus ativos de alto valor.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -237,7 +249,7 @@ const Login = () => {
                     <motion.div 
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-red-50 text-red-600 p-4 rounded-2xl text-[11px] font-black uppercase tracking-wider border border-red-100 flex items-center gap-3"
+                        className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-2xl text-[11px] font-black uppercase tracking-wider border border-red-100 dark:border-red-900/30 flex items-center gap-3"
                     >
                         <Shield size={16} /> {error}
                     </motion.div>
@@ -246,15 +258,15 @@ const Login = () => {
                 {!require2FA ? (
                     <>
                         <div className="space-y-2">
-                            <label className="text-[10px] uppercase font-black text-slate-400 ml-4 tracking-[0.2em]">Identificação</label>
+                            <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] ml-4 tracking-[0.2em]">Identificação</label>
                             <div className="relative group">
-                                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
+                                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 group-focus-within:text-gold transition-colors" size={18} />
                                 <input 
                                     type="email" 
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-6 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-navy-900"
+                                    className="w-full bg-[var(--bg-secondary)] border-2 border-[var(--border-primary)] rounded-[2rem] pl-16 pr-6 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-[var(--text-primary)]"
                                     placeholder="E-mail ou ID de Usuário"
                                 />
                             </div>
@@ -262,22 +274,22 @@ const Login = () => {
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center ml-4">
-                                <label className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Senha Criptografada</label>
+                                <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] tracking-[0.2em]">Senha Criptografada</label>
                             </div>
                             <div className="relative group">
-                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
+                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 group-focus-within:text-gold transition-colors" size={18} />
                                 <input 
                                     type={showPassword ? "text" : "password"} 
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-16 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-navy-900"
+                                    className="w-full bg-[var(--bg-secondary)] border-2 border-[var(--border-primary)] rounded-[2rem] pl-16 pr-16 py-5 focus:border-gold outline-none transition-all shadow-sm font-bold text-[var(--text-primary)]"
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-gold transition-colors"
+                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 hover:text-gold transition-colors"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -285,11 +297,11 @@ const Login = () => {
                         </div>
 
                         <div className="flex items-center justify-between px-4 text-[11px]">
-                            <label className="flex items-center gap-2 text-slate-500 font-bold cursor-pointer group">
-                                <input type="checkbox" className="w-4 h-4 rounded border-slate-200 text-gold focus:ring-gold transition-all" />
+                            <label className="flex items-center gap-2 text-[var(--text-secondary)] font-bold cursor-pointer group">
+                                <input type="checkbox" className="w-4 h-4 rounded border-[var(--border-primary)] bg-[var(--bg-primary)] text-gold focus:ring-gold transition-all" />
                                 Lembrar neste dispositivo
                             </label>
-                            <button type="button" className="text-navy-900 font-black uppercase tracking-widest hover:text-gold transition-colors">Solicitar Nova Senha</button>
+                            <button type="button" className="text-[var(--text-primary)] font-black uppercase tracking-widest hover:text-gold transition-colors">Solicitar Nova Senha</button>
                         </div>
                     </>
                 ) : (
@@ -300,19 +312,19 @@ const Login = () => {
                     >
                         <div className="p-6 bg-gold/5 border border-gold/20 rounded-[2rem]">
                             <Smartphone className="w-12 h-12 text-gold mx-auto mb-4" />
-                            <h4 className="text-navy-900 font-black italic tracking-tight mb-2">Google Authenticator</h4>
-                            <p className="text-slate-400 text-xs font-semibold">Insira o código de 6 dígitos gerado pelo seu aplicativo de autenticação.</p>
+                            <h4 className="text-[var(--text-primary)] font-black italic tracking-tight mb-2">Google Authenticator</h4>
+                            <p className="text-[var(--text-secondary)] text-xs font-semibold">Insira o código de 6 dígitos gerado pelo seu aplicativo de autenticação.</p>
                         </div>
                         
                         <div className="relative group">
-                            <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={18} />
+                            <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-500 group-focus-within:text-gold transition-colors" size={18} />
                             <input 
                                 type="text" 
                                 value={twoFactorCode}
                                 onChange={(e) => setTwoFactorCode(e.target.value)}
                                 required
                                 maxLength={6}
-                                className="w-full bg-white border-2 border-slate-100 rounded-[2rem] pl-16 pr-6 py-6 text-center text-3xl font-black tracking-[0.5em] focus:border-gold outline-none transition-all shadow-sm text-navy-900"
+                                className="w-full bg-[var(--bg-secondary)] border-2 border-[var(--border-primary)] rounded-[2rem] pl-16 pr-6 py-6 text-center text-3xl font-black tracking-[0.5em] focus:border-gold outline-none transition-all shadow-sm text-[var(--text-primary)]"
                                 placeholder="000000"
                                 autoFocus
                             />
@@ -331,7 +343,7 @@ const Login = () => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-navy-900 text-white !py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-3 hover:bg-gold hover:text-navy-900 transition-all shadow-2xl active:scale-[0.98] disabled:opacity-70 group"
+                    className="w-full bg-navy-900 dark:bg-gold text-white dark:text-navy-900 !py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-3 hover:bg-gold hover:text-navy-900 dark:hover:bg-white transition-all shadow-2xl active:scale-[0.98] disabled:opacity-70 group"
                 >
                     {loading ? 'Validando...' : require2FA ? 'Confirmar Autenticação' : 'Acessar Workspace'}
                     <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
@@ -342,23 +354,23 @@ const Login = () => {
 
             <div className="mt-16 text-center">
                 <div className="flex items-center gap-4 mb-8">
-                    <div className="h-[1px] flex-1 bg-slate-100"></div>
-                    <span className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em]">Criptografia de Ponta a Ponta</span>
-                    <div className="h-[1px] flex-1 bg-slate-100"></div>
+                    <div className="h-[1px] flex-1 bg-[var(--border-primary)]"></div>
+                    <span className="text-[9px] uppercase font-black text-[var(--text-secondary)] tracking-[0.3em]">Criptografia de Ponta a Ponta</span>
+                    <div className="h-[1px] flex-1 bg-[var(--border-primary)]"></div>
                 </div>
                 
-                <div className="flex justify-center gap-8 opacity-20 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700">
+                <div className="flex justify-center gap-8 opacity-20 dark:opacity-40 grayscale dark:grayscale-0 hover:opacity-100 hover:grayscale-0 transition-all duration-700">
                     <div className="flex flex-col items-center gap-1">
-                        <Shield size={24} className="text-navy-900" />
-                        <span className="text-[8px] font-black">256-BIT</span>
+                        <Shield size={24} className="text-[var(--text-primary)]" />
+                        <span className="text-[8px] font-black text-[var(--text-primary)]">256-BIT</span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                        <Lock size={24} className="text-navy-900" />
-                        <span className="text-[8px] font-black">TLS 1.3</span>
+                        <Lock size={24} className="text-[var(--text-primary)]" />
+                        <span className="text-[8px] font-black text-[var(--text-primary)]">TLS 1.3</span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                        <Smartphone size={24} className="text-navy-900" />
-                        <span className="text-[8px] font-black">2FA</span>
+                        <Smartphone size={24} className="text-[var(--text-primary)]" />
+                        <span className="text-[8px] font-black text-[var(--text-primary)]">2FA</span>
                     </div>
                 </div>
             </div>
