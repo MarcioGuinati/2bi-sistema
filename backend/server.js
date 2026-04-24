@@ -32,7 +32,7 @@ const leadLimiter = rateLimit({
 // App Settings
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://2bi.orionchat.cloud'] 
+    ? ['https://2bi.orionchat.cloud', 'https://app.2biplanejamento.cloud'] 
     : true,
   credentials: true
 }));
