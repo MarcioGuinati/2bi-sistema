@@ -974,23 +974,23 @@ const ClientOnboarding = () => {
                 <div className="space-y-4">
                   {[
                     { key: 'income', label: 'Receitas', val: calculatedTotals.incomeTotal, color: 'text-green-600', perc: 100 },
-                    { key: 'fixed', label: 'Gastos Fixos', val: calculatedTotals.fixedTotal, color: 'text-red-600', perc: (calculatedTotals.fixedTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
-                    { key: 'variable', label: 'Gastos Variáveis', val: calculatedTotals.variableTotal, color: 'text-orange-500', perc: (calculatedTotals.variableTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                    { key: 'fixed', label: 'Gastos Fixos', val: calculatedTotals.fixedTotal, color: 'text-[var(--text-primary)] opacity-80', perc: (calculatedTotals.fixedTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                    { key: 'variable', label: 'Gastos Variáveis', val: calculatedTotals.variableTotal, color: 'text-[var(--text-primary)] opacity-80', perc: (calculatedTotals.variableTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                     { key: 'invest', label: 'Investimentos', val: 0, color: 'text-blue-500', perc: 0 },
-                    { key: 'result', label: 'Resultado', val: calculatedTotals.result, color: 'text-[var(--text-primary)] bg-[var(--bg-primary)] p-4 rounded-xl', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
+                    { key: 'result', label: 'Resultado', val: calculatedTotals.result, color: calculatedTotals.result >= 0 ? 'text-green-600' : 'text-red-600', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                   ].map(item => (
                     <div key={item.key} className="space-y-4">
-                      <div className={`flex justify-between items-center ${item.label === 'Resultado' ? '' : 'pb-2 border-b border-[var(--border-primary)]'}`}>
+                      <div className={`flex justify-between items-center ${item.key === 'result' ? 'bg-[var(--bg-primary)] p-5 rounded-2xl border-2 ' + (calculatedTotals.result >= 0 ? 'border-green-500/20' : 'border-red-500/20') : 'pb-2 border-b border-[var(--border-primary)]'}`}>
                         <div>
                           <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{item.label}</div>
-                          <div className={`text-lg font-black ${item.color.includes('text-') ? item.color.split(' ')[0] : 'text-[var(--text-primary)]'}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
+                          <div className={`text-xl font-black ${item.color}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
                         </div>
                         <div className="text-right text-xs font-bold text-[var(--text-secondary)] italic">{item.perc}%</div>
                       </div>
                       
-                      {/* SUB-ITENS DETALHADOS COM CORES DIFERENTES */}
+                      {/* SUB-ITENS DETALHADOS EM TONS NEUTROS */}
                       {item.key === 'fixed' && calculatedTotals.fixedTotal > 0 && (
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-red-500/20 mb-4 bg-red-500/5 rounded-r-xl">
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-slate-500/20 mb-4 bg-slate-500/5 rounded-r-xl">
                           {[
                             { l: 'Moradia', v: data.cashFlow.fixed.housing },
                             { l: 'Alimentação', v: data.cashFlow.fixed.food },
@@ -1000,15 +1000,15 @@ const ClientOnboarding = () => {
                             { l: 'Outros F.', v: data.cashFlow.fixed.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g,'')||0)/100, 0) }
                           ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g,'')) > 0 : s.v > 0)).map(sub => (
                             <div key={sub.l} className="flex justify-between items-center">
-                              <span className="text-[11px] font-bold text-red-700/70 dark:text-red-400/70 uppercase tracking-tight">{sub.l}</span>
-                              <span className="text-xs font-black text-red-600 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
+                              <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-tight">{sub.l}</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
                             </div>
                           ))}
                         </div>
                       )}
 
                       {item.key === 'variable' && calculatedTotals.variableTotal > 0 && (
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-orange-500/20 mb-4 bg-orange-500/5 rounded-r-xl">
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-3 pl-4 py-3 border-l-2 border-slate-500/20 mb-4 bg-slate-500/5 rounded-r-xl">
                           {[
                             { l: 'Moradia', v: data.cashFlow.variable.housing },
                             { l: 'Alimentação', v: data.cashFlow.variable.food },
@@ -1017,8 +1017,8 @@ const ClientOnboarding = () => {
                             { l: 'Outros V.', v: data.cashFlow.variable.others?.reduce((acc, o) => acc + parseFloat(o.value.replace(/\D/g,'')||0)/100, 0) }
                           ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g,'')) > 0 : s.v > 0)).map(sub => (
                             <div key={sub.l} className="flex justify-between items-center">
-                              <span className="text-[11px] font-bold text-orange-700/70 dark:text-orange-400/70 uppercase tracking-tight">{sub.l}</span>
-                              <span className="text-xs font-black text-orange-600 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
+                              <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-tight">{sub.l}</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g,'')||0)/100 : sub.v).toLocaleString('pt-BR')}</span>
                             </div>
                           ))}
                         </div>
