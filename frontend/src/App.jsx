@@ -36,6 +36,7 @@ import AuditLogs from './pages/AuditLogs';
 import Reports from './pages/Reports';
 import AdminReports from './pages/AdminReports';
 import UserProfile from './pages/UserProfile';
+import AppLandingPage from './pages/AppLandingPage';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -70,6 +71,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<DashboardRedirect />} />
           <Route path="/home" element={<Institutional />} />
+          <Route path="/app" element={<AppLandingPage />} />
           <Route path="/login" element={<Login />} />
 
           {/* Admin Protected Routes */}
