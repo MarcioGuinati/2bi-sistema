@@ -190,7 +190,7 @@ class AuthController {
     }
   }
 
-  async registerClient(req, res) {
+  registerClient = async (req, res) => {
     if (req.userRole !== 'admin' && req.userRole !== 'partner') {
       return res.status(403).json({ error: 'Only admins or partners can register clients' });
     }
@@ -225,6 +225,13 @@ class AuthController {
       hasReportAccess: hasReportAccess || false,
       hasAIAccess: hasAIAccess || false
     });
+
+    // Send Welcome Email
+    try {
+      await this.sendWelcomeEmail(user);
+    } catch (emailErr) {
+      console.error('Failed to send welcome email during registration:', emailErr);
+    }
 
     return res.json(user);
   }
@@ -565,6 +572,140 @@ class AuthController {
       return res.json(user.onboardingData || {});
     } catch (err) {
       return res.status(500).json({ error: 'Erro ao buscar dados de onboarding' });
+    }
+  }
+
+  sendWelcomeEmail = async (user) => {
+    try {
+      const email = user.email.toLowerCase();
+      const sentFrom = new Sender(process.env.MAIL_FROM, "2BI Planejamento");
+      const recipients = [new Recipient(email, user.name)];
+
+      const emailParams = new EmailParams()
+        .setFrom(sentFrom)
+        .setTo(recipients)
+        .setReplyTo(sentFrom)
+        .setSubject("Bem-vindo à 2BI Planejamento - Seu Acesso Exclusivo")
+        .setHtml(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>2BI - Boas-vindas</title>
+      </head>
+
+      <body style="margin:0; padding:0; background:#050b14; font-family: Arial, Helvetica, sans-serif;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#050b14; padding:40px 16px;">
+          <tr>
+            <td align="center">
+
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:560px; background:#0b1b33; border-radius:24px; overflow:hidden; border:1px solid rgba(212, 175, 85, 0.35); box-shadow:0 20px 60px rgba(0,0,0,0.45);">
+
+                <!-- TOP BAR -->
+                <tr>
+                  <td style="background:linear-gradient(135deg, #06101f 0%, #102847 100%); padding:36px 32px 28px 32px; text-align:center;">
+                    <img 
+                      src="https://app.2biplanejamento.cloud/logo_2bi.png" 
+                      alt="2BI Planejamento" 
+                      width="130" 
+                      style="display:block; margin:0 auto 24px auto;"
+                    />
+
+                    <div style="display:inline-block; padding:8px 16px; border-radius:999px; background:rgba(212,175,85,0.12); border:1px solid rgba(212,175,85,0.45); color:#d4af55; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;">
+                      Acesso Liberado
+                    </div>
+
+                    <h1 style="margin:22px 0 10px 0; color:#ffffff; font-size:28px; line-height:1.2; font-weight:800;">
+                      Bem-vindo à 2BI
+                    </h1>
+
+                    <p style="margin:0; color:#aab6c8; font-size:15px; line-height:1.6;">
+                      Olá <strong style="color:#ffffff;">${user.name}</strong>, é um prazer ter você conosco. Sua conta foi configurada e está pronta para uso.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- CTA -->
+                <tr>
+                  <td style="padding:38px 32px 28px 32px; text-align:center; background:#0b1b33;">
+                    <p style="color:#ffffff; font-size:16px; margin-bottom:24px; font-weight:500;">
+                      Acesse agora seu painel estratégico e acompanhe sua evolução financeira em tempo real.
+                    </p>
+                    
+                    <a href="https://app.2biplanejamento.cloud/login" style="display:inline-block; padding:18px 42px; background:#d4af55; color:#050b14; text-decoration:none; border-radius:16px; font-weight:900; font-size:14px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 10px 25px rgba(212, 175, 85, 0.3);">
+                      Acessar Aplicativo
+                    </a>
+
+                    <p style="margin-top:24px; color:#748196; font-size:12px;">
+                      Link de acesso: <a href="https://app.2biplanejamento.cloud/login" style="color:#d4af55; text-decoration:none;">app.2biplanejamento.cloud/login</a>
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- INFO -->
+                <tr>
+                  <td style="padding:0 32px 36px 32px; text-align:center; background:#0b1b33;">
+                    <p style="margin:0; color:#c9d3e3; font-size:14px; line-height:1.7;">
+                      Utilize seu e-mail institucional e a senha cadastrada pelo seu consultor para realizar o primeiro login.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- FOOTER -->
+                <tr>
+                  <td style="background:#071222; padding:26px 30px; text-align:center; border-top:1px solid rgba(212,175,85,0.18);">
+                    <p style="margin:0 0 8px 0; color:#d4af55; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:2px;">
+                      2BI Planejamento
+                    </p>
+
+                    <p style="margin:0; color:#748196; font-size:12px; line-height:1.6;">
+                      Estratégia financeira, proteção patrimonial e visão de longo prazo.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `)
+        .setText(`Olá ${user.name}, bem-vindo à 2BI Planejamento! Sua conta foi criada com sucesso. Acesse o aplicativo em: https://app.2biplanejamento.cloud/login`);
+
+      await mailerSend.email.send(emailParams);
+      return true;
+    } catch (err) {
+      console.error('MailSend Error (Welcome):', err);
+      throw err;
+    }
+  }
+
+  resendWelcomeEmail = async (req, res) => {
+    if (req.userRole !== 'admin' && req.userRole !== 'partner') {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    try {
+      const { id } = req.params;
+      const user = await User.findByPk(id);
+
+      if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+
+      if (req.userRole === 'partner' && user.partner_id !== req.userId) {
+        return res.status(403).json({ error: 'Acesso negado a este cliente' });
+      }
+
+      await this.sendWelcomeEmail(user);
+      await AuditService.log(req.userId, 'WELCOME_EMAIL_RESENT', 'Auth', { targetUserId: user.id, email: user.email }, req.ip);
+      return res.json({ message: 'E-mail de boas-vindas reenviado com sucesso' });
+    } catch (err) {
+      console.error(err);
+      const errorMessage = err.body?.message || err.message || 'Erro interno ao processar reenvio';
+      return res.status(500).json({ error: errorMessage });
     }
   }
 

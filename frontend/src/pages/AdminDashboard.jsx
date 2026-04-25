@@ -558,6 +558,17 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleResendWelcome = async (clientId) => {
+    try {
+      await api.post(`/admin/clients/${clientId}/resend-welcome`);
+      success('E-mail de boas-vindas reenviado com sucesso!');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Falha ao reenviar e-mail de boas-vindas.';
+      error(msg);
+      console.error(err);
+    }
+  };
+
   return (
     <SystemLayout>
       <div className="space-y-8">
@@ -921,6 +932,13 @@ const AdminDashboard = () => {
                       <p className="text-[10px] uppercase font-black text-white/30 mb-2">Contato Direto</p>
                       <p className="text-xs font-bold truncate opacity-80">{selectedClient.email}</p>
                       <p className="text-sm font-black mt-2 text-gold tracking-tight">{selectedClient.phone || '(No Phone)'}</p>
+                      
+                      <button 
+                        onClick={() => handleResendWelcome(selectedClient.id)}
+                        className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                      >
+                        <MessageSquare size={14} className="text-gold" /> Reenviar Boas-vindas
+                      </button>
                     </div>
                     <div className="bg-gold/5 p-6 rounded-[2rem] border border-gold/10">
                       <p className="text-[10px] uppercase font-black text-gold/60 mb-2">Objetivos</p>

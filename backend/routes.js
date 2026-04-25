@@ -58,6 +58,7 @@ routes.get('/ai-insights/history', AIController.listInsights);
 routes.delete('/ai-insights/:id', AIController.deleteInsight);
 routes.put('/clients/:id', AuthController.updateClient);
 routes.delete('/clients/:id', AuthController.deleteClient);
+routes.post('/admin/clients/:id/resend-welcome', AuthController.resendWelcomeEmail);
 routes.post('/admin/impersonate/:id', AuthController.impersonate);
 
 // Accounts
