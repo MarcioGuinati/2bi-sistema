@@ -49,7 +49,12 @@ class AuthController {
       await AuditService.log(user.id, 'LOGIN_SUCCESS', 'Auth', { email, role }, req.ip);
 
       return res.json({
-        user: { id, name, email, role, avatar_url: user.avatar_url },
+        user: { 
+          id, name, email, role, 
+          avatar_url: user.avatar_url,
+          hasReportAccess: user.hasReportAccess,
+          hasAIAccess: user.hasAIAccess
+        },
         token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
           expiresIn: '7d',
         }),
@@ -190,7 +195,11 @@ class AuthController {
       return res.status(403).json({ error: 'Only admins or partners can register clients' });
     }
 
-    const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields, onboardingData } = req.body;
+    const { 
+      name, email, password, phone, cpf, income, occupation, 
+      financialGoal, customFields, onboardingData,
+      hasReportAccess, hasAIAccess 
+    } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
 
@@ -212,7 +221,9 @@ class AuthController {
       financialGoal,
       partner_id: req.userRole === 'partner' ? req.userId : null,
       customFields: customFields || [],
-      onboardingData: onboardingData || {}
+      onboardingData: onboardingData || {},
+      hasReportAccess: hasReportAccess || false,
+      hasAIAccess: hasAIAccess || false
     });
 
     return res.json(user);
@@ -352,7 +363,12 @@ class AuthController {
 
     const clients = await User.findAll({
       where,
-      attributes: ['id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 'financialGoal', 'customFields', 'onboardingData', 'isLead', 'isActive', 'leadSource', 'partner_id', 'createdAt'],
+      attributes: [
+        'id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 
+        'financialGoal', 'customFields', 'onboardingData', 'isLead', 
+        'isActive', 'leadSource', 'partner_id', 'createdAt',
+        'hasReportAccess', 'hasAIAccess'
+      ],
       include: [
         { model: User, as: 'Partner', attributes: ['id', 'name'] }
       ],
@@ -369,7 +385,11 @@ class AuthController {
 
     try {
       const { id } = req.params;
-      const { name, email, password, phone, cpf, income, occupation, financialGoal, customFields, onboardingData } = req.body;
+      const { 
+        name, email, password, phone, cpf, income, occupation, 
+        financialGoal, customFields, onboardingData,
+        hasReportAccess, hasAIAccess 
+      } = req.body;
 
       const user = await User.findByPk(id);
 
@@ -383,7 +403,11 @@ class AuthController {
       }
 
       // Only update fields provided in the request body
-      const fields = { name, email, phone, cpf, income, occupation, financialGoal, customFields, onboardingData };
+      const fields = { 
+        name, email, phone, cpf, income, occupation, 
+        financialGoal, customFields, onboardingData,
+        hasReportAccess, hasAIAccess 
+      };
       const updateData = {};
 
       Object.keys(fields).forEach(key => {
@@ -453,7 +477,14 @@ class AuthController {
     const { name, email, role } = user;
 
     return res.json({
-      user: { id: user.id, name, email, role },
+      user: { 
+        id: user.id, 
+        name, 
+        email, 
+        role,
+        hasReportAccess: user.hasReportAccess,
+        hasAIAccess: user.hasAIAccess
+      },
       token: jwt.sign({ id: user.id, role }, process.env.JWT_SECRET, {
         expiresIn: '7d',
       }),
@@ -506,7 +537,15 @@ class AuthController {
       const { id, role, avatar_url: updatedAvatar } = user;
 
       return res.json({
-        user: { id, name: user.name, email: user.email, role, avatar_url: updatedAvatar },
+        user: { 
+          id, 
+          name: user.name, 
+          email: user.email, 
+          role, 
+          avatar_url: updatedAvatar,
+          hasReportAccess: user.hasReportAccess,
+          hasAIAccess: user.hasAIAccess
+        },
         token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
           expiresIn: '7d',
         }),

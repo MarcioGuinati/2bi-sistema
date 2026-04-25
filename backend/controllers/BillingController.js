@@ -27,7 +27,11 @@ class BillingController {
 
   async storeContract(req, res) {
     try {
-      const { user_id, title, setupValue = 0, monthlyValue = 0, billingCycle, startDate, recurrence = 1 } = req.body;
+      const { 
+        user_id, title, setupValue = 0, monthlyValue = 0, 
+        billingCycle, startDate, recurrence = 1,
+        hasReportAccess, hasAIAccess 
+      } = req.body;
       
       // Calculate total value for display (Setup + first month if any)
       const totalValue = Number(setupValue) + Number(monthlyValue);
@@ -41,7 +45,9 @@ class BillingController {
         recurrence,
         billingCycle,
         startDate: startDate || new Date(),
-        status: 'active'
+        status: 'active',
+        hasReportAccess: hasReportAccess || false,
+        hasAIAccess: hasAIAccess || false
       });
 
       // Automatically generate the requested number of payments
@@ -94,12 +100,18 @@ class BillingController {
     }
     try {
       const { id } = req.params;
-      const { title, value, billingCycle, startDate } = req.body;
+      const { 
+        title, value, billingCycle, startDate,
+        hasReportAccess, hasAIAccess 
+      } = req.body;
       const contract = await Contract.findByPk(id);
       
       if (!contract) return res.status(404).json({ error: 'Contrato não encontrado' });
 
-      await contract.update({ title, value, billingCycle, startDate });
+      await contract.update({ 
+        title, value, billingCycle, startDate, 
+        hasReportAccess, hasAIAccess 
+      });
       return res.json(contract);
     } catch (err) {
       return res.status(400).json({ error: 'Erro ao atualizar contrato' });

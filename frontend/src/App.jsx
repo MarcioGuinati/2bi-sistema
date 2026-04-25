@@ -163,7 +163,7 @@ function App() {
           <Route 
             path="/insights" 
             element={
-              <ProtectedRoute role="client">
+              <ProtectedRoute role="client" requiredFeature="hasAIAccess">
                 <AIInsights />
               </ProtectedRoute>
             } 
@@ -220,7 +220,7 @@ function App() {
           <Route 
             path="/reports" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredFeature="hasReportAccess">
                 <Reports />
               </ProtectedRoute>
             } 

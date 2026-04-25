@@ -291,7 +291,7 @@ const AppLandingPage = () => {
       <footer className="py-16 px-6 border-t border-white/5 opacity-40">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 text-center md:text-left">
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <img src="/logo_2bi.png" alt="2BI" className="h-6 md:h-7 mb-4" />
+            <img src="/logo_2bi.png" alt="2BI" className="h-8 md:h-10 mb-4" />
             <p className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-relaxed max-w-[200px]">Estratégia e Inteligência financeira para quem busca o extraordinário.</p>
           </div>
           <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] text-center">

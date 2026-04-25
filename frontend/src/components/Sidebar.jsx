@@ -36,12 +36,12 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
   const clientLinks = [
     { name: 'Visão Geral', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Dashboard Estratégico', path: '/dashboard?tab=dashboard', icon: PieChart },
-    { name: 'Relatórios PDF', path: '/reports', icon: FileText },
+    ...(user?.hasReportAccess ? [{ name: 'Relatórios PDF', path: '/reports', icon: FileText }] : []),
     { name: 'Extrato Financeiro', path: '/finance', icon: Wallet },
     { name: 'Contas e Cartões', path: '/accounts', icon: CreditCard },
     { name: 'Categorias', path: '/categories', icon: Layers },
     { name: 'Metas e Orçamentos', path: '/budgets', icon: Target },
-    { name: 'Insights de IA', path: '/insights', icon: Zap },
+    ...(user?.hasAIAccess ? [{ name: 'Insights de IA', path: '/insights', icon: Zap }] : []),
     { name: 'Meu Planejamento', path: '/my-planning', icon: ShieldCheck },
     { name: 'Agendar Mentoria', path: '/mentoria', icon: Calendar },
   ];
@@ -78,12 +78,12 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
           <img
             src="/logo_2bi.png"
             alt="2BI Planejamento"
-            className="w-full max-w-[130px] h-auto object-contain drop-shadow-xl brightness-110"
+            className="w-full max-w-[130px] h-auto object-contain drop-shadow-xl"
           />
         </Link>
         {isCollapsed && (
-          <div className="hidden lg:flex w-10 h-10 bg-gold rounded-xl items-center justify-center text-navy-900 font-black text-xl mx-auto shadow-lg shadow-gold/20 hover:scale-105 transition-transform cursor-pointer">
-            <img src="/logo_2bi.png" alt="2B" className="w-6 h-6 object-contain" />
+          <div className="hidden lg:flex w-10 h-10 bg-gold rounded-xl items-center justify-center text-navy-900 font-black text-xl mx-auto shadow-lg shadow-gold/20 hover:scale-105 transition-transform cursor-pointer overflow-hidden">
+            <img src="/logo_2bi.png" alt="2B" className="w-12 h-12 object-contain brightness-110" />
           </div>
         )}
 

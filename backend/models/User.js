@@ -73,6 +73,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
+    hasReportAccess: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    hasAIAccess: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     twoFactorSecret: {
       type: DataTypes.STRING,
       allowNull: true

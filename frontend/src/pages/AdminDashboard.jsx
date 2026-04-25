@@ -55,7 +55,9 @@ const AdminDashboard = () => {
     monthlyValue: '0', 
     billingCycle: 'monthly', 
     startDate: new Date().toISOString().split('T')[0],
-    recurrence: 1 
+    recurrence: 1,
+    hasReportAccess: false,
+    hasAIAccess: false
   });
   const [billingStats, setBillingStats] = useState({ totalActiveValue: 0, pendingAmount: 0, paidMonth: 0 });
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -132,9 +134,27 @@ const AdminDashboard = () => {
   };
 
   const handleOpenRegister = () => {
-    setEditingClient(null);
-    setClientForm({ name: '', email: '', password: '', phone: '', cpf: '', income: maskCurrency('0'), occupation: '', financialGoal: '', customFields: [] });
+    setClientForm({ 
+      name: '', email: '', password: '', phone: '', cpf: '', 
+      income: maskCurrency('0'), occupation: '', financialGoal: '', 
+      customFields: []
+    });
     setShowRegModal(true);
+  };
+
+  const handleOpenContract = () => {
+    setEditingBillingContract(null);
+    setContractForm({ 
+      title: '', 
+      setupValue: '0', 
+      monthlyValue: '0', 
+      billingCycle: 'monthly', 
+      startDate: new Date().toISOString().split('T')[0],
+      recurrence: 1,
+      hasReportAccess: false,
+      hasAIAccess: false
+    });
+    setShowContractModal(true);
   };
 
   const handleOpenEdit = (client) => {
@@ -1015,7 +1035,7 @@ const AdminDashboard = () => {
                             <Briefcase className="text-gold" size={24} /> Planos Contratados
                           </h3>
                           <button
-                            onClick={() => setShowContractModal(true)}
+                            onClick={handleOpenContract}
                             className="w-full md:w-auto btn-primary py-4 px-8 text-[10px] uppercase font-black tracking-widest flex items-center justify-center gap-3 rounded-2xl shadow-xl shadow-gold/20"
                           >
                             <Plus size={18} /> Novo Contrato
@@ -1040,7 +1060,9 @@ const AdminDashboard = () => {
                                           title: c.title,
                                           value: c.value,
                                           billingCycle: c.billingCycle,
-                                          startDate: c.startDate.split('T')[0]
+                                          startDate: c.startDate.split('T')[0],
+                                          hasReportAccess: c.hasReportAccess || false,
+                                          hasAIAccess: c.hasAIAccess || false
                                         });
                                         setShowContractModal(true);
                                       }}
@@ -1185,7 +1207,9 @@ const AdminDashboard = () => {
                       setupValue: (Number(selectedClient.income || 0) * 12 * 0.02).toFixed(2),
                       monthlyValue: '49.90',
                       billingCycle: 'monthly',
-                      recurrence: 12
+                      recurrence: 12,
+                      hasReportAccess: true,
+                      hasAIAccess: true
                     })}
                     className="p-4 bg-navy-900 rounded-2xl border border-gold/20 cursor-pointer hover:bg-navy-800 transition-all flex flex-col items-center gap-1 group"
                   >
@@ -1263,6 +1287,40 @@ const AdminDashboard = () => {
                       value={contractForm.recurrence} onChange={e => setContractForm({ ...contractForm, recurrence: Number(e.target.value) })}
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
                     />
+                  </div>
+                </div>
+
+                {/* Plan / Features Section in Contract Modal */}
+                <div className="space-y-4 pt-4 border-t border-[var(--border-primary)]">
+                  <h4 className="text-[10px] uppercase font-black text-slate-400 ml-2 tracking-widest italic">Recursos Inclusos no Plano</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] shadow-sm">
+                      <div>
+                        <div className="text-[10px] font-black text-[var(--text-primary)]">Relatórios PDF</div>
+                        <div className="text-[8px] text-slate-400 font-bold uppercase tracking-tight">Estratégicos</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setContractForm({ ...contractForm, hasReportAccess: !contractForm.hasReportAccess })}
+                        className={`w-10 h-5 rounded-full transition-all relative ${contractForm.hasReportAccess ? 'bg-gold' : 'bg-slate-700'}`}
+                      >
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${contractForm.hasReportAccess ? 'left-5' : 'left-0.5'}`} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] shadow-sm">
+                      <div>
+                        <div className="text-[10px] font-black text-[var(--text-primary)]">Insights de IA</div>
+                        <div className="text-[8px] text-slate-400 font-bold uppercase tracking-tight">Análises</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setContractForm({ ...contractForm, hasAIAccess: !contractForm.hasAIAccess })}
+                        className={`w-10 h-5 rounded-full transition-all relative ${contractForm.hasAIAccess ? 'bg-gold' : 'bg-slate-700'}`}
+                      >
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${contractForm.hasAIAccess ? 'left-5' : 'left-0.5'}`} />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg mt-4 shadow-xl shadow-gold/20">

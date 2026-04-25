@@ -47,8 +47,39 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.ENUM('active', 'expired', 'cancelled'),
       defaultValue: 'active'
+    },
+    hasReportAccess: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    hasAIAccess: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   });
+
+  const syncUserFeatures = async (contract) => {
+    const { User } = sequelize.models;
+    const userId = contract.user_id;
+    if (!userId) return;
+
+    // Find all active contracts for this user
+    const activeContracts = await contract.constructor.findAll({
+      where: { user_id: userId, status: 'active' }
+    });
+
+    const hasReportAccess = activeContracts.some(c => c.hasReportAccess);
+    const hasAIAccess = activeContracts.some(c => c.hasAIAccess);
+
+    await User.update(
+      { hasReportAccess, hasAIAccess },
+      { where: { id: userId } }
+    );
+  };
+
+  Contract.afterCreate(syncUserFeatures);
+  Contract.afterUpdate(syncUserFeatures);
+  Contract.afterDestroy(syncUserFeatures);
 
   return Contract;
 };

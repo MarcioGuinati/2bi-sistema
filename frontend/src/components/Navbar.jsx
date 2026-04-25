@@ -32,7 +32,7 @@ const Navbar = () => {
           <img 
             src="/logo_2bi.png" 
             alt="2BI Planejamento" 
-            className={`h-auto transition-all duration-300 ${scrolled ? 'w-28 md:w-32' : 'w-32 md:w-40'}`}
+            className={`h-auto transition-all duration-300 drop-shadow-xl ${scrolled ? 'w-32 md:w-36' : 'w-40 md:w-48'}`}
           />
         </Link>
 
