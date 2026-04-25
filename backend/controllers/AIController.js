@@ -31,13 +31,13 @@ class AIController {
           user_id: req.userId,
           date: { [Op.between]: [startDate, endDate] }
         },
-        include: [{ model: Category, attributes: ['name', 'type'] }],
+        include: [{ model: Category, attributes: ['name'] }],
         attributes: [
           'category_id',
-          [sequelize.fn('sum', sequelize.col('amount')), 'total'],
-          [sequelize.col('Category.type'), 'type']
+          'type', // Use Transaction.type directly
+          [sequelize.fn('sum', sequelize.col('amount')), 'total']
         ],
-        group: ['category_id', 'Category.id', 'Category.name', 'Category.type'],
+        group: ['category_id', 'Transaction.type', 'Category.id', 'Category.name'],
         raw: true
       });
 
@@ -48,13 +48,13 @@ class AIController {
 
       transactions.forEach(t => {
         const total = parseFloat(t.total);
-        const name = t['Category.name'];
-        const type = t['Category.type'];
+        const name = t['Category.name'] || 'Outros / Sem Categoria';
+        const type = t.type;
         
         if (type === 'income') {
           totalIncome += total;
           incomeCategories.push(`${name}: R$ ${total.toLocaleString('pt-BR')}`);
-        } else {
+        } else if (type === 'expense') {
           totalExpenses += total;
           expenseCategories.push(`${name}: R$ ${total.toLocaleString('pt-BR')}`);
         }
