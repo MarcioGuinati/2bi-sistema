@@ -42,7 +42,8 @@ const steps = [
   { id: 7, title: 'Cartões', icon: CreditCard },
   { id: 8, title: 'Fluxo Mensal', icon: DollarSign },
   { id: 9, title: 'Review', icon: PieChart },
-  { id: 10, title: 'Fechamento', icon: FileText },
+  { id: 10, title: 'Estratégia', icon: Briefcase },
+  { id: 11, title: 'Fechamento', icon: FileText },
 ];
 
 const ClientOnboarding = ({ isReadOnly = false }) => {
@@ -1144,6 +1145,18 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
           </motion.div>
         );
       case 10:
+        return (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+            <div className="relative group overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-[var(--border-primary)] shadow-2xl bg-white">
+              <img 
+                src="/apresentacao.png" 
+                alt="Estratégia 2BI" 
+                className="w-full h-auto"
+              />
+            </div>
+          </motion.div>
+        );
+      case 11:
         const baseFee = calculatedTotals.incomeTotal * 12 * 0.03;
         const fee = baseFee * (1 + (parseFloat(data.adjustmentPercentage || 0) / 100));
         const gaps = getGapAnalysis();
@@ -1509,13 +1522,13 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                   <button type="button" onClick={nextStep} className="btn-primary px-10 py-4 flex items-center gap-3 text-[10px] uppercase font-black tracking-[0.2em] shadow-xl">
                     Próximo <ChevronRight size={16} />
                   </button>
-                  {currentStep === 9 && (
+                  {(currentStep === 9 || currentStep === 10) && (
                     <button
                       type="button"
-                      onClick={() => setCurrentStep(10)}
+                      onClick={() => setCurrentStep(currentStep + 1)}
                       className="bg-gold text-navy-900 px-6 py-4 rounded-xl flex items-center gap-2 text-[10px] uppercase font-black tracking-[0.2em] hover:bg-gold/90 transition-all shadow-lg"
                     >
-                      {isReadOnly ? 'Ver Fechamento' : 'Ver Proposta'} <ChevronRight size={16} />
+                      {currentStep === 9 ? 'Ver Estratégia' : 'Ver Fechamento'} <ChevronRight size={16} />
                     </button>
                   )}
                 </div>
