@@ -97,7 +97,8 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
       consegueComecar: '',
       mudancasPrevistas: '',
       acompanhaFinancas: ''
-    }
+    },
+    selectedPlan: 'convencional'
   });
 
   const formatCurrency = (value) => {
@@ -908,9 +909,9 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                     <div className="flex gap-2 self-end">
                       <input value={card.annuity} onChange={e => {
                         const newList = [...data.cards.list];
-                        newList[idx].annuity = e.target.value;
+                        newList[idx].annuity = formatCurrency(e.target.value);
                         setData({ ...data, cards: { list: newList } });
-                      }} className="input-premium text-[10px] w-full py-3" placeholder="Anuidade?" />
+                      }} className="input-premium text-[10px] w-full py-3" placeholder="Anuidade (R$)" />
                       <button
                         type="button"
                         onClick={() => {
@@ -1065,7 +1066,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                       <div className={`flex justify-between items-center ${item.key === 'result' ? 'bg-[var(--bg-primary)] p-5 rounded-2xl border-2 ' + (calculatedTotals.result >= 0 ? 'border-green-500/20' : 'border-red-500/20') : 'pb-2 border-b border-[var(--border-primary)]'}`}>
                         <div>
                           <div className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">{item.label}</div>
-                          <div className={`text-xl font-black ${item.color}`}>R$ {Number(item.val).toLocaleString('pt-BR')}</div>
+                          <div className={`text-xl font-black ${item.color}`}>{item.val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
                         </div>
                         <div className="text-right text-xs font-bold text-[var(--text-secondary)] italic">{item.perc}%</div>
                       </div>
@@ -1083,7 +1084,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                           ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g, '')) > 0 : s.v > 0)).map(sub => (
                             <div key={sub.l} className="flex justify-between items-center">
                               <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-tight">{sub.l}</span>
-                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g, '') || 0) / 100 : sub.v).toLocaleString('pt-BR')}</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">{(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g, '') || 0) / 100 : sub.v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                             </div>
                           ))}
                         </div>
@@ -1100,7 +1101,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                           ].filter(s => s.v && (typeof s.v === 'string' ? parseFloat(s.v.replace(/\D/g, '')) > 0 : s.v > 0)).map(sub => (
                             <div key={sub.l} className="flex justify-between items-center">
                               <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-tight">{sub.l}</span>
-                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">R$ {(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g, '') || 0) / 100 : sub.v).toLocaleString('pt-BR')}</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] opacity-60 italic">{(typeof sub.v === 'string' ? parseFloat(sub.v.replace(/\D/g, '') || 0) / 100 : sub.v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                             </div>
                           ))}
                         </div>
@@ -1177,8 +1178,8 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                             <div className="h-full bg-gold shadow-[0_0_10px_rgba(197,160,89,0.5)]" style={{ width: `${perc}%` }}></div>
                           </div>
                           <div className="flex justify-between text-[9px] font-black text-[var(--text-secondary)] uppercase">
-                            <span>JÁ TEM: R$ {saved.toLocaleString()}</span>
-                            <span className="text-red-500">FALTA: R$ {missing.toLocaleString()}</span>
+                            <span>JÁ TEM: {saved.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            <span className="text-red-500">FALTA: {missing.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                           </div>
                         </div>
                       );
@@ -1260,7 +1261,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                         }}
                         itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
-                        formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                        formatter={(value) => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       />
                       <Pie
                         data={cashFlowData}
@@ -1285,16 +1286,10 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
             {/* FEE HEADER - EYE-CATCHING REVEAL */}
             <motion.div
               layout
-              onClick={() => setShowFee(!showFee)}
-              className={`relative overflow-hidden rounded-[2.5rem] mt-12 mb-8 transition-all duration-500 cursor-pointer border-2 ${!showFee ? 'bg-navy-900 border-gold shadow-[0_0_30px_rgba(197,160,89,0.3)] animate-pulse-subtle' : 'bg-navy-900 border-gold/40 shadow-2xl'}`}
+              className={`relative overflow-hidden rounded-[2.5rem] mt-12 mb-8 transition-all duration-500 bg-navy-900 border-2 ${!showFee ? 'border-gold shadow-[0_0_30px_rgba(197,160,89,0.3)]' : 'border-gold/40 shadow-2xl'}`}
             >
-              {/* Gold Glow Effect when closed */}
-              {!showFee && (
-                <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-gold/10 to-gold/5 animate-shimmer"></div>
-              )}
-
-              {!isReadOnly && (
-                <div className="p-8 md:p-12 text-center relative z-10">
+              <div className="p-8 md:p-12 text-center relative z-10">
+                <div onClick={() => setShowFee(!showFee)} className="cursor-pointer">
                   <motion.h4
                     layout="position"
                     className={`text-gold font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all ${!showFee ? 'text-xs md:text-sm' : 'text-[10px] mb-6'}`}
@@ -1305,41 +1300,71 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                     </motion.div>
                   </motion.h4>
 
-                  <AnimatePresence mode="wait">
-                    {showFee ? (
-                      <motion.div
-                        key="opened"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="space-y-6"
-                      >
-                        <div className="text-5xl md:text-8xl font-black text-white italic tracking-tighter leading-none">
-                          R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="h-[2px] w-24 bg-gold/40 rounded-full"></div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-gold font-black text-2xl md:text-4xl italic tracking-tighter">R$ 49,90</span>
-                            <span className="text-white/60 text-xs uppercase font-black tracking-[0.2em]">/ mensal</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="closed"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="pt-6"
-                      >
-                        <div className="inline-block px-8 py-3 bg-gold text-navy-900 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-all">
-                          Clique aqui para Visualizar a Proposta
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {!showFee && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="pt-6"
+                    >
+                      <div className="inline-block px-8 py-3 bg-gold text-navy-900 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-all">
+                        Clique para Visualizar a Proposta de Investimento
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
-              )}
+
+                <AnimatePresence>
+                  {showFee && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="pt-10 space-y-12"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                          { id: 'convencional', price: 49.90, label: 'Convencional', desc: 'Acompanhamento estratégico e suporte' },
+                          { id: 'ia', price: 59.90, label: 'IA Plus', desc: 'Acompanhamento + Inteligência Artificial 2BI' },
+                          { id: 'vip', price: 69.90, label: 'VIP Mentoring', desc: 'IA + Reunião Mensal de Acompanhamento' }
+                        ].map((plan) => (
+                          <div
+                            key={plan.id}
+                            onClick={() => setData({ ...data, selectedPlan: plan.id })}
+                            className={`p-6 rounded-[2rem] border-2 transition-all cursor-pointer relative flex flex-col items-center gap-4 ${data.selectedPlan === plan.id ? 'bg-gold border-gold text-navy-900 scale-105 shadow-2xl' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                          >
+                            {data.selectedPlan === plan.id && (
+                              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-navy-900 text-gold px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-gold">
+                                Selecionado
+                              </div>
+                            )}
+                            <div className="text-[10px] font-black uppercase tracking-widest opacity-60">{plan.label}</div>
+                            <div className="text-3xl font-black italic tracking-tighter">
+                              {plan.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </div>
+                            <p className={`text-[9px] font-bold leading-relaxed text-center ${data.selectedPlan === plan.id ? 'text-navy-900/70' : 'text-white/40'}`}>
+                              {plan.desc}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-white/5 p-8 rounded-[2rem] border border-white/10">
+                        <p className="text-white/60 text-xs font-medium italic mb-2">Total do Investimento Sugerido:</p>
+                        <div className="text-3xl md:text-5xl font-black text-white italic tracking-tighter">
+                          {fee.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} 
+                          <span className="text-gold mx-4">+</span>
+                          {[
+                            { id: 'convencional', price: 49.90 },
+                            { id: 'ia', price: 59.90 },
+                            { id: 'vip', price: 69.90 }
+                          ].find(p => p.id === data.selectedPlan).price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          <span className="text-white/40 text-xs uppercase font-black tracking-widest ml-4 italic">/ mensal</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
 
             {!isReadOnly && (
