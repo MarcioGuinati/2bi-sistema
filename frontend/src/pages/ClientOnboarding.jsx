@@ -1469,31 +1469,80 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
           )}
         </div>
 
-        {/* Stepper Navigation */}
-        <div className="flex flex-nowrap gap-3 mb-10 overflow-x-auto pb-4 scrollbar-hide">
-          {steps
-            .filter(s => !(isReadOnly && s.id === 1))
-            .map((step) => {
-              const Icon = step.icon;
-              const active = currentStep === step.id;
-              const completed = currentStep > step.id;
-              return (
-                <div
-                  key={step.id}
-                  onClick={() => setCurrentStep(step.id)}
-                  className={`flex-1 min-w-[120px] p-4 rounded-2xl flex flex-col items-center gap-2 cursor-pointer transition-all border-2 relative ${active ? 'bg-navy-900 text-white border-navy-900 scale-105 shadow-xl' : completed ? 'bg-gold/10 text-gold border-gold/20' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-primary)] opacity-60'}`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border-2 ${active ? 'bg-gold border-gold text-navy-900' : 'bg-[var(--bg-primary)] border-transparent'}`}>
-                    {completed ? <CheckCircle2 size={16} className="text-green-600" /> : <Icon size={16} />}
-                  </div>
-                  <div className="text-center">
-                    <p className={`text-[7px] uppercase font-black tracking-widest ${active ? 'text-gold' : 'text-[var(--text-secondary)]'}`}>Passo 0{step.id}</p>
-                    <p className="text-[9px] font-black uppercase whitespace-nowrap">{step.title}</p>
-                  </div>
-                  {active && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-navy-900 rotate-45"></div>}
-                </div>
-              );
-            })}
+        {/* Stepper Navigation with Arrows and Progress */}
+        <div className="relative group/stepper mb-12">
+          {/* Progress Line */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-[var(--bg-secondary)] rounded-full overflow-hidden mb-6">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${(currentStep / steps.length) * 100}%` }}
+              className="h-full bg-gold shadow-[0_0_15px_rgba(197,160,89,0.5)] transition-all duration-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-4 relative pt-6">
+            <button 
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className={`hidden md:flex w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-navy-900 border border-[var(--border-primary)] shadow-lg hover:scale-110 transition-all disabled:opacity-30 disabled:pointer-events-none group/btn`}
+            >
+              <ChevronLeft size={20} className="text-gold group-hover/btn:-translate-x-0.5 transition-transform" />
+            </button>
+
+            <div 
+              id="stepper-viewport"
+              className="flex-1 flex flex-nowrap gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth relative"
+              style={{ scrollSnapType: 'x mandatory' }}
+            >
+              {/* Fade Guards for Scroll */}
+              <div className="sticky left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[var(--bg-primary)] to-transparent z-10 pointer-events-none opacity-0 group-hover/stepper:opacity-100 transition-opacity"></div>
+              
+              {steps
+                .filter(s => !(isReadOnly && s.id === 1))
+                .map((step) => {
+                  const Icon = step.icon;
+                  const active = currentStep === step.id;
+                  const completed = currentStep > step.id;
+                  return (
+                    <div
+                      key={step.id}
+                      onClick={() => setCurrentStep(step.id)}
+                      className={`flex-1 min-w-[130px] p-4 rounded-3xl flex flex-col items-center gap-2 cursor-pointer transition-all border-2 relative scroll-snap-align-center ${
+                        active 
+                          ? 'bg-navy-900 text-white border-gold shadow-2xl scale-105 z-20' 
+                          : completed 
+                            ? 'bg-gold/5 text-gold border-gold/10 hover:bg-gold/10' 
+                            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-primary)] opacity-40 hover:opacity-100'
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border-2 transition-colors ${active ? 'bg-gold border-gold text-navy-900' : 'bg-transparent border-current opacity-60'}`}>
+                        {completed ? <CheckCircle2 size={16} /> : <Icon size={16} />}
+                      </div>
+                      <div className="text-center">
+                        <p className={`text-[8px] uppercase font-black tracking-[0.2em] mb-1 ${active ? 'text-gold' : 'text-current opacity-40'}`}>Etapa {step.id < 10 ? `0${step.id}` : step.id}</p>
+                        <p className="text-[10px] font-black uppercase whitespace-nowrap tracking-tighter">{step.title}</p>
+                      </div>
+                      {active && (
+                        <motion.div 
+                          layoutId="active-step-indicator"
+                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-navy-900 border-b-2 border-r-2 border-gold rotate-45"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+
+              <div className="sticky right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[var(--bg-primary)] to-transparent z-10 pointer-events-none opacity-0 group-hover/stepper:opacity-100 transition-opacity"></div>
+            </div>
+
+            <button 
+              onClick={nextStep}
+              disabled={currentStep === steps.length}
+              className={`hidden md:flex w-10 h-10 rounded-full items-center justify-center bg-white dark:bg-navy-900 border border-[var(--border-primary)] shadow-lg hover:scale-110 transition-all disabled:opacity-30 disabled:pointer-events-none group/btn`}
+            >
+              <ChevronRight size={20} className="text-gold group-hover/btn:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </div>
 
         {/* Form Content Area */}
