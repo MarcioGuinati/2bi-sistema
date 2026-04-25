@@ -144,7 +144,7 @@ const AppLandingPage = () => {
               theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-2xl'
             }`}>
               <img 
-                src="/app/1.png" 
+                src="/app-img/1.png" 
                 alt="2BI App Screenshot" 
                 className="w-full h-auto rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl transition-transform hover:scale-[1.01] duration-700"
               />
@@ -247,7 +247,7 @@ const AppLandingPage = () => {
               className="relative"
             >
               <img 
-                src="/app/2.png" 
+                src="/app-img/2.png" 
                 alt="Metas Onboarding" 
                 className={`relative z-10 rounded-[2rem] md:rounded-[2.5rem] border shadow-2xl max-w-xs md:max-w-md mx-auto ${
                   theme === 'dark' ? 'border-white/10' : 'border-slate-200'
@@ -307,7 +307,7 @@ const AppLandingPage = () => {
                className="order-1 lg:order-2"
             >
               <img 
-                src="/app/3.png" 
+                src="/app-img/3.png" 
                 alt="Dashboard Charts" 
                 className={`rounded-[2rem] md:rounded-[2.5rem] border shadow-2xl max-w-xs md:max-w-md mx-auto ${
                   theme === 'dark' ? 'border-white/10' : 'border-slate-200'
