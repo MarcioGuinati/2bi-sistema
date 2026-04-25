@@ -23,7 +23,7 @@ import {
   X
 } from 'lucide-react';
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart as RechartsPieChart, Pie
 } from 'recharts';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -79,7 +79,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
     investments: { types: '', riskProfile: '', alreadyInvests: false },
     cards: { list: [{ bank: '', annuity: 'Não', miles: 'Não', limit: '', monthlySpend: '' }] },
     cashFlow: {
-      salaries: '', otherIncome: '',
+      salaries: '', otherIncome: '', investments: '',
       fixed: {
         housing: '', food: '', transport: '', health: '', energy: '', water: '', internet: '', others: []
       },
@@ -244,9 +244,10 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
       .reduce((sum, [_, v]) => sum + parseCurrency(v), 0) +
       (data.cashFlow.variable.others?.reduce((sum, o) => sum + parseCurrency(o.value), 0) || 0);
 
-    const result = incomeTotal - fixedTotal - variableTotal;
+    const investTotal = parseCurrency(data.cashFlow.investments);
+    const result = incomeTotal - fixedTotal - variableTotal - investTotal;
 
-    return { incomeTotal, fixedTotal, variableTotal, result };
+    return { incomeTotal, fixedTotal, variableTotal, investTotal, result };
   }, [data]);
 
   const generatePDF = async () => {
@@ -935,10 +936,14 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
               <label className="text-[10px] uppercase font-black text-gold tracking-widest px-2 flex items-center gap-2">
                 <DollarSign size={16} /> Renda e Fluxo Mensal
               </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
                   <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-4 italic">Salário Líquido (Mensal)</label>
                   <input type="text" value={data.cashFlow.salaries} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, salaries: formatCurrency(e.target.value) } })} className="input-premium text-xl font-black text-green-600 text-center py-5" placeholder="R$ 10.000,00" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-4 italic">Investimentos Atuais</label>
+                  <input type="text" value={data.cashFlow.investments} onChange={e => setData({ ...data, cashFlow: { ...data.cashFlow, investments: formatCurrency(e.target.value) } })} className="input-premium text-xl font-black text-blue-500 text-center py-5 border-blue-500/20 shadow-lg shadow-blue-500/5" placeholder="R$ 0,00" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] uppercase font-bold text-[var(--text-secondary)] ml-4 italic">Outras Rendas / Extras</label>
@@ -1053,7 +1058,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                     { key: 'income', label: 'Receitas', val: calculatedTotals.incomeTotal, color: 'text-green-600', perc: 100 },
                     { key: 'fixed', label: 'Gastos Fixos', val: calculatedTotals.fixedTotal, color: 'text-[var(--text-primary)] opacity-80', perc: (calculatedTotals.fixedTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                     { key: 'variable', label: 'Gastos Variáveis', val: calculatedTotals.variableTotal, color: 'text-[var(--text-primary)] opacity-80', perc: (calculatedTotals.variableTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
-                    { key: 'invest', label: 'Investimentos', val: 0, color: 'text-blue-500', perc: 0 },
+                    { key: 'invest', label: 'Investimentos', val: calculatedTotals.investTotal, color: 'text-blue-500', perc: (calculatedTotals.investTotal / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                     { key: 'result', label: 'Resultado', val: calculatedTotals.result, color: calculatedTotals.result >= 0 ? 'text-green-600' : 'text-red-600', perc: (calculatedTotals.result / (calculatedTotals.incomeTotal || 1) * 100).toFixed(1) },
                   ].map(item => (
                     <div key={item.key} className="space-y-4">
@@ -1127,7 +1132,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase font-black text-white/30">Valor para Investimento (Média Poupar)</label>
                     <div className="bg-gold/10 border border-gold/20 w-full p-5 rounded-2xl font-black text-gold text-center text-2xl shadow-lg">
-                      {data.investimentoMensal.valorMedio || 'R$ 0,00'}
+                      {data.cashFlow.expected.investments || 'R$ 0,00'}
                     </div>
                   </div>
                 </div>
@@ -1142,72 +1147,13 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
         const cashFlowData = [
           { name: 'Fixos', value: calculatedTotals.fixedTotal, color: '#ef4444' },
           { name: 'Variáveis', value: calculatedTotals.variableTotal, color: '#f97316' },
+          { name: 'Investimento', value: calculatedTotals.investTotal, color: '#3b82f6' },
           { name: 'Sobra', value: Math.max(0, calculatedTotals.result), color: '#c5a059' },
         ];
 
         return (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
             <div id="strategic-proposal" className="bg-[var(--bg-primary)] p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-[var(--border-primary)] space-y-12 transition-colors">
-              {/* FEE HEADER - EYE-CATCHING REVEAL */}
-              <motion.div
-                layout
-                onClick={() => setShowFee(!showFee)}
-                className={`relative overflow-hidden rounded-[2.5rem] transition-all duration-500 cursor-pointer border-2 ${!showFee ? 'bg-navy-900 border-gold shadow-[0_0_30px_rgba(197,160,89,0.3)] animate-pulse-subtle' : 'bg-navy-900 border-gold/40 shadow-2xl'}`}
-              >
-                {/* Gold Glow Effect when closed */}
-                {!showFee && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-gold/10 to-gold/5 animate-shimmer"></div>
-                )}
-
-                {!isReadOnly && (
-                  <div className="p-8 md:p-12 text-center relative z-10">
-                    <motion.h4
-                      layout="position"
-                      className={`text-gold font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all ${!showFee ? 'text-xs md:text-sm' : 'text-[10px] mb-6'}`}
-                    >
-                      Investimento para Implementação
-                      <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
-                        <ChevronRight size={!showFee ? 20 : 14} />
-                      </motion.div>
-                    </motion.h4>
-
-                    <AnimatePresence mode="wait">
-                      {showFee ? (
-                        <motion.div
-                          key="opened"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          className="space-y-6"
-                        >
-                          <div className="text-5xl md:text-8xl font-black text-white italic tracking-tighter leading-none">
-                            R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </div>
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="h-[2px] w-24 bg-gold/40 rounded-full"></div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-gold font-black text-2xl md:text-4xl italic tracking-tighter">R$ 49,90</span>
-                              <span className="text-white/60 text-xs uppercase font-black tracking-[0.2em]">/ mensal</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="closed"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="pt-6"
-                        >
-                          <div className="inline-block px-8 py-3 bg-gold text-navy-900 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-all">
-                            Clique aqui para Visualizar a Proposta
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </motion.div>
-
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {/* OBJECTIVES PROGRESS */}
                 <div className="space-y-6">
@@ -1303,11 +1249,8 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                     <PieChart className="text-orange-500" size={18} /> Fluxo de Caixa Atual
                   </h5>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={cashFlowData}>
-                      <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
-                      <YAxis fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
+                    <RechartsPieChart>
                       <Tooltip
-                        cursor={{ fill: 'rgba(197,160,89,0.05)' }}
                         contentStyle={{
                           backgroundColor: 'var(--bg-secondary)',
                           borderColor: 'var(--border-primary)',
@@ -1319,16 +1262,85 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                         itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
                         formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                       />
-                      <Bar dataKey="value" radius={[10, 10, 0, 0]}>
+                      <Pie
+                        data={cashFlowData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
                         {cashFlowData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
-                      </Bar>
-                    </BarChart>
+                      </Pie>
+                    </RechartsPieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
             </div>
+
+            {/* FEE HEADER - EYE-CATCHING REVEAL */}
+            <motion.div
+              layout
+              onClick={() => setShowFee(!showFee)}
+              className={`relative overflow-hidden rounded-[2.5rem] mt-12 mb-8 transition-all duration-500 cursor-pointer border-2 ${!showFee ? 'bg-navy-900 border-gold shadow-[0_0_30px_rgba(197,160,89,0.3)] animate-pulse-subtle' : 'bg-navy-900 border-gold/40 shadow-2xl'}`}
+            >
+              {/* Gold Glow Effect when closed */}
+              {!showFee && (
+                <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-gold/10 to-gold/5 animate-shimmer"></div>
+              )}
+
+              {!isReadOnly && (
+                <div className="p-8 md:p-12 text-center relative z-10">
+                  <motion.h4
+                    layout="position"
+                    className={`text-gold font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all ${!showFee ? 'text-xs md:text-sm' : 'text-[10px] mb-6'}`}
+                  >
+                    Investimento para Implementação
+                    <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
+                      <ChevronRight size={!showFee ? 20 : 14} />
+                    </motion.div>
+                  </motion.h4>
+
+                  <AnimatePresence mode="wait">
+                    {showFee ? (
+                      <motion.div
+                        key="opened"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="space-y-6"
+                      >
+                        <div className="text-5xl md:text-8xl font-black text-white italic tracking-tighter leading-none">
+                          R$ {fee.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="h-[2px] w-24 bg-gold/40 rounded-full"></div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-gold font-black text-2xl md:text-4xl italic tracking-tighter">R$ 49,90</span>
+                            <span className="text-white/60 text-xs uppercase font-black tracking-[0.2em]">/ mensal</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="closed"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="pt-6"
+                      >
+                        <div className="inline-block px-8 py-3 bg-gold text-navy-900 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(197,160,89,0.4)] hover:scale-105 transition-all">
+                          Clique aqui para Visualizar a Proposta
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+            </motion.div>
 
             {!isReadOnly && (
               <div className="flex justify-center pt-6">
