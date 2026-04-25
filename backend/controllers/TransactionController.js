@@ -276,6 +276,15 @@ class TransactionController {
         'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
       ];
 
+      let runningBalance = 0;
+      let currentMonthIncome = 0;
+      let prevMonthIncome = 0;
+      let currentMonthExpense = 0;
+      let prevMonthExpense = 0;
+
+      const now = new Date();
+      const currentMonthIndex = now.getMonth();
+
       for (let i = 0; i < 12; i++) {
         const startDate = new Date(currentYear, i, 1);
         const endDate = new Date(currentYear, i + 1, 0);
@@ -297,12 +306,23 @@ class TransactionController {
           .filter(t => t.type === 'expense')
           .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
 
+        runningBalance += (income - expense);
+
         monthlyData.push({
           month: months[i],
           receita: income,
           despesa: expense,
-          saldo: income - expense
+          saldo: income - expense,
+          saldoAcumulado: runningBalance
         });
+
+        if (i === currentMonthIndex) {
+          currentMonthIncome = income;
+          currentMonthExpense = expense;
+        } else if (i === currentMonthIndex - 1) {
+          prevMonthIncome = income;
+          prevMonthExpense = expense;
+        }
       }
 
       // 2. Category Breakdown (Expenses only)
@@ -360,37 +380,24 @@ class TransactionController {
           category: t.Category?.name || 'Outros'
         }));
 
-      // MoM Comparison (Current vs Previous Month)
-      const currentMonthStart = new Date();
-      currentMonthStart.setDate(1);
-      const prevMonthStart = new Date(currentMonthStart);
-      prevMonthStart.setMonth(prevMonthStart.getMonth() - 1);
-      const prevMonthEnd = new Date(currentMonthStart);
-      prevMonthEnd.setDate(0);
-
-      const prevMonthTransactions = await Transaction.findAll({
-        where: {
-          user_id: targetUserId,
-          type: 'expense',
-          date: {
-            [Op.between]: [prevMonthStart.toISOString().split('T')[0], prevMonthEnd.toISOString().split('T')[0]]
-          }
-        }
-      });
-
-      const currentMonthExpense = allDetailedTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-      const prevMonthExpense = prevMonthTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-
       return res.json({
         monthlyData,
         categoryData: categories,
         dailyData,
         topExpenses,
         comparison: {
-          current: currentMonthExpense,
-          previous: prevMonthExpense,
-          diff: currentMonthExpense - prevMonthExpense,
-          percent: prevMonthExpense > 0 ? ((currentMonthExpense - prevMonthExpense) / prevMonthExpense) * 100 : 0
+          income: {
+            current: currentMonthIncome,
+            previous: prevMonthIncome,
+            diff: currentMonthIncome - prevMonthIncome,
+            percent: prevMonthIncome > 0 ? ((currentMonthIncome - prevMonthIncome) / prevMonthIncome) * 100 : 0
+          },
+          expense: {
+            current: currentMonthExpense,
+            previous: prevMonthExpense,
+            diff: currentMonthExpense - prevMonthExpense,
+            percent: prevMonthExpense > 0 ? ((currentMonthExpense - prevMonthExpense) / prevMonthExpense) * 100 : 0
+          }
         }
       });
     } catch (error) {

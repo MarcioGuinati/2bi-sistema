@@ -18,7 +18,8 @@ import {
   Plus,
   Quote,
   ChevronLeft,
-  FileText
+  FileText,
+  Info
 } from 'lucide-react';
 import {
   BarChart,
@@ -414,8 +415,8 @@ const ClientDashboard = () => {
           <>
             {/* Motivational Banner */}
             <div className={`relative overflow-hidden rounded-[2.5rem] border p-8 md:p-12 shadow-2xl group transition-all duration-300 ${theme === 'dark'
-                ? 'bg-navy-900 border-white/5 text-white shadow-navy-900/20'
-                : 'bg-white border-slate-100 text-navy-900 shadow-gold/5'
+              ? 'bg-navy-900 border-white/5 text-white shadow-navy-900/20'
+              : 'bg-white border-slate-100 text-navy-900 shadow-gold/5'
               }`}>
               <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gold/10 dark:from-gold/20 to-transparent pointer-events-none" />
               <div className="absolute -bottom-10 -right-10 opacity-5 dark:opacity-10">
@@ -501,11 +502,109 @@ const ClientDashboard = () => {
               </motion.div>
             </div>
 
+            {/* Performance Indicators */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-6 rounded-[2rem] shadow-sm relative group">
+                <div className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none">
+                  <TrendingUp size={40} className="absolute -bottom-2 -right-2 text-gold/5 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="flex justify-between items-start mb-1 relative z-10">
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Savings Rate</p>
+                  <div className="group/tip relative">
+                    <Info size={10} className="text-gold cursor-help opacity-40 hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-navy-900 text-[10px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10">
+                      Cálculo: (Renda - Gastos) / Renda. Reflete a sua eficiência em converter ganhos em patrimônio.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-end gap-2 relative z-10">
+                  <h4 className="text-2xl font-black text-gold">
+                    {stats.income > 0 ? Math.max(0, Math.round(((stats.income - stats.expense) / stats.income) * 100)) : 0}%
+                  </h4>
+                  <span className="text-[10px] font-black text-slate-400 mb-1.5 uppercase">da renda</span>
+                </div>
+              </div>
+
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-6 rounded-[2rem] shadow-sm relative group">
+                <div className="flex justify-between items-start mb-1 relative z-10">
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Status Receita</p>
+                  <div className="group/tip relative">
+                    <Info size={10} className="text-gold cursor-help opacity-40 hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-navy-900 text-[10px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10">
+                      Mostra o crescimento ou queda da sua renda total comparada ao mês anterior.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 relative z-10">
+                  <h4 className={`text-2xl font-black ${dashboardData.comparison?.income?.percent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {dashboardData.comparison?.income?.percent ? dashboardData.comparison.income.percent.toFixed(1) : '0.0'}%
+                  </h4>
+                  {dashboardData.comparison?.income?.percent >= 0 ? (
+                    <ArrowUpRight size={18} className="text-green-500" />
+                  ) : (
+                    <ArrowDownLeft size={18} className="text-red-500" />
+                  )}
+                </div>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-1 relative z-10">vs mês anterior</p>
+              </div>
+
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-6 rounded-[2rem] shadow-sm relative group">
+                <div className="flex justify-between items-start mb-1 relative z-10">
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Controle de Saídas</p>
+                  <div className="group/tip relative">
+                    <Info size={10} className="text-gold cursor-help opacity-40 hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-navy-900 text-[10px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10">
+                      Representa a variação dos seus gastos. Porcentagem verde indica economia; vermelha indica aumento.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 relative z-10">
+                  <h4 className={`text-2xl font-black ${dashboardData.comparison?.expense?.percent <= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {Math.abs(dashboardData.comparison?.expense?.percent || 0).toFixed(1)}%
+                  </h4>
+                  {dashboardData.comparison?.expense?.percent <= 0 ? (
+                    <ArrowDownLeft size={18} className="text-green-500" />
+                  ) : (
+                    <ArrowUpRight size={18} className="text-red-500" />
+                  )}
+                </div>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-1 relative z-10">
+                  {dashboardData.comparison?.expense?.percent <= 0 ? 'Economia' : 'Aumento'} de gastos
+                </p>
+              </div>
+
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-6 rounded-[2rem] shadow-sm relative group">
+                <div className="flex justify-between items-start mb-1 relative z-10">
+                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Liberdade Financeira</p>
+                  <div className="group/tip relative">
+                    <Info size={10} className="text-gold cursor-help opacity-40 hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-navy-900 text-[10px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10">
+                      Calcula quanto do seu custo de vida atual está sendo coberto pelas sobras financeiras deste mês.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-end gap-2 relative z-10">
+                  <h4 className="text-2xl font-black text-[var(--text-primary)]">
+                    {Math.min(100, Math.round((stats.balance / (stats.expense || 1)) * 100))}%
+                  </h4>
+                </div>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-1 relative z-10">Cobertura Mensal</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Chart */}
-              <div className="lg:col-span-2 card-premium p-8">
-                <div className="flex justify-between items-center mb-10">
-                  <h3 className="text-xl font-bold font-heading">Saúde Financeira</h3>
+              <div className="lg:col-span-2 card-premium p-8 relative">
+                <div className="flex justify-between items-center mb-10 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold font-heading">Saúde Financeira</h3>
+                    <div className="group/tip relative">
+                      <Info size={12} className="text-gold cursor-help opacity-50" />
+                      <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-navy-900 text-[10px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10">
+                        Comparativo direto entre tudo o que entrou e tudo o que saiu da sua conta no período selecionado.
+                      </div>
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 font-medium">
                       <div className="w-2 h-2 rounded-full bg-green-500" /> Receitas
@@ -533,10 +632,18 @@ const ClientDashboard = () => {
               </div>
 
               {/* Goals / Budgets */}
-              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 rounded-[2.5rem] text-[var(--text-primary)] shadow-xl flex flex-col justify-between">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] text-[var(--text-primary)] shadow-xl flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-8">
-                    <h3 className="text-xl font-bold font-heading">Orçamentário</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-bold font-heading">Orçamentário</h3>
+                      <div className="group/tip relative">
+                        <Info size={12} className="text-navy-900 dark:text-gold cursor-help opacity-50" />
+                        <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-navy-900 text-[10px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10 text-left">
+                          Calculado com base nos limites que você definiu para cada categoria. Mostra o consumo do seu orçamento em tempo real.
+                        </div>
+                      </div>
+                    </div>
                     <TrendingUp className="text-gold" size={24} />
                   </div>
                   <div className="space-y-8">
@@ -720,12 +827,136 @@ const ClientDashboard = () => {
 
         ) : (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-            {/* Row 1: Provisionamento Anual */}
-            <div className="card-premium p-8">
-              <div className="flex justify-between items-center mb-10">
-                <div>
-                  <h3 className="text-xl font-bold font-heading">Provisionamento Anual</h3>
-                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Fluxo projetado de Receitas vs Despesas</p>
+            {/* Row 1: Evolução Patrimonial (New WOW factor) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 card-premium p-6 md:p-8 relative">
+                <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
+                  <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <TrendingUp size={120} className="text-gold" />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mb-10 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <h3 className="text-xl font-bold font-heading italic">Evolução Patrimonial</h3>
+                      <p className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Crescimento Líquido Acumulado</p>
+                    </div>
+                    <div className="group/tip relative">
+                      <Info size={12} className="text-gold cursor-help opacity-50" />
+                      <div className="absolute bottom-full left-0 mb-2 w-56 p-3 bg-navy-900 text-[11px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10 normal-case font-medium">
+                        Cálculo Acumulado: Saldo Anterior + (Receitas - Despesas do mês). Mostra a variação real do seu patrimônio ao longo do ano.
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-full">
+                    <span className="text-[10px] font-black text-gold uppercase tracking-widest">Ano {selectedYear}</span>
+                  </div>
+                </div>
+
+                <div className="h-80 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dashboardData.monthlyData}>
+                      <defs>
+                        <linearGradient id="colorPatrimony" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#c5a059" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#c5a059" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 'bold' }}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#94A3B8', fontSize: 11 }}
+                        tickFormatter={(val) => `R$ ${val.toLocaleString()}`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: '24px',
+                          border: '1px solid rgba(197, 160, 89, 0.2)',
+                          boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                          background: theme === 'dark' ? '#0b1b33' : '#ffffff',
+                          padding: '20px'
+                        }}
+                        itemStyle={{ color: '#c5a059', fontWeight: 'bold' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="saldoAcumulado"
+                        stroke="#c5a059"
+                        strokeWidth={4}
+                        fillOpacity={1}
+                        fill="url(#colorPatrimony)"
+                        animationDuration={1500}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="card-premium p-6 md:p-8 border-gold/20 shadow-sm relative group overflow-hidden">
+                <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                <div className="relative z-10 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-6">
+                      <h3 className="text-xl font-black italic tracking-tighter text-[var(--text-primary)]">Insights do Mês</h3>
+                      <div className="p-2 bg-gold/10 rounded-xl border border-gold/20">
+                        <TrendingUp size={20} className="text-gold" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div className="p-5 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-primary)] shadow-inner">
+                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Capacidade de Poupança</p>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-black text-gold">
+                            {stats.income > 0 ? ((stats.income - stats.expense) / stats.income * 100).toFixed(1) : 0}%
+                          </span>
+                          <span className="text-xs font-bold text-slate-400">da renda total</span>
+                        </div>
+                      </div>
+
+                      <div className="p-5 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-primary)] shadow-inner">
+                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Fluxo de Caixa</p>
+                        <div className="flex items-baseline gap-2">
+                          <span className={`text-2xl font-black ${stats.balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            R$ {stats.balance.toLocaleString()}
+                          </span>
+                          <span className="text-xs font-bold text-slate-400">saldo disponível</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-[var(--border-primary)] transition-colors">
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed italic">
+                      "Seu crescimento acumulado reflete a disciplina estratégica aplicada neste trimestre."
+                    </p>
+                    <p className="text-[9px] font-black uppercase text-gold mt-2 tracking-widest">— Parecer 2BI</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Provisionamento Anual (Standard chart but moved) */}
+            <div className="card-premium p-8 relative">
+              <div className="flex justify-between items-center mb-10 relative z-10">
+                <div className="flex items-center gap-2">
+                  <div>
+                    <h3 className="text-xl font-bold font-heading">Provisionamento Anual</h3>
+                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Fluxo projetado de Receitas vs Despesas</p>
+                  </div>
+                  <div className="group/tip relative">
+                    <Info size={12} className="text-gold cursor-help opacity-50" />
+                    <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-navy-900 text-[11px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10 normal-case font-medium">
+                      Exibe a tendência mensal de entradas e saídas, permitindo visualizar sazonalidades nos seus ganhos e gastos.
+                    </div>
+                  </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
@@ -807,7 +1038,7 @@ const ClientDashboard = () => {
               </div>
 
               {/* Performance / Balanced Chart */}
-              <div className="card-premium p-8">
+              <div className="card-premium p-6 md:p-8">
                 <h3 className="text-xl font-bold font-heading mb-2">Evolução de Saldo</h3>
                 <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-10">Acumulado mensal do patrimônio</p>
                 <div className="h-80 w-full">
@@ -865,7 +1096,7 @@ const ClientDashboard = () => {
             </div>
 
             {/* Visual Quote / Placeholder for better design */}
-            <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-12 rounded-[3rem] text-center relative overflow-hidden shadow-sm">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary)] p-8 md:p-12 rounded-[2.25rem] md:rounded-[3rem] text-center relative overflow-hidden shadow-sm">
               <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
               <TrendingUp className="text-gold mx-auto mb-6" size={48} />
               <h4 className="text-2xl font-black text-[var(--text-primary)] italic max-w-2xl mx-auto leading-tight">
