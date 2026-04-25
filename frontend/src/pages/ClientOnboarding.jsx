@@ -55,6 +55,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
   const [loading, setLoading] = useState(true);
   const [isPDFMaximized, setIsPDFMaximized] = useState(false);
   const [showFee, setShowFee] = useState(false);
+  const [showAdjustment, setShowAdjustment] = useState(false);
 
   const [data, setData] = useState({
     personal: { name: '', birthDate: '' },
@@ -98,7 +99,8 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
       mudancasPrevistas: '',
       acompanhaFinancas: ''
     },
-    selectedPlan: 'convencional'
+    selectedPlan: 'convencional',
+    adjustmentPercentage: 0
   });
 
   const formatCurrency = (value) => {
@@ -1142,7 +1144,8 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
           </motion.div>
         );
       case 10:
-        const fee = calculatedTotals.incomeTotal * 12 * 0.03;
+        const baseFee = calculatedTotals.incomeTotal * 12 * 0.03;
+        const fee = baseFee * (1 + (parseFloat(data.adjustmentPercentage || 0) / 100));
         const gaps = getGapAnalysis();
         const projectionData = getProjectionData();
         const cashFlowData = [
@@ -1321,6 +1324,49 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                       exit={{ opacity: 0, y: -20 }}
                       className="pt-10 space-y-12"
                     >
+                      <div className="flex flex-col items-center gap-4">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAdjustment(!showAdjustment);
+                          }}
+                          className="text-[9px] font-black uppercase tracking-widest text-gold/60 hover:text-gold flex items-center gap-2"
+                        >
+                          {showAdjustment ? 'Ocultar Ajuste' : 'Aplicar Desconto/Ajuste %'}
+                        </button>
+                        
+                        {showAdjustment && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center gap-4"
+                          >
+                            <span className="text-[10px] font-bold text-white/40 uppercase">Porcentagem:</span>
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => setData({...data, adjustmentPercentage: (parseFloat(data.adjustmentPercentage || 0) - 5)})}
+                                className="w-8 h-8 rounded-lg bg-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500/30 transition-all"
+                              >
+                                -5
+                              </button>
+                              <input 
+                                type="number" 
+                                value={data.adjustmentPercentage}
+                                onChange={(e) => setData({...data, adjustmentPercentage: e.target.value})}
+                                className="bg-transparent border-b border-gold/40 text-white font-black text-center w-16 outline-none"
+                              />
+                              <button 
+                                onClick={() => setData({...data, adjustmentPercentage: (parseFloat(data.adjustmentPercentage || 0) + 5)})}
+                                className="w-8 h-8 rounded-lg bg-green-500/20 text-green-500 flex items-center justify-center hover:bg-green-500/30 transition-all"
+                              >
+                                +5
+                              </button>
+                            </div>
+                            <span className="text-xs font-black text-gold">%</span>
+                          </motion.div>
+                        )}
+                      </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
                           { id: 'convencional', price: 49.90, label: 'Convencional', desc: 'Acompanhamento estratégico e suporte' },
