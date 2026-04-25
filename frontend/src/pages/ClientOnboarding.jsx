@@ -1426,16 +1426,6 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
               </div>
             </motion.div>
 
-            {!isReadOnly && (
-              <div className="flex justify-center pt-6">
-                <button
-                  onClick={generatePDF}
-                  className="bg-navy-900 text-white px-12 py-5 rounded-2xl flex items-center gap-4 text-sm font-black uppercase tracking-[0.2em] hover:bg-navy-800 transition-all shadow-2xl active:scale-95"
-                >
-                  <FileText size={24} /> Imprimir Proposta Estratégica
-                </button>
-              </div>
-            )}
           </motion.div>
         );
       default:

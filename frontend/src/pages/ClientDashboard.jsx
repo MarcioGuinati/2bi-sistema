@@ -13,6 +13,7 @@ import {
   Layers,
   TrendingUp,
   ChevronRight,
+  ChevronDown,
   X,
   CreditCard,
   Plus,
@@ -413,47 +414,29 @@ const ClientDashboard = () => {
 
         {activeTab === 'overview' ? (
           <>
-            {/* Motivational Banner */}
-            <div className={`relative overflow-hidden rounded-[2.5rem] border p-8 md:p-12 shadow-2xl group transition-all duration-300 ${theme === 'dark'
-              ? 'bg-navy-900 border-white/5 text-white shadow-navy-900/20'
-              : 'bg-white border-slate-100 text-navy-900 shadow-gold/5'
-              }`}>
-              <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gold/10 dark:from-gold/20 to-transparent pointer-events-none" />
-              <div className="absolute -bottom-10 -right-10 opacity-5 dark:opacity-10">
-                <Quote size={200} className="text-gold" />
+            {/* Frase do Dia - Discrete & Elegant */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gold/10 rounded-xl flex items-center justify-center border border-gold/20">
+                  <TrendingUp size={20} className="text-gold" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-[var(--text-primary)] italic tracking-tight">Visão Geral</h2>
+                  <p className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Acompanhe seu desempenho hoje</p>
+                </div>
               </div>
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentQuote}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.8, ease: "circOut" }}
-                  className="relative z-10 flex flex-col md:flex-row items-center gap-8"
-                >
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gold/10 dark:bg-gold/20 rounded-3xl flex items-center justify-center border border-gold/20 flex-shrink-0">
-                    <TrendingUp size={40} className="text-gold" />
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-xl md:text-3xl font-black italic mb-3 leading-tight tracking-tight">
-                      "{quotes[currentQuote].text}"
-                    </h2>
-                    <p className="text-gold text-[10px] font-black uppercase tracking-[0.3em] font-bold">
-                      {quotes[currentQuote].author}
-                    </p>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Progress Indicators */}
-              <div className="flex gap-2 mt-8 justify-center md:justify-start relative z-10">
-                {quotes.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-1000 ${i === currentQuote ? 'w-8 bg-gold' : 'w-2 bg-slate-300 dark:bg-white/20'}`}
-                  />
-                ))}
+              <div className="group relative">
+                <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl transition-all shadow-sm">
+                  <Quote size={12} className="text-gold" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-primary)]">Frase do Dia</span>
+                  <ChevronDown size={10} className="text-slate-400" />
+                </button>
+                <div className="absolute top-full right-0 mt-2 w-72 p-5 bg-navy-900 text-white rounded-3xl opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-[100] shadow-2xl border border-white/10 pointer-events-none">
+                  <Quote size={24} className="text-gold/20 mb-2" />
+                  <p className="text-[11px] italic leading-relaxed font-medium">"{quotes[currentQuote].text}"</p>
+                  <p className="text-[9px] text-gold font-black uppercase mt-3 tracking-widest">— {quotes[currentQuote].author}</p>
+                </div>
               </div>
             </div>
 
