@@ -221,7 +221,7 @@ const ClientDashboard = () => {
     doc.setFont('helvetica', 'bold');
     doc.text('2BI PLANEJAMENTO ESTRATÉGICO LTDA', 50, y);
     doc.setFont('helvetica', 'normal');
-    doc.text('CNPJ: XX.XXX.XXX/0001-XX | Sede: Maringá - PR', 50, y + 5);
+    doc.text('CNPJ: 57.967.874/0001-30', 50, y + 5);
 
     y += 15;
     doc.text('CONTRATANTE:', 20, y);
@@ -909,7 +909,7 @@ const ClientDashboard = () => {
                         <TrendingUp size={20} className="text-gold" />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-6">
                       <div className="p-5 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-primary)] shadow-inner">
                         <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Capacidade de Poupança</p>

@@ -49,11 +49,11 @@ const AdminDashboard = () => {
   const [clientContracts, setClientContracts] = useState([]);
   const [clientPayments, setClientPayments] = useState([]);
   const [showContractModal, setShowContractModal] = useState(false);
-  const [contractForm, setContractForm] = useState({ 
-    title: '', 
-    setupValue: '0', 
-    monthlyValue: '0', 
-    billingCycle: 'monthly', 
+  const [contractForm, setContractForm] = useState({
+    title: '',
+    setupValue: '0',
+    monthlyValue: '0',
+    billingCycle: 'monthly',
     startDate: new Date().toISOString().split('T')[0],
     recurrence: 1,
     hasReportAccess: false,
@@ -134,9 +134,9 @@ const AdminDashboard = () => {
   };
 
   const handleOpenRegister = () => {
-    setClientForm({ 
-      name: '', email: '', password: '', phone: '', cpf: '', 
-      income: maskCurrency('0'), occupation: '', financialGoal: '', 
+    setClientForm({
+      name: '', email: '', password: '', phone: '', cpf: '',
+      income: maskCurrency('0'), occupation: '', financialGoal: '',
       customFields: []
     });
     setShowRegModal(true);
@@ -144,11 +144,11 @@ const AdminDashboard = () => {
 
   const handleOpenContract = () => {
     setEditingBillingContract(null);
-    setContractForm({ 
-      title: '', 
-      setupValue: '0', 
-      monthlyValue: '0', 
-      billingCycle: 'monthly', 
+    setContractForm({
+      title: '',
+      setupValue: '0',
+      monthlyValue: '0',
+      billingCycle: 'monthly',
       startDate: new Date().toISOString().split('T')[0],
       recurrence: 1,
       hasReportAccess: false,
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
     // 2. Premium Header Bar
     doc.setFillColor(10, 25, 47); // Navy 900
     doc.rect(0, 0, pageWidth, 40, 'F');
-    
+
     // 2.1 Logo
     try {
       const logo = await preloadImage('/logo_2bi.png');
@@ -298,12 +298,12 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error('Erro ao carregar logo para o PDF (Admin):', err);
     }
-    
+
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 45, 25);
-    
+
     doc.setTextColor(197, 160, 89); // Gold
     doc.setFontSize(8);
     doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 45, 32);
@@ -314,7 +314,7 @@ const AdminDashboard = () => {
     const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
     doc.text(docId, pageWidth - 20, 15, { align: 'right' });
     doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 20, { align: 'right' });
-    
+
     // Summary of Fees for the header logic
     const hasSetup = Number(contract.setupValue) > 0;
     const hasMonthly = Number(contract.monthlyValue) > 0;
@@ -325,23 +325,23 @@ const AdminDashboard = () => {
     doc.setDrawColor(197, 160, 89); // Gold
     doc.setLineWidth(0.5);
     doc.line(20, y, 40, y);
-    
+
     doc.setTextColor(10, 25, 47);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text('I. DAS PARTES', 20, y + 8);
-    
+
     y += 18;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(51, 65, 85);
-    
+
     doc.text('CONTRATADA:', 20, y);
     doc.setFont('helvetica', 'bold');
     doc.text('2BI PLANEJAMENTO ESTRATÉGICO LTDA', 50, y);
     doc.setFont('helvetica', 'normal');
-    doc.text('CNPJ: XX.XXX.XXX/0001-XX | Sede: Maringá - PR', 50, y + 5);
-    
+    doc.text('CNPJ: 57.967.874/0001-30', 50, y + 5);
+
     y += 15;
     doc.text('CONTRATANTE:', 20, y);
     doc.setFont('helvetica', 'bold');
@@ -356,7 +356,7 @@ const AdminDashboard = () => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(10, 25, 47);
     doc.text('II. DO OBJETO', 20, y + 8);
-    
+
     y += 18;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
@@ -372,12 +372,12 @@ const AdminDashboard = () => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(10, 25, 47);
     doc.text('III. VALORES E CONDIÇÕES', 20, y + 8);
-    
+
     y += 18;
-    
+
     // Setup Box
     if (hasSetup) {
-      doc.setFillColor(248, 250, 252); 
+      doc.setFillColor(248, 250, 252);
       doc.roundedRect(20, y - 5, (pageWidth - 40) / (hasMonthly ? 2.1 : 1), 25, 3, 3, 'F');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
@@ -392,7 +392,7 @@ const AdminDashboard = () => {
       doc.setTextColor(150, 150, 150);
       doc.text('* Taxa de Implementação (Setup) Isenta', 20, y + 5);
     }
-    
+
     // Monthly Box
     if (hasMonthly) {
       const startX = hasSetup ? (pageWidth / 2) + 5 : 20;
@@ -407,7 +407,7 @@ const AdminDashboard = () => {
       doc.setTextColor(197, 160, 89);
       doc.text(`R$ ${Number(contract.monthlyValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, startX + 10, y + 13);
     }
-    
+
     y += 30;
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
@@ -419,12 +419,12 @@ const AdminDashboard = () => {
     doc.setDrawColor(226, 232, 240); // Slate 200
     doc.line(20, y, 90, y);
     doc.line(120, y, pageWidth - 20, y);
-    
+
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(client.name, 55, y + 5, { align: 'center' });
     doc.text('Contratante', 55, y + 10, { align: 'center' });
-    
+
     doc.text('2BI PLANEJAMENTO', 155, y + 5, { align: 'center' });
     doc.text('Contratada', 155, y + 10, { align: 'center' });
 
@@ -636,7 +636,7 @@ const AdminDashboard = () => {
             <h3 className="text-xl font-bold font-heading">{user?.role === 'partner' ? 'Minha Carteira' : 'Base de Clientes'}</h3>
             <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
               {user?.role === 'admin' && (
-                <select 
+                <select
                   value={partnerFilter}
                   onChange={(e) => setPartnerFilter(e.target.value)}
                   className="bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 rounded-xl text-xs font-bold outline-none focus:border-gold transition-all"
@@ -677,10 +677,10 @@ const AdminDashboard = () => {
                         </div>
                         <div className="cursor-pointer" onClick={() => handleSelectClient(c)}>
                           <div className="font-bold text-sm flex items-center gap-2">
-                             {c.name}
-                             {c.isLead && (
-                               <span className="bg-gold text-[8px] font-black px-2 py-0.5 rounded text-navy-900 uppercase tracking-tighter shadow-sm">Lead Site</span>
-                             )}
+                            {c.name}
+                            {c.isLead && (
+                              <span className="bg-gold text-[8px] font-black px-2 py-0.5 rounded text-navy-900 uppercase tracking-tighter shadow-sm">Lead Site</span>
+                            )}
                           </div>
                           <div className="text-[10px] text-gold font-black uppercase italic flex items-center gap-2">
                             {c.isActive ? 'Membro Premium' : 'Aguardando Ativação'}
@@ -703,11 +703,11 @@ const AdminDashboard = () => {
                     <td className="px-8 py-5">
                       <div className="flex justify-end gap-2 text-right">
                         {user?.role === 'admin' && (
-                          <button 
+                          <button
                             onClick={async () => {
                               await impersonate(c.id);
                               navigate('/dashboard');
-                            }} 
+                            }}
                             title="Monitorar Sistema"
                             className="p-2 text-slate-400 hover:text-gold rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
                           >
@@ -715,8 +715,8 @@ const AdminDashboard = () => {
                           </button>
                         )}
                         {user?.role === 'admin' && (
-                          <button 
-                            onClick={() => navigate(`/admin/clients/${c.id}/onboarding`)} 
+                          <button
+                            onClick={() => navigate(`/admin/clients/${c.id}/onboarding`)}
                             title="Ficha de Onboarding"
                             className="p-2 text-slate-400 hover:text-green-600 rounded-lg bg-[var(--bg-secondary)] shadow-sm border border-[var(--border-primary)] transition-all"
                           >
@@ -792,8 +792,8 @@ const AdminDashboard = () => {
                 <div className="space-y-4 pt-4 border-t border-[var(--border-primary)]">
                   <div className="flex justify-between items-center px-2">
                     <h4 className="text-xs font-black uppercase text-slate-400 tracking-widest">Campos Personalizados</h4>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setClientForm({ ...clientForm, customFields: [...clientForm.customFields, { name: '', value: '' }] })}
                       className="text-[10px] bg-gold/10 text-gold px-3 py-1.5 rounded-lg font-black uppercase tracking-widest hover:bg-gold hover:text-white transition-all flex items-center gap-2"
                     >
@@ -804,34 +804,34 @@ const AdminDashboard = () => {
                     <div key={index} className="flex gap-4 items-end animate-in fade-in slide-in-from-left-2 duration-300">
                       <div className="flex-1 space-y-1">
                         <label className="text-[8px] uppercase font-black text-slate-400 ml-2">Nome do Campo</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: Endereço" 
-                          value={field.name} 
+                        <input
+                          type="text"
+                          placeholder="Ex: Endereço"
+                          value={field.name}
                           onChange={e => {
                             const newFields = [...clientForm.customFields];
                             newFields[index].name = e.target.value;
                             setClientForm({ ...clientForm, customFields: newFields });
-                          }} 
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-3 rounded-xl outline-none focus:border-gold transition-all text-xs" 
+                          }}
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-3 rounded-xl outline-none focus:border-gold transition-all text-xs"
                         />
                       </div>
                       <div className="flex-[2] space-y-1">
                         <label className="text-[8px] uppercase font-black text-slate-400 ml-2">Valor</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: Rua das Flores, 123" 
-                          value={field.value} 
+                        <input
+                          type="text"
+                          placeholder="Ex: Rua das Flores, 123"
+                          value={field.value}
                           onChange={e => {
                             const newFields = [...clientForm.customFields];
                             newFields[index].value = e.target.value;
                             setClientForm({ ...clientForm, customFields: newFields });
-                          }} 
-                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-3 rounded-xl outline-none focus:border-gold transition-all text-xs" 
+                          }}
+                          className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-3 rounded-xl outline-none focus:border-gold transition-all text-xs"
                         />
                       </div>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => {
                           const newFields = clientForm.customFields.filter((_, i) => i !== index);
                           setClientForm({ ...clientForm, customFields: newFields });
@@ -850,18 +850,18 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-black text-slate-400 ml-2">
-                    {(editingClient?.isLead && !editingClient?.isActive) ? 'Cadastrar Senha Definitiva' : 'Senha de Acesso'} 
+                    {(editingClient?.isLead && !editingClient?.isActive) ? 'Cadastrar Senha Definitiva' : 'Senha de Acesso'}
                     {!editingClient && <span className="text-red-500">*</span>}
                     {(editingClient?.isLead && !editingClient?.isActive) && <span className="text-gold ml-2 font-bold">(Obrigatório para Ativar)</span>}
                   </label>
                   <div className="relative">
-                    <input 
-                      type={showPassword ? 'text' : 'password'} 
-                      placeholder={editingClient ? ((editingClient.isLead && !editingClient.isActive) ? 'Crie uma senha para o acesso' : 'Deixe em branco para manter') : 'Crie uma senha segura'} 
-                      required={!editingClient || (editingClient.isLead && !editingClient.isActive)} 
-                      value={clientForm.password} 
-                      onChange={e => setClientForm({ ...clientForm, password: e.target.value })} 
-                      className={`w-full bg-[var(--bg-primary)] border p-4 pr-12 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)] ${(editingClient?.isLead && !editingClient?.isActive) ? 'border-gold/50' : 'border-[var(--border-primary)]'}`} 
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder={editingClient ? ((editingClient.isLead && !editingClient.isActive) ? 'Crie uma senha para o acesso' : 'Deixe em branco para manter') : 'Crie uma senha segura'}
+                      required={!editingClient || (editingClient.isLead && !editingClient.isActive)}
+                      value={clientForm.password}
+                      onChange={e => setClientForm({ ...clientForm, password: e.target.value })}
+                      className={`w-full bg-[var(--bg-primary)] border p-4 pr-12 rounded-2xl outline-none focus:border-gold transition-all text-[var(--text-primary)] ${(editingClient?.isLead && !editingClient?.isActive) ? 'border-gold/50' : 'border-[var(--border-primary)]'}`}
                     />
                     <button
                       type="button"
@@ -880,10 +880,10 @@ const AdminDashboard = () => {
 
         {selectedClient && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[150] flex items-center justify-center p-0 md:p-4 lg:p-10 pt-16 md:pt-4">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[var(--bg-secondary)]/90 backdrop-blur-2xl rounded-none md:rounded-[3rem] w-full max-w-6xl h-full lg:h-[90vh] overflow-hidden shadow-2xl flex flex-col border-none md:border border-white/40"
             >
               {/* Premium Header - Replicating Adjust Profile Style */}
@@ -901,8 +901,8 @@ const AdminDashboard = () => {
                     <p className="text-gold/60 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Gestão Estratégica e CRM 2BI</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setSelectedClient(null)} 
+                <button
+                  onClick={() => setSelectedClient(null)}
                   className="bg-white/10 hover:bg-white/20 p-3 rounded-2xl transition-all relative z-10"
                 >
                   <X size={24} />
@@ -917,23 +917,23 @@ const AdminDashboard = () => {
                       <p className="text-[10px] uppercase font-black text-slate-400 mb-1">Patrimônio / Renda</p>
                       <p className="text-2xl font-black text-[var(--text-primary)]">R$ {Number(selectedClient.income || 0).toLocaleString('pt-BR')}</p>
                     </div>
-                  {/* Custom Fields in Details View */}
-                  {selectedClient.customFields && selectedClient.customFields.length > 0 && (
-                    <div className="space-y-3">
-                      {selectedClient.customFields.map((field, idx) => (
-                        <div key={idx} className="bg-white/40 backdrop-blur-sm p-4 rounded-2xl border border-white/60 shadow-sm">
-                          <p className="text-[8px] uppercase font-black text-slate-400 mb-1">{field.name}</p>
-                          <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{field.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                    {/* Custom Fields in Details View */}
+                    {selectedClient.customFields && selectedClient.customFields.length > 0 && (
+                      <div className="space-y-3">
+                        {selectedClient.customFields.map((field, idx) => (
+                          <div key={idx} className="bg-white/40 backdrop-blur-sm p-4 rounded-2xl border border-white/60 shadow-sm">
+                            <p className="text-[8px] uppercase font-black text-slate-400 mb-1">{field.name}</p>
+                            <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">{field.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="bg-navy-900 p-6 rounded-[2rem] text-white shadow-xl shadow-navy-900/20">
                       <p className="text-[10px] uppercase font-black text-white/30 mb-2">Contato Direto</p>
                       <p className="text-xs font-bold truncate opacity-80">{selectedClient.email}</p>
                       <p className="text-sm font-black mt-2 text-gold tracking-tight">{selectedClient.phone || '(No Phone)'}</p>
-                      
-                      <button 
+
+                      <button
                         onClick={() => handleResendWelcome(selectedClient.id)}
                         className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                       >
@@ -977,37 +977,37 @@ const AdminDashboard = () => {
                             </h3>
                             <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">{notes.length} Registros</span>
                           </div>
-                          
+
                           <form onSubmit={handleAddNote} className="bg-[var(--bg-secondary)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl shadow-slate-200/50 space-y-4">
-                            <textarea 
-                              placeholder="Descreva o próximo passo ou detalhe do contato..." 
-                              value={newNote} 
-                              onChange={e => setNewNote(e.target.value)} 
-                              className="w-full p-6 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-3xl outline-none focus:border-gold/50 transition-all text-sm h-32 text-[var(--text-primary)] resize-none" 
+                            <textarea
+                              placeholder="Descreva o próximo passo ou detalhe do contato..."
+                              value={newNote}
+                              onChange={e => setNewNote(e.target.value)}
+                              className="w-full p-6 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-3xl outline-none focus:border-gold/50 transition-all text-sm h-32 text-[var(--text-primary)] resize-none"
                             />
                             <div className="flex gap-3">
-                               <button type="submit" className="flex-1 btn-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em]">
-                                 {editingNote ? 'Atualizar Evolução' : 'Registrar Interação'}
-                               </button>
-                               {editingNote && (
-                                 <button 
-                                   type="button" 
-                                   onClick={() => { setEditingNote(null); setNewNote(''); }}
-                                   className="px-8 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] uppercase font-black tracking-widest hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]"
-                                 >
-                                   Cancelar
-                                 </button>
-                               )}
+                              <button type="submit" className="flex-1 btn-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em]">
+                                {editingNote ? 'Atualizar Evolução' : 'Registrar Interação'}
+                              </button>
+                              {editingNote && (
+                                <button
+                                  type="button"
+                                  onClick={() => { setEditingNote(null); setNewNote(''); }}
+                                  className="px-8 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] uppercase font-black tracking-widest hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]"
+                                >
+                                  Cancelar
+                                </button>
+                              )}
                             </div>
                           </form>
 
                           <div className="space-y-6 relative before:absolute before:left-8 before:top-0 before:bottom-0 before:w-px before:bg-gradient-to-b before:from-gold/50 before:to-transparent">
                             {notes.map((n, idx) => (
-                              <motion.div 
+                              <motion.div
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.05 }}
-                                key={n.id} 
+                                key={n.id}
                                 className="pl-16 relative group"
                               >
                                 <div className="absolute left-6 top-6 w-4 h-4 bg-white border-2 border-gold rounded-full z-10 group-hover:scale-125 transition-transform"></div>
@@ -1015,18 +1015,18 @@ const AdminDashboard = () => {
                                   <div className="flex justify-between items-start mb-4">
                                     <p className="text-sm md:text-base text-[var(--text-primary)] leading-relaxed font-medium">"{n.content}"</p>
                                     <div className="flex gap-2">
-                                       <button 
-                                         onClick={() => { setEditingNote(n); setNewNote(n.content); }}
-                                         className="p-3 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
-                                       >
-                                         <Edit2 size={14} />
-                                       </button>
-                                       <button 
-                                         onClick={() => handleDeleteNote(n.id)}
-                                         className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                       >
-                                         <Trash2 size={14} />
-                                       </button>
+                                      <button
+                                        onClick={() => { setEditingNote(n); setNewNote(n.content); }}
+                                        className="p-3 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                      >
+                                        <Edit2 size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteNote(n.id)}
+                                        className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
                                     </div>
                                   </div>
                                   <div className="pt-4 border-t border-slate-50 flex flex-wrap justify-between items-center gap-4">
@@ -1059,7 +1059,7 @@ const AdminDashboard = () => {
                             <Plus size={18} /> Novo Contrato
                           </button>
                         </div>
-  
+
                         {/* Active Contracts Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {clientContracts.map(c => (
@@ -1071,7 +1071,7 @@ const AdminDashboard = () => {
                                 </div>
                                 {user?.role === 'admin' && (
                                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button 
+                                    <button
                                       onClick={() => {
                                         setEditingBillingContract(c);
                                         setContractForm({
@@ -1164,16 +1164,16 @@ const AdminDashboard = () => {
                                         {user?.role === 'admin' ? (
                                           <>
                                             {p.status === 'pending' && (
-                                              <button 
-                                                onClick={() => handlePayDebt(p.id)} 
+                                              <button
+                                                onClick={() => handlePayDebt(p.id)}
                                                 className="px-6 py-3 bg-gold text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-gold-500 transition-all shadow-lg shadow-gold/20"
                                               >
                                                 Dar Baixa
                                               </button>
                                             )}
                                             {p.status === 'paid' && (
-                                              <button 
-                                                onClick={() => handleUnpayDebt(p.id)} 
+                                              <button
+                                                onClick={() => handleUnpayDebt(p.id)}
                                                 className="px-6 py-3 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
                                               >
                                                 Estornar
@@ -1205,7 +1205,7 @@ const AdminDashboard = () => {
       <AnimatePresence>
         {showContractModal && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)]/90 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] w-full max-w-lg overflow-hidden shadow-2xl border border-white/40">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)]/90 backdrop-blur-xl rounded-[1.5rem] md:rounded-[3rem] w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl border border-white/40 scrollbar-hide">
               <div className="bg-gradient-to-r from-gold to-yellow-500 p-8 text-navy-900 flex justify-between items-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
                 <div className="relative z-10">
@@ -1215,13 +1215,13 @@ const AdminDashboard = () => {
                 <button onClick={() => setShowContractModal(false)} className="bg-navy-900/10 hover:bg-navy-900/20 p-2 rounded-xl transition-all"><X size={20} /></button>
               </div>
 
-              {/* Suggestions Section */}
+              {/* Suggestions Section - Now in a smaller scrollable area if needed */}
               {!editingBillingContract && selectedClient && (
-                <div className="px-8 pt-6 pb-2 grid grid-cols-2 gap-4">
-                  <div 
-                    onClick={() => setContractForm({ 
-                      ...contractForm, 
-                      title: 'Plano Estratégico 360 (Setup + Mensal)', 
+                <div className="px-8 pt-6 pb-2 grid grid-cols-2 gap-3">
+                  <div
+                    onClick={() => setContractForm({
+                      ...contractForm,
+                      title: 'Plano Estratégico 360 (Setup + Mensal)',
                       setupValue: (Number(selectedClient.income || 0) * 12 * 0.02).toFixed(2),
                       monthlyValue: '49.90',
                       billingCycle: 'monthly',
@@ -1229,24 +1229,101 @@ const AdminDashboard = () => {
                       hasReportAccess: true,
                       hasAIAccess: true
                     })}
-                    className="p-4 bg-navy-900 rounded-2xl border border-gold/20 cursor-pointer hover:bg-navy-800 transition-all flex flex-col items-center gap-1 group"
+                    className="p-4 bg-navy-900 rounded-2xl border border-gold/20 cursor-pointer hover:bg-navy-800 transition-all flex flex-col items-center text-center gap-1.5 group shadow-lg"
                   >
-                    <span className="text-gold text-[8px] font-bold uppercase tracking-widest">Plano Completo (Setup + Mes)</span>
-                    <span className="text-white text-xs font-black italic">R$ {(Number(selectedClient.income || 0) * 12 * 0.02 + 49.9).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-gold text-[10px] font-black uppercase tracking-[0.2em]">Setup + Mensal (360)</span>
+                    <span className="text-white text-sm font-black italic">R$ {(Number(selectedClient.income || 0) * 12 * 0.02 + 49.9).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-white/40 text-[9px] font-bold">Completo com IA e Relatórios</span>
                   </div>
-                  <div 
-                    onClick={() => setContractForm({ 
-                      ...contractForm, 
-                      title: 'Mentoria Mensal (Setup Isento)', 
+
+                  <div
+                    onClick={() => setContractForm({
+                      ...contractForm,
+                      title: 'Convencional (Setup Isento)',
                       setupValue: '0',
                       monthlyValue: '49.90',
                       billingCycle: 'monthly',
-                      recurrence: 12
+                      recurrence: 12,
+                      hasReportAccess: true,
+                      hasAIAccess: false
                     })}
-                    className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] cursor-pointer hover:border-gold/30 transition-all flex flex-col items-center gap-1 group"
+                    className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] cursor-pointer hover:border-gold/30 transition-all flex flex-col items-center text-center gap-1.5 group shadow-sm"
                   >
-                    <span className="text-[var(--text-secondary)] text-[8px] font-bold uppercase tracking-widest">Isentar Setup</span>
+                    <span className="text-[var(--text-secondary)] text-[10px] font-black uppercase tracking-[0.2em]">Convencional</span>
                     <span className="text-[var(--text-primary)] text-sm font-black italic">R$ 49,90/mês</span>
+                    <span className="text-[var(--text-secondary)]/40 text-[9px] font-bold">Acompanhamento Sem IA</span>
+                  </div>
+
+                  <div
+                    onClick={() => setContractForm({
+                      ...contractForm,
+                      title: 'IA Plus',
+                      setupValue: '0',
+                      monthlyValue: '59.90',
+                      billingCycle: 'monthly',
+                      recurrence: 12,
+                      hasReportAccess: true,
+                      hasAIAccess: true
+                    })}
+                    className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] cursor-pointer hover:border-gold/30 transition-all flex flex-col items-center text-center gap-1.5 group shadow-sm"
+                  >
+                    <span className="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em]">IA Plus</span>
+                    <span className="text-[var(--text-primary)] text-sm font-black italic">R$ 59,90/mês</span>
+                    <span className="text-[var(--text-secondary)]/40 text-[9px] font-bold">Acompanhamento + IA 2BI</span>
+                  </div>
+
+                  <div
+                    onClick={() => setContractForm({
+                      ...contractForm,
+                      title: 'VIP Mentoring',
+                      setupValue: '0',
+                      monthlyValue: '69.90',
+                      billingCycle: 'monthly',
+                      recurrence: 12,
+                      hasReportAccess: true,
+                      hasAIAccess: true
+                    })}
+                    className="p-4 bg-gold/10 rounded-2xl border border-gold/30 cursor-pointer hover:bg-gold/20 transition-all flex flex-col items-center text-center gap-1.5 group shadow-md"
+                  >
+                    <span className="text-gold text-[10px] font-black uppercase tracking-[0.2em]">VIP Mentoring</span>
+                    <span className="text-gold text-sm font-black italic">R$ 69,90/mês</span>
+                    <span className="text-gold/50 text-[9px] font-bold">IA + Reunião Mensal</span>
+                  </div>
+
+                  <div
+                    onClick={() => setContractForm({
+                      ...contractForm,
+                      title: 'Só App 2BI Planejamento',
+                      setupValue: '0',
+                      monthlyValue: '49.90',
+                      billingCycle: 'monthly',
+                      recurrence: 12,
+                      hasReportAccess: false,
+                      hasAIAccess: false
+                    })}
+                    className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] cursor-pointer hover:border-gold/30 transition-all flex flex-col items-center text-center gap-1.5 group shadow-sm"
+                  >
+                    <span className="text-[var(--text-secondary)] text-[10px] font-black uppercase tracking-[0.2em]">Só App 2BI</span>
+                    <span className="text-[var(--text-primary)] text-sm font-black italic">R$ 49,90/mês</span>
+                    <span className="text-[var(--text-secondary)]/40 text-[9px] font-bold">Acesso Básico ao Sistema</span>
+                  </div>
+
+                  <div
+                    onClick={() => setContractForm({
+                      ...contractForm,
+                      title: 'App 2BI c/ IA',
+                      setupValue: '0',
+                      monthlyValue: '59.90',
+                      billingCycle: 'monthly',
+                      recurrence: 12,
+                      hasReportAccess: false,
+                      hasAIAccess: true
+                    })}
+                    className="p-4 bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-primary)] cursor-pointer hover:border-gold/30 transition-all flex flex-col items-center text-center gap-1.5 group shadow-sm"
+                  >
+                    <span className="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em]">App c/ IA</span>
+                    <span className="text-[var(--text-primary)] text-sm font-black italic">R$ 59,90/mês</span>
+                    <span className="text-[var(--text-secondary)]/40 text-[9px] font-bold">App + Inteligência Artificial</span>
                   </div>
                 </div>
               )}
@@ -1391,7 +1468,7 @@ const AdminDashboard = () => {
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Título do Aviso</label>
                     <input type="text" required value={annForm.title} onChange={e => setAnnForm({ ...annForm, title: e.target.value })} className="input-premium" placeholder="Ex: Sistema Atualizado v2.0" />
                   </div>
-                  
+
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Tipo de Comunicado</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
