@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
+import TopBar from './TopBar';
+import MobileNav from './MobileNav';
 import ImpersonationBanner from './ImpersonationBanner';
-import { Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const SystemLayout = ({ children }) => {
@@ -19,35 +20,16 @@ const SystemLayout = ({ children }) => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-primary)]">
-      <ImpersonationBanner />
-
-      {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-navy-900 flex items-center justify-between px-6 z-[60] shadow-lg">
-        <div className="flex items-center">
-          <img 
-            src="/logo_2bi.png" 
-            alt="2BI Planejamento" 
-            className="h-8 w-auto object-contain"
-          />
-        </div>
-        <button 
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="text-white p-2 hover:bg-white/10 rounded-xl transition-all"
-        >
-          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+    <div className="flex min-h-screen bg-[var(--bg-primary)] overflow-hidden text-[var(--text-primary)]">
+      {/* Dynamic Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-20 transition-opacity duration-1000">
+        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-gold/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-[35vw] h-[35vw] bg-navy-900/5 dark:bg-gold/5 rounded-full blur-[100px]"></div>
       </div>
 
-      {/* Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[90]"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <ImpersonationBanner />
 
-      {/* Sidebar */}
+      {/* Luxury Sidebar Portal (Works as Drawer on Mobile) */}
       <Sidebar 
         isOpen={isSidebarOpen} 
         isCollapsed={isCollapsed}
@@ -55,16 +37,31 @@ const SystemLayout = ({ children }) => {
         onClose={() => setIsSidebarOpen(false)} 
       />
 
-      {/* Main Content */}
-      <main className={`
-        flex-1 overflow-y-auto transition-all duration-300 mt-16 lg:mt-0 
-        ${isCollapsed ? 'lg:pl-20' : 'lg:pl-72'} 
-        ${isImpersonating ? 'lg:pt-12 pb-24 sm:pb-0' : ''}
+      {/* Mobile Glass Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-navy-900/80 backdrop-blur-md z-[120] transition-all duration-700"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Premium Content Stack */}
+      <div className={`
+        flex-1 flex flex-col min-w-0 h-screen transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] relative z-10
+        ${isCollapsed ? 'lg:pl-[148px] lg:pr-8' : 'lg:pl-[328px] lg:pr-8'}
+        ${isImpersonating ? 'pt-14' : ''}
       `}>
-        <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
-          {children}
-        </div>
-      </main>
+        <TopBar toggleMobileSidebar={() => setIsSidebarOpen(true)} />
+        
+        <main className={`flex-1 overflow-y-auto custom-scrollbar pb-32 lg:pb-12 pt-2 px-4 lg:px-0`}>
+          <div className="max-w-[1700px] mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
+            {children}
+          </div>
+        </main>
+
+        {/* Adaptive Mobile Navigation Bar */}
+        <MobileNav onOpenMenu={() => setIsSidebarOpen(true)} />
+      </div>
     </div>
   );
 };

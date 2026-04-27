@@ -38,10 +38,15 @@
   }
   
   body {
-    @apply antialiased transition-colors duration-300;
+    @apply antialiased transition-colors duration-500 min-h-screen;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-sans);
+  }
+
+  .dark body {
+    background-image: radial-gradient(circle at top right, #05193B, #020617);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
