@@ -53,6 +53,7 @@ routes.get('/admin/mentorship-overview', AdminController.getMentorshipOverview);
 routes.get('/admin/ai-config', ConfigController.getAIConfig);
 routes.post('/admin/ai-config', ConfigController.updateAIConfig);
 routes.get('/admin/ai-usage', ConfigController.getAIUsage);
+routes.get('/admin/ai-usage-detailed', ConfigController.getDetailedAIUsage);
 routes.get('/ai-insights', AIController.getInsights);
 routes.get('/ai-insights/history', AIController.listInsights);
 routes.delete('/ai-insights/:id', AIController.deleteInsight);

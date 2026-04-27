@@ -1,4 +1,5 @@
 const { Setting, Insight, User, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 class ConfigController {
   async getAIConfig(req, res) {
@@ -42,6 +43,12 @@ class ConfigController {
 
   async getAIUsage(req, res) {
     try {
+      const { startDate, endDate } = req.query;
+      const whereInsight = {};
+      if (startDate && endDate) {
+        whereInsight.created_at = { [Op.between]: [startDate, endDate] };
+      }
+
       // Invertemos a lógica: buscamos usuários que possuem insights para garantir os dados do usuário
       const usage = await User.findAll({
         attributes: [
@@ -54,7 +61,8 @@ class ConfigController {
         include: [{
           model: Insight,
           attributes: [],
-          required: true // Somente usuários que tem insights
+          required: true, // Somente usuários que tem insights
+          where: whereInsight
         }],
         group: ['User.id'],
         order: [[sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'DESC']],
@@ -65,6 +73,30 @@ class ConfigController {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Erro ao buscar relatório de uso' });
+    }
+  }
+
+  async getDetailedAIUsage(req, res) {
+    try {
+      const { startDate, endDate } = req.query;
+      const where = {};
+      if (startDate && endDate) {
+        where.created_at = { [Op.between]: [startDate, endDate] };
+      }
+
+      const usage = await Insight.findAll({
+        where,
+        include: [{
+          model: User,
+          attributes: ['name', 'email']
+        }],
+        order: [['createdAt', 'DESC']]
+      });
+
+      return res.json(usage);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao buscar detalhamento de uso' });
     }
   }
 }

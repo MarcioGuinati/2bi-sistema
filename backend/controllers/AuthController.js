@@ -45,8 +45,8 @@ class AuthController {
       await AuditService.log(user.id, 'LOGIN_SUCCESS', 'Auth', { email, role }, req.ip);
 
       return res.json({
-        user: { 
-          id, name, email, role, 
+        user: {
+          id, name, email, role,
           avatar_url: user.avatar_url,
           hasReportAccess: user.hasReportAccess,
           hasAIAccess: user.hasAIAccess
@@ -191,10 +191,10 @@ class AuthController {
       return res.status(403).json({ error: 'Only admins or partners can register clients' });
     }
 
-    const { 
-      name, email, password, phone, cpf, income, occupation, 
+    const {
+      name, email, password, phone, cpf, income, occupation,
       financialGoal, customFields, onboardingData,
-      hasReportAccess, hasAIAccess 
+      hasReportAccess, hasAIAccess
     } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
@@ -367,8 +367,8 @@ class AuthController {
     const clients = await User.findAll({
       where,
       attributes: [
-        'id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation', 
-        'financialGoal', 'customFields', 'onboardingData', 'isLead', 
+        'id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation',
+        'financialGoal', 'customFields', 'onboardingData', 'isLead',
         'isActive', 'leadSource', 'partner_id', 'createdAt',
         'hasReportAccess', 'hasAIAccess'
       ],
@@ -388,10 +388,10 @@ class AuthController {
 
     try {
       const { id } = req.params;
-      const { 
-        name, email, password, phone, cpf, income, occupation, 
+      const {
+        name, email, password, phone, cpf, income, occupation,
         financialGoal, customFields, onboardingData,
-        hasReportAccess, hasAIAccess 
+        hasReportAccess, hasAIAccess
       } = req.body;
 
       const user = await User.findByPk(id);
@@ -406,10 +406,10 @@ class AuthController {
       }
 
       // Only update fields provided in the request body
-      const fields = { 
-        name, email, phone, cpf, income, occupation, 
+      const fields = {
+        name, email, phone, cpf, income, occupation,
         financialGoal, customFields, onboardingData,
-        hasReportAccess, hasAIAccess 
+        hasReportAccess, hasAIAccess
       };
       const updateData = {};
 
@@ -480,10 +480,10 @@ class AuthController {
     const { name, email, role } = user;
 
     return res.json({
-      user: { 
-        id: user.id, 
-        name, 
-        email, 
+      user: {
+        id: user.id,
+        name,
+        email,
         role,
         hasReportAccess: user.hasReportAccess,
         hasAIAccess: user.hasAIAccess
@@ -540,11 +540,11 @@ class AuthController {
       const { id, role, avatar_url: updatedAvatar } = user;
 
       return res.json({
-        user: { 
-          id, 
-          name: user.name, 
-          email: user.email, 
-          role, 
+        user: {
+          id,
+          name: user.name,
+          email: user.email,
+          role,
           avatar_url: updatedAvatar,
           hasReportAccess: user.hasReportAccess,
           hasAIAccess: user.hasAIAccess
