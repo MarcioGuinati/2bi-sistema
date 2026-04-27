@@ -24,7 +24,8 @@ import {
   Megaphone,
   Trophy,
   Star,
-  Activity
+  Activity,
+  PenTool
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -57,7 +58,8 @@ const AdminDashboard = () => {
     startDate: new Date().toISOString().split('T')[0],
     recurrence: 1,
     hasReportAccess: false,
-    hasAIAccess: false
+    hasAIAccess: false,
+    url: ''
   });
   const [billingStats, setBillingStats] = useState({ totalActiveValue: 0, pendingAmount: 0, paidMonth: 0 });
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -152,7 +154,24 @@ const AdminDashboard = () => {
       startDate: new Date().toISOString().split('T')[0],
       recurrence: 1,
       hasReportAccess: false,
-      hasAIAccess: false
+      hasAIAccess: false,
+      url: ''
+    });
+    setShowContractModal(true);
+  };
+
+  const handleOpenEditContract = (contract) => {
+    setEditingBillingContract(contract);
+    setContractForm({
+      title: contract.title,
+      setupValue: contract.setupValue.toString(),
+      monthlyValue: contract.monthlyValue.toString(),
+      billingCycle: contract.billingCycle,
+      startDate: new Date(contract.startDate).toISOString().split('T')[0],
+      recurrence: contract.recurrence,
+      hasReportAccess: contract.hasReportAccess,
+      hasAIAccess: contract.hasAIAccess,
+      url: contract.url || ''
     });
     setShowContractModal(true);
   };
@@ -447,6 +466,48 @@ const AdminDashboard = () => {
       console.error('Erro ao baixar contrato:', err);
       error('Falha ao gerar PDF.');
     }
+  };
+
+  const handleSendToAssinafy = async (contract) => {
+    // Se já tiver ID, apenas atualiza o status
+    if (contract.signature_id) {
+      try {
+        const res = await api.get(`/contracts/${contract.id}/signature/status`);
+        if (res.data.status === 'signed') {
+          success('Assinatura confirmada e registrada!');
+        } else {
+          info('O contrato ainda consta como pendente no Assinafy.');
+        }
+        fetchBillingData(selectedClient.id);
+      } catch (err) {
+        error('Falha ao sincronizar com Assinafy.');
+      }
+      return;
+    }
+
+    confirm({
+      title: 'Enviar para Assinatura',
+      message: `Deseja enviar o contrato "${contract.title}" para assinatura digital via Assinafy? Ambas as partes receberão o e-mail.`,
+      onConfirm: async () => {
+        try {
+          // 1. Gera o PDF dinamicamente
+          const doc = await generateContractPDF(contract);
+          
+          // 2. Extrai o Base64 (apenas a parte dos dados)
+          const pdfData = doc.output('datauristring').split(',')[1];
+          
+          // 3. Envia para o backend para processar com Assinafy
+          await api.post(`/contracts/${contract.id}/signature`, {
+            documentBase64: pdfData
+          });
+          
+          success('Solicitação de assinatura enviada com sucesso!');
+          fetchBillingData(selectedClient.id);
+        } catch (err) {
+          error(err.response?.data?.error || 'Erro ao enviar para assinatura.');
+        }
+      }
+    });
   };
 
   const handlePreviewContract = async (contract) => {
@@ -1072,18 +1133,7 @@ const AdminDashboard = () => {
                                 {user?.role === 'admin' && (
                                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
-                                      onClick={() => {
-                                        setEditingBillingContract(c);
-                                        setContractForm({
-                                          title: c.title,
-                                          value: c.value,
-                                          billingCycle: c.billingCycle,
-                                          startDate: c.startDate.split('T')[0],
-                                          hasReportAccess: c.hasReportAccess || false,
-                                          hasAIAccess: c.hasAIAccess || false
-                                        });
-                                        setShowContractModal(true);
-                                      }}
+                                      onClick={() => handleOpenEditContract(c)}
                                       className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                                     >
                                       <Edit2 size={16} />
@@ -1117,6 +1167,14 @@ const AdminDashboard = () => {
                                     title="Baixar PDF"
                                   >
                                     <FileText size={18} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleSendToAssinafy(c)}
+                                    className={`flex-1 md:flex-none p-4 rounded-2xl transition-all shadow-sm border flex items-center justify-center gap-2 ${c.signature_id ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-navy-900 text-white border-navy-900 hover:bg-gold hover:border-gold'}`}
+                                    title={c.signature_id ? 'Ver Status Assinatura' : 'Enviar para Assinatura (Assinafy)'}
+                                  >
+                                    <PenTool size={18} />
+                                    {c.signature_id && <span className="text-[9px] font-black uppercase tracking-tight">{c.signature_status === 'signed' ? 'Assinado' : 'Pendente'}</span>}
                                   </button>
                                 </div>
                               </div>
@@ -1383,6 +1441,16 @@ const AdminDashboard = () => {
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Link do Contrato (PDF)</label>
+                  <input
+                    type="url" placeholder="https://..."
+                    value={contractForm.url} onChange={e => setContractForm({ ...contractForm, url: e.target.value })}
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold transition-all"
+                  />
+                  <p className="text-[9px] text-slate-500 italic ml-2">Insira o link do PDF hospedado (Ex: Google Drive, Dropbox) para enviar para assinatura.</p>
                 </div>
 
                 {/* Plan / Features Section in Contract Modal */}

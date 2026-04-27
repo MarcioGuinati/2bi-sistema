@@ -55,6 +55,22 @@ module.exports = (sequelize, DataTypes) => {
     hasAIAccess: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    signature_id: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    signature_status: {
+      type: DataTypes.ENUM('pending', 'signed', 'rejected'),
+      defaultValue: 'pending'
+    },
+    signature_url: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    signedAt: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   });
 

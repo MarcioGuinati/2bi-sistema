@@ -1,6 +1,98 @@
 const { Contract, Payment, User } = require('../models');
+const AssinafyService = require('../services/AssinafyService');
 
 class BillingController {
+  async handleAssinafyWebhook(req, res) {
+    try {
+      const { event, document } = req.body;
+      console.log('Webhook Assinafy Recebido:', event);
+
+      // Se o documento foi assinado por todos (ou conforme o evento da doc)
+      if (document && document.id) {
+        const contract = await Contract.findOne({ where: { signature_id: document.id } });
+        
+        if (contract) {
+          // Atualiza status baseado no que vem da Assinafy
+          // Geralmente o status de finalizado é 'closed' ou 'signed'
+          const isSigned = document.status === 'closed' || document.status === 'signed';
+          
+          await contract.update({
+            signature_status: isSigned ? 'signed' : 'pending',
+            signedAt: isSigned ? new Date() : null,
+            // Se a Assinafy enviar a URL do PDF assinado em artifacts.original ou similar
+            signature_url: document.artifacts?.signed || document.artifacts?.original
+          });
+          
+          console.log(`Contrato ${contract.id} atualizado via Webhook para: ${contract.signature_status}`);
+        }
+      }
+
+      return res.status(200).send('OK');
+    } catch (err) {
+      console.error('Erro no Webhook Assinafy:', err);
+      return res.status(500).send('Error');
+    }
+  }
+
+  async getSignatureStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const contract = await Contract.findByPk(id);
+
+      if (!contract || !contract.signature_id) {
+        return res.status(400).json({ error: 'Este contrato não possui uma assinatura vinculada.' });
+      }
+
+      const doc = await AssinafyService.checkDocumentStatus(contract.signature_id);
+
+      if (doc) {
+        // Status do documento na Assinafy
+        const isSigned = doc.status === 'closed' || doc.status === 'signed';
+        
+        await contract.update({
+          signature_status: isSigned ? 'signed' : 'pending',
+          signedAt: isSigned ? new Date() : null,
+          signature_url: doc.artifacts?.signed || doc.artifacts?.original
+        });
+      }
+
+      return res.json({ status: contract.signature_status, contract });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Erro ao verificar status na Assinafy' });
+    }
+  }
+
+  async sendToAssinafy(req, res) {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ error: 'Apenas administradores podem enviar contratos para assinatura' });
+    }
+
+    try {
+      const { id } = req.params;
+      const { documentBase64 } = req.body;
+      const contract = await Contract.findByPk(id, {
+        include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+      });
+
+      if (!contract) return res.status(404).json({ error: 'Contrato não encontrado' });
+      if (!documentBase64) return res.status(400).json({ error: 'O PDF não foi enviado para assinatura.' });
+
+      const result = await AssinafyService.sendContractForSignature(contract, contract.User, documentBase64);
+
+      // Save Assinafy ID and update status
+      await contract.update({
+        signature_id: result.id,
+        signature_status: 'pending'
+      });
+
+      return res.json({ message: 'Contrato enviado para assinatura com sucesso!', result });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.message || 'Erro ao integrar com Assinafy' });
+    }
+  }
+
   async listContracts(req, res) {
     try {
       const { userId } = req.params;
@@ -30,7 +122,7 @@ class BillingController {
       const { 
         user_id, title, setupValue = 0, monthlyValue = 0, 
         billingCycle, startDate, recurrence = 1,
-        hasReportAccess, hasAIAccess 
+        hasReportAccess, hasAIAccess, url
       } = req.body;
       
       // Calculate total value for display (Setup + first month if any)
@@ -47,7 +139,8 @@ class BillingController {
         startDate: startDate || new Date(),
         status: 'active',
         hasReportAccess: hasReportAccess || false,
-        hasAIAccess: hasAIAccess || false
+        hasAIAccess: hasAIAccess || false,
+        url
       });
 
       // Automatically generate the requested number of payments
@@ -102,7 +195,7 @@ class BillingController {
       const { id } = req.params;
       const { 
         title, value, billingCycle, startDate,
-        hasReportAccess, hasAIAccess 
+        hasReportAccess, hasAIAccess, url
       } = req.body;
       const contract = await Contract.findByPk(id);
       
@@ -110,7 +203,7 @@ class BillingController {
 
       await contract.update({ 
         title, value, billingCycle, startDate, 
-        hasReportAccess, hasAIAccess 
+        hasReportAccess, hasAIAccess, url
       });
       return res.json(contract);
     } catch (err) {

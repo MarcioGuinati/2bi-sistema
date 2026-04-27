@@ -92,6 +92,9 @@ routes.delete('/goals/:id', GoalController.delete);
 // Billing & Contracts
 routes.get('/contracts/:userId', BillingController.listContracts);
 routes.post('/contracts', BillingController.storeContract);
+routes.post('/contracts/:id/signature', BillingController.sendToAssinafy);
+routes.post('/webhooks/assinafy', BillingController.handleAssinafyWebhook);
+routes.get('/contracts/:id/signature/status', authMiddleware, BillingController.getSignatureStatus);
 routes.put('/contracts/:id', BillingController.updateContract);
 routes.delete('/contracts/:id', BillingController.deleteContract);
 routes.get('/payments/:userId', BillingController.listPayments);
