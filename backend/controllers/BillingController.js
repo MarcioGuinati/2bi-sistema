@@ -440,20 +440,40 @@ class BillingController {
       const axios = require('axios');
       const accountId = await AssinafyService.getAccountId();
       
-      const response = await axios.get(
-        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`,
-        {
+      console.log(`Tentando baixar contrato assinado ${contract.signature_id} da conta ${accountId}`);
+
+      let downloadUrl = `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`;
+      
+      try {
+        const response = await axios.get(downloadUrl, {
           headers: { 'X-Api-Key': process.env.ASSINAFY_TOKEN },
           responseType: 'arraybuffer'
-        }
-      );
+        });
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=contrato_assinado_${contract.title.replace(/\s+/g, '_')}.pdf`);
-      return res.send(Buffer.from(response.data));
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=contrato_assinado_${contract.title.replace(/\s+/g, '_')}.pdf`);
+        return res.send(Buffer.from(response.data));
+      } catch (signedErr) {
+        console.warn('Aviso: Versão /signed não disponível, tentando /original');
+        // Tenta a versão original se a assinada ainda não existir
+        downloadUrl = `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/original`;
+        
+        const responseOrigin = await axios.get(downloadUrl, {
+          headers: { 'X-Api-Key': process.env.ASSINAFY_TOKEN },
+          responseType: 'arraybuffer'
+        });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=contrato_${contract.title.replace(/\s+/g, '_')}_pendente.pdf`);
+        return res.send(Buffer.from(responseOrigin.data));
+      }
+
     } catch (err) {
-      console.error('Erro no download assinado:', err.response?.data || err.message);
-      return res.status(500).json({ error: 'Não foi possível baixar o documento assinado da Assinafy.' });
+      console.error('ERRO CRÍTICO NO DOWNLOAD:', err.response?.data || err.message);
+      return res.status(500).json({ 
+        error: 'Não foi possível baixar o documento da Assinafy.',
+        details: err.response?.data || err.message 
+      });
     }
   }
 }
