@@ -429,50 +429,60 @@ class BillingController {
   }
 
   async downloadSignedContract(req, res) {
+    const axios = require('axios');
+    const { id } = req.params;
+    
     try {
-      const { id } = req.params;
       const contract = await Contract.findByPk(id);
-
       if (!contract || !contract.signature_id) {
         return res.status(404).json({ error: 'Contrato ou assinatura não encontrados' });
       }
 
-      const axios = require('axios');
       const accountId = await AssinafyService.getAccountId();
+      const token = process.env.ASSINAFY_TOKEN;
       
-      console.log(`Tentando baixar contrato assinado ${contract.signature_id} da conta ${accountId}`);
+      // Lista de URLs para tentar em ordem de prioridade
+      const urls = [
+        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`,
+        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/signed`,
+        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/original`,
+        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/original`
+      ];
 
-      let downloadUrl = `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`;
-      
-      try {
-        const response = await axios.get(downloadUrl, {
-          headers: { 'X-Api-Key': process.env.ASSINAFY_TOKEN },
-          responseType: 'arraybuffer'
-        });
+      for (const url of urls) {
+        try {
+          console.log(`Tentando download: ${url}`);
+          const response = await axios.get(url, {
+            headers: { 'X-Api-Key': token },
+            responseType: 'arraybuffer',
+            timeout: 5000
+          });
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=contrato_assinado_${contract.title.replace(/\s+/g, '_')}.pdf`);
-        return res.send(Buffer.from(response.data));
-      } catch (signedErr) {
-        console.warn('Aviso: Versão /signed não disponível, tentando /original');
-        // Tenta a versão original se a assinada ainda não existir
-        downloadUrl = `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/original`;
-        
-        const responseOrigin = await axios.get(downloadUrl, {
-          headers: { 'X-Api-Key': process.env.ASSINAFY_TOKEN },
-          responseType: 'arraybuffer'
-        });
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=contrato_${contract.title.replace(/\s+/g, '_')}_pendente.pdf`);
-        return res.send(Buffer.from(responseOrigin.data));
+          if (response.status === 200) {
+            res.setHeader('Content-Type', 'application/pdf');
+            const isOriginal = url.includes('/original');
+            res.setHeader('Content-Disposition', `attachment; filename=contrato_${isOriginal ? 'original' : 'assinado'}_${contract.title.replace(/\s+/g, '_')}.pdf`);
+            return res.send(Buffer.from(response.data));
+          }
+        } catch (e) {
+          console.warn(`Falha na URL: ${url} (Status: ${e.response?.status})`);
+          continue; // Tenta a próxima
+        }
       }
 
+      throw new Error('Nenhuma das URLs de download da Assinafy funcionou.');
+
     } catch (err) {
-      console.error('ERRO CRÍTICO NO DOWNLOAD:', err.response?.data || err.message);
+      let details = err.message;
+      if (err.response?.data) {
+        // Converter Buffer de erro para String se necessário
+        details = Buffer.isBuffer(err.response.data) ? err.response.data.toString() : err.response.data;
+      }
+      
+      console.error('ERRO NO DOWNLOAD ASSINADO:', details);
       return res.status(500).json({ 
         error: 'Não foi possível baixar o documento da Assinafy.',
-        details: err.response?.data || err.message 
+        details: details
       });
     }
   }
