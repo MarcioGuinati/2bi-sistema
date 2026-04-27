@@ -25,7 +25,8 @@ import {
   Trophy,
   Star,
   Activity,
-  PenTool
+  PenTool,
+  ShieldCheck
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -1178,6 +1179,17 @@ const AdminDashboard = () => {
                                 >
                                   <FileText size={18} />
                                 </button>
+                                {c.signature_status === 'signed' && c.signature_url && (
+                                  <a
+                                    href={c.signature_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-1 lg:flex-none p-3.5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-all shadow-lg flex items-center justify-center"
+                                    title="Ver Contrato Assinado"
+                                  >
+                                    <ShieldCheck size={18} />
+                                  </a>
+                                )}
                                 <button
                                   onClick={() => handleSendToAssinafy(c)}
                                   className={`flex-1 lg:flex-none p-3.5 rounded-2xl transition-all shadow-sm border flex items-center justify-center ${c.signature_id ? (c.signature_status === 'signed' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-blue-500/10 text-blue-600 border-blue-500/20') : 'bg-navy-900 text-white border-navy-900 hover:bg-gold hover:border-gold'}`}
