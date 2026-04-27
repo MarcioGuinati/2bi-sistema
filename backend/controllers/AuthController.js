@@ -1,16 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-const { MailerSend, EmailParams, Sender, Recipient } = require('mailersend');
 const sequelize = require('../config/database');
 const otplib = require('otplib');
 const qrcode = require('qrcode');
 const AuditService = require('../services/AuditService');
+const MailService = require('../services/MailService');
 require('dotenv').config();
-
-const mailerSend = new MailerSend({
-  apiKey: process.env.MAILERSEND_API_KEY,
-});
 
 class AuthController {
   async login(req, res) {
@@ -578,15 +574,7 @@ class AuthController {
   sendWelcomeEmail = async (user) => {
     try {
       const email = user.email.toLowerCase();
-      const sentFrom = new Sender(process.env.MAIL_FROM, "2BI Planejamento");
-      const recipients = [new Recipient(email, user.name)];
-
-      const emailParams = new EmailParams()
-        .setFrom(sentFrom)
-        .setTo(recipients)
-        .setReplyTo(sentFrom)
-        .setSubject("Bem-vindo à 2BI Planejamento - Seu Acesso Exclusivo")
-        .setHtml(`
+      const html = `
     <!DOCTYPE html>
     <html lang="pt-BR">
       <head>
@@ -671,10 +659,15 @@ class AuthController {
         </table>
       </body>
     </html>
-  `)
-        .setText(`Olá ${user.name}, bem-vindo à 2BI Planejamento! Sua conta foi criada com sucesso. Acesse o aplicativo em: https://app.2biplanejamento.cloud/login`);
+  `;
 
-      await mailerSend.email.send(emailParams);
+      await MailService.sendMail({
+        to: email,
+        subject: "Bem-vindo à 2BI Planejamento - Seu Acesso Exclusivo",
+        text: `Olá ${user.name}, bem-vindo à 2BI Planejamento! Sua conta foi criada com sucesso. Acesse o aplicativo em: https://app.2biplanejamento.cloud/login`,
+        html
+      });
+
       return true;
     } catch (err) {
       console.error('MailSend Error (Welcome):', err);
@@ -730,15 +723,7 @@ class AuthController {
         resetPasswordExpires: expires
       });
 
-      const sentFrom = new Sender(process.env.MAIL_FROM, "2BI Planejamento");
-      const recipients = [new Recipient(email, user.name)];
-
-      const emailParams = new EmailParams()
-        .setFrom(sentFrom)
-        .setTo(recipients)
-        .setReplyTo(sentFrom)
-        .setSubject("Seu Código de Acesso Exclusivo - 2BI")
-        .setHtml(`
+      const html = `
     <!DOCTYPE html>
     <html lang="pt-BR">
       <head>
@@ -842,10 +827,14 @@ class AuthController {
         </table>
       </body>
     </html>
-  `)
-        .setText(`Seu código de recuperação 2BI é: ${token}. Este código expira em 5 minutos.`);
+  `;
 
-      await mailerSend.email.send(emailParams);
+      await MailService.sendMail({
+        to: email,
+        subject: "Seu Código de Acesso Exclusivo - 2BI",
+        text: `Seu código de recuperação 2BI é: ${token}. Este código expira em 5 minutos.`,
+        html
+      });
 
       return res.json({ message: 'Token enviado com sucesso' });
     } catch (err) {
