@@ -441,11 +441,10 @@ class BillingController {
       const accountId = await AssinafyService.getAccountId();
       const token = process.env.ASSINAFY_TOKEN;
       
-      // Lista de URLs para tentar em ordem de prioridade (bundle e certificated são os nomes oficiais pós-assinatura)
+      // Lista de URLs para tentar em ordem de prioridade
       const urls = [
-        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/bundle`,
         `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/certificated`,
-        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/bundle`,
+        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/bundle`,
         `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`,
         `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/signed`,
         `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/original`
@@ -457,14 +456,19 @@ class BillingController {
           const response = await axios.get(url, {
             headers: { 'X-Api-Key': token },
             responseType: 'arraybuffer',
-            timeout: 5000
+            timeout: 8000
           });
 
-          if (response.status === 200) {
+          const contentType = response.headers['content-type'];
+          
+          // Só entrega se for PDF. Se for JSON ou HTML, é erro.
+          if (response.status === 200 && contentType.includes('application/pdf')) {
             res.setHeader('Content-Type', 'application/pdf');
             const isOriginal = url.includes('/original');
             res.setHeader('Content-Disposition', `attachment; filename=contrato_${isOriginal ? 'original' : 'assinado'}_${contract.title.replace(/\s+/g, '_')}.pdf`);
             return res.send(Buffer.from(response.data));
+          } else {
+            console.warn(`URL ignorada (não é PDF): ${url} - Tipo: ${contentType}`);
           }
         } catch (e) {
           console.warn(`Falha na URL: ${url} (Status: ${e.response?.status})`);
