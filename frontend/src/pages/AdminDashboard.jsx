@@ -514,6 +514,24 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleDownloadSignedContract = async (contract) => {
+    try {
+      const response = await api.get(`/contracts/${contract.id}/signature/download`, {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `contrato_assinado_${contract.title}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      success('Download iniciado!');
+    } catch (err) {
+      error('Erro ao baixar contrato assinado da Assinafy.');
+    }
+  };
+
   const handlePreviewContract = async (contract) => {
     try {
       const doc = await generateContractPDF(contract);
@@ -1179,16 +1197,14 @@ const AdminDashboard = () => {
                                 >
                                   <FileText size={18} />
                                 </button>
-                                {c.signature_status === 'signed' && c.signature_url && (
-                                  <a
-                                    href={c.signature_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                {c.signature_status === 'signed' && (
+                                  <button
+                                    onClick={() => handleDownloadSignedContract(c)}
                                     className="flex-1 lg:flex-none p-3.5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-all shadow-lg flex items-center justify-center"
-                                    title="Ver Contrato Assinado"
+                                    title="Baixar Contrato Assinado"
                                   >
                                     <ShieldCheck size={18} />
-                                  </a>
+                                  </button>
                                 )}
                                 <button
                                   onClick={() => handleSendToAssinafy(c)}

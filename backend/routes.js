@@ -95,6 +95,7 @@ routes.get('/contracts/:userId', BillingController.listContracts);
 routes.post('/contracts', BillingController.storeContract);
 routes.post('/contracts/:id/signature', BillingController.sendToAssinafy);
 routes.get('/contracts/:id/signature/status', BillingController.getSignatureStatus);
+routes.get('/contracts/:id/signature/download', authMiddleware, BillingController.downloadSignedContract);
 routes.put('/contracts/:id', BillingController.updateContract);
 routes.delete('/contracts/:id', BillingController.deleteContract);
 routes.get('/payments/:userId', BillingController.listPayments);

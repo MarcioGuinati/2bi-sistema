@@ -427,6 +427,33 @@ class BillingController {
       return res.status(500).json({ error: 'Erro ao buscar estatísticas' });
     }
   }
+
+  async downloadSignedContract(req, res) {
+    try {
+      const { id } = req.params;
+      const contract = await Contract.findByPk(id);
+
+      if (!contract || !contract.signature_id) {
+        return res.status(404).json({ error: 'Contrato ou assinatura não encontrados' });
+      }
+
+      const axios = require('axios');
+      const response = await axios.get(
+        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/original`,
+        {
+          headers: { 'X-Api-Key': process.env.ASSINAFY_TOKEN },
+          responseType: 'arraybuffer'
+        }
+      );
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=contrato_assinado_${contract.title.replace(/\s+/g, '_')}.pdf`);
+      return res.send(Buffer.from(response.data));
+    } catch (err) {
+      console.error('Erro no download assinado:', err.response?.data || err.message);
+      return res.status(500).json({ error: 'Não foi possível baixar o documento assinado da Assinafy.' });
+    }
+  }
 }
 
 module.exports = new BillingController();
