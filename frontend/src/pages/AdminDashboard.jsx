@@ -1127,58 +1127,64 @@ const AdminDashboard = () => {
                             <div key={c.id} className="bg-[var(--bg-secondary)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-sm hover:shadow-xl hover:border-gold/20 transition-all group">
                               <div className="flex justify-between items-start mb-6">
                                 <div>
+                                <div className="flex flex-wrap gap-2">
                                   <span className="text-[8px] font-black text-gold uppercase tracking-[0.3em] px-3 py-1 bg-gold/10 rounded-full">{c.billingCycle === 'monthly' ? 'Mensalidade' : 'Anuidade'}</span>
-                                  <h4 className="font-black text-[var(--text-primary)] text-xl mt-2 tracking-tight group-hover:text-gold transition-colors">{c.title}</h4>
+                                  {c.signature_id && (
+                                    <span className={`text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full ${c.signature_status === 'signed' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-blue-500/10 text-blue-600'}`}>
+                                      {c.signature_status === 'signed' ? 'Assinado' : 'Aguardando Assinatura'}
+                                    </span>
+                                  )}
                                 </div>
-                                {user?.role === 'admin' && (
-                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                      onClick={() => handleOpenEditContract(c)}
-                                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                                    >
-                                      <Edit2 size={16} />
-                                    </button>
-                                    <button onClick={() => handleDeleteContract(c.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-                                      <Trash2 size={16} />
-                                    </button>
-                                  </div>
-                                )}
+                                <h4 className="font-black text-[var(--text-primary)] text-xl mt-3 tracking-tight group-hover:text-gold transition-colors">{c.title}</h4>
                               </div>
-                              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                                <div>
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Acordo Total (Setup+Mes)</p>
-                                  <div className="text-3xl font-black text-[var(--text-primary)]">R$ {Number(c.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                  <div className="flex gap-2 mt-1">
-                                    {Number(c.setupValue) > 0 && <span className="text-[8px] font-bold text-gold uppercase tracking-tighter">Setup: R${Number(c.setupValue).toLocaleString()}</span>}
-                                    {Number(c.monthlyValue) > 0 && <span className="text-[8px] font-bold text-blue-400 uppercase tracking-tighter">Mensal: R${Number(c.monthlyValue).toLocaleString()}</span>}
-                                  </div>
-                                </div>
-                                <div className="flex gap-3 w-full md:w-auto">
+                              {user?.role === 'admin' && (
+                                <div className="flex gap-2">
                                   <button
-                                    onClick={() => handlePreviewContract(c)}
-                                    className="flex-1 md:flex-none p-4 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl hover:bg-navy-900 hover:text-white transition-all shadow-sm border border-[var(--border-primary)] flex items-center justify-center gap-2"
-                                    title="Visualizar Contrato"
+                                    onClick={() => handleOpenEditContract(c)}
+                                    className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                                   >
-                                    <Eye size={18} />
+                                    <Edit2 size={16} />
                                   </button>
-                                  <button
-                                    onClick={() => handleDownloadContract(c)}
-                                    className="flex-1 md:flex-none p-4 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl hover:bg-gold hover:text-white transition-all shadow-sm border border-[var(--border-primary)] flex items-center justify-center gap-2"
-                                    title="Baixar PDF"
-                                  >
-                                    <FileText size={18} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleSendToAssinafy(c)}
-                                    className={`flex-1 md:flex-none p-4 rounded-2xl transition-all shadow-sm border flex items-center justify-center gap-2 ${c.signature_id ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-navy-900 text-white border-navy-900 hover:bg-gold hover:border-gold'}`}
-                                    title={c.signature_id ? 'Ver Status Assinatura' : 'Enviar para Assinatura (Assinafy)'}
-                                  >
-                                    <PenTool size={18} />
-                                    {c.signature_id && <span className="text-[9px] font-black uppercase tracking-tight">{c.signature_status === 'signed' ? 'Assinado' : 'Pendente'}</span>}
+                                  <button onClick={() => handleDeleteContract(c.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                    <Trash2 size={16} />
                                   </button>
                                 </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                              <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Acordo Total (Setup+Mes)</p>
+                                <div className="text-3xl font-black text-[var(--text-primary)]">R$ {Number(c.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                <div className="flex gap-2 mt-1">
+                                  {Number(c.setupValue) > 0 && <span className="text-[8px] font-bold text-gold uppercase tracking-tighter">Setup: R${Number(c.setupValue).toLocaleString()}</span>}
+                                  {Number(c.monthlyValue) > 0 && <span className="text-[8px] font-bold text-blue-400 uppercase tracking-tighter">Mensal: R${Number(c.monthlyValue).toLocaleString()}</span>}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 w-full lg:w-auto">
+                                <button
+                                  onClick={() => handlePreviewContract(c)}
+                                  className="flex-1 lg:flex-none p-3.5 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl hover:bg-navy-900 hover:text-white transition-all shadow-sm border border-[var(--border-primary)] flex items-center justify-center"
+                                  title="Visualizar Contrato"
+                                >
+                                  <Eye size={18} />
+                                </button>
+                                <button
+                                  onClick={() => handleDownloadContract(c)}
+                                  className="flex-1 lg:flex-none p-3.5 bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-2xl hover:bg-gold hover:text-white transition-all shadow-sm border border-[var(--border-primary)] flex items-center justify-center"
+                                  title="Baixar PDF"
+                                >
+                                  <FileText size={18} />
+                                </button>
+                                <button
+                                  onClick={() => handleSendToAssinafy(c)}
+                                  className={`flex-1 lg:flex-none p-3.5 rounded-2xl transition-all shadow-sm border flex items-center justify-center ${c.signature_id ? (c.signature_status === 'signed' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-blue-500/10 text-blue-600 border-blue-500/20') : 'bg-navy-900 text-white border-navy-900 hover:bg-gold hover:border-gold'}`}
+                                  title={c.signature_id ? (c.signature_status === 'signed' ? 'Assinatura Confirmada' : 'Verificar Status da Assinatura') : 'Enviar para Assinatura Digital'}
+                                >
+                                  <PenTool size={18} />
+                                </button>
                               </div>
                             </div>
+                          </div>
                           ))}
                           {clientContracts.length === 0 && (
                             <div className="md:col-span-2 py-20 text-center border-2 border-dashed border-slate-200 rounded-[3rem]">
