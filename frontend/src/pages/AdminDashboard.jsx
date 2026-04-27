@@ -478,9 +478,12 @@ const AdminDashboard = () => {
         } else {
           info('O contrato ainda consta como pendente no Assinafy.');
         }
-        fetchBillingData(selectedClient.id);
+        if (selectedClient) {
+          fetchBillingData(selectedClient.id);
+        }
       } catch (err) {
-        error('Falha ao sincronizar com Assinafy.');
+        console.error('Erro na sincronização:', err);
+        error(err.response?.data?.error || 'Falha ao sincronizar com Assinafy.');
       }
       return;
     }
