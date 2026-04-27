@@ -11,12 +11,17 @@ class AuditService {
    */
   static async log(userId, action, resource, details = {}, ipAddress = null) {
     try {
+      // Limpar prefixo IPv6 se existir para IPv4
+      const cleanIp = ipAddress && ipAddress.startsWith('::ffff:') 
+        ? ipAddress.replace('::ffff:', '') 
+        : ipAddress;
+
       await AuditLog.create({
         userId,
         action,
         resource,
         details,
-        ipAddress
+        ipAddress: cleanIp
       });
     } catch (err) {
       // We don't want to break the main flow if auditing fails, but we should log it

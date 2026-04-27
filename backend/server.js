@@ -9,6 +9,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Habilitar trust proxy para capturar IP real atrás de proxies (Nginx, Cloudflare, etc)
+app.set('trust proxy', true);
+
 // Security Hardening
 app.use(helmet());
 
