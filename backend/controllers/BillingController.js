@@ -441,11 +441,13 @@ class BillingController {
       const accountId = await AssinafyService.getAccountId();
       const token = process.env.ASSINAFY_TOKEN;
       
-      // Lista de URLs para tentar em ordem de prioridade
+      // Lista de URLs para tentar em ordem de prioridade (bundle e certificated são os nomes oficiais pós-assinatura)
       const urls = [
+        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/bundle`,
+        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/certificated`,
+        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/bundle`,
         `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`,
         `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/signed`,
-        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/original`,
         `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/original`
       ];
 
