@@ -61,21 +61,40 @@ class AssinafyService {
       const documentId = uploadRes.data.id || uploadRes.data.data?.id;
       console.log('Documento Uploaded:', documentId);
 
-      // PASSO B: Criar/Buscar Signatário
-      const signerRes = await axios.post(`${this.baseUrl}/accounts/${accountId}/signers`, {
+      // PASSO B: Criar/Buscar Signatário do Cliente
+      const signerClientRes = await axios.post(`${this.baseUrl}/accounts/${accountId}/signers`, {
         full_name: user.name,
         email: user.email
       }, {
         headers: { 'X-Api-Key': this.token }
       });
 
-      const signerId = signerRes.data.data?.id || signerRes.data.id;
-      console.log('Signatário Criado:', signerId);
+      const clientSignerId = signerClientRes.data.data?.id || signerClientRes.data.id;
+      const signerIds = [clientSignerId];
 
-      // PASSO C: Solicitar Assinatura (Assignment)
+      // PASSO B.1: Criar/Buscar Signatário do Sócio (Fixo)
+      const partnerEmail = process.env.ASSINAFY_PARTNER_EMAIL;
+      const partnerName = process.env.ASSINAFY_PARTNER_NAME;
+
+      if (partnerEmail && partnerEmail !== user.email) {
+        try {
+          const signerPartnerRes = await axios.post(`${this.baseUrl}/accounts/${accountId}/signers`, {
+            full_name: partnerName || 'Sócio 2Bi',
+            email: partnerEmail
+          }, {
+            headers: { 'X-Api-Key': this.token }
+          });
+          const partnerSignerId = signerPartnerRes.data.data?.id || signerPartnerRes.data.id;
+          signerIds.push(partnerSignerId);
+        } catch (err) {
+          console.warn('Não foi possível adicionar o sócio como assinante fixo:', err.message);
+        }
+      }
+
+      // PASSO C: Solicitar Assinatura (Assignment para ambos)
       const assignRes = await axios.post(`${this.baseUrl}/documents/${documentId}/assignments`, {
-        method: 'virtual', // Conforme doc
-        signerIds: [signerId]
+        method: 'virtual',
+        signerIds: signerIds
       }, {
         headers: { 'X-Api-Key': this.token }
       });
