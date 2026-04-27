@@ -438,8 +438,10 @@ class BillingController {
       }
 
       const axios = require('axios');
+      const accountId = await AssinafyService.getAccountId();
+      
       const response = await axios.get(
-        `https://api.assinafy.com.br/v1/documents/${contract.signature_id}/download/signed`,
+        `https://api.assinafy.com.br/v1/accounts/${accountId}/documents/${contract.signature_id}/download/signed`,
         {
           headers: { 'X-Api-Key': process.env.ASSINAFY_TOKEN },
           responseType: 'arraybuffer'
