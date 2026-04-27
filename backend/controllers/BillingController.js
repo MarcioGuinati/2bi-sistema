@@ -4,26 +4,26 @@ const AssinafyService = require('../services/AssinafyService');
 class BillingController {
   async handleAssinafyWebhook(req, res) {
     try {
-      const { event, document } = req.body;
+      const { event, object } = req.body; // Assinafy envia os dados em 'object'
       console.log('Webhook Assinafy Recebido:', event);
 
-      // Se o documento foi assinado por todos (ou conforme o evento da doc)
-      if (document && document.id) {
-        const contract = await Contract.findOne({ where: { signature_id: document.id } });
+      if (object && object.id) {
+        const contract = await Contract.findOne({ where: { signature_id: object.id } });
         
         if (contract) {
-          // Atualiza status baseado no que vem da Assinafy
-          // Geralmente o status de finalizado é 'closed' ou 'signed'
-          const isSigned = document.status === 'closed' || document.status === 'signed';
+          // Verifica se está assinado pelo status OU pelo contador de assinaturas
+          const summary = object.assignment?.summary;
+          const isSigned = object.status === 'closed' || 
+                           object.status === 'signed' || 
+                           (summary && summary.completed_count >= summary.signer_count && summary.signer_count > 0);
           
           await contract.update({
             signature_status: isSigned ? 'signed' : 'pending',
             signedAt: isSigned ? new Date() : null,
-            // Se a Assinafy enviar a URL do PDF assinado em artifacts.original ou similar
-            signature_url: document.artifacts?.signed || document.artifacts?.original
+            signature_url: object.artifacts?.signed || object.artifacts?.original
           });
           
-          console.log(`Contrato ${contract.id} atualizado via Webhook para: ${contract.signature_status}`);
+          console.log(`Contrato ${contract.id} atualizado via Webhook. Status: ${contract.signature_status}`);
         }
       }
 
@@ -43,11 +43,14 @@ class BillingController {
         return res.status(400).json({ error: 'Este contrato não possui uma assinatura vinculada.' });
       }
 
-      const doc = await AssinafyService.checkDocumentStatus(contract.signature_id);
+      const response = await AssinafyService.checkDocumentStatus(contract.signature_id);
+      const doc = response?.data || response; // Documentação indica que vem em 'data'
 
       if (doc) {
-        // Status do documento na Assinafy
-        const isSigned = doc.status === 'closed' || doc.status === 'signed';
+        const summary = doc.assignment?.summary;
+        const isSigned = doc.status === 'closed' || 
+                         doc.status === 'signed' || 
+                         (summary && summary.completed_count >= summary.signer_count && summary.signer_count > 0);
         
         await contract.update({
           signature_status: isSigned ? 'signed' : 'pending',
@@ -58,7 +61,7 @@ class BillingController {
 
       return res.json({ status: contract.signature_status, contract });
     } catch (err) {
-      console.error(err);
+      console.error('Erro no Sync Manual:', err);
       return res.status(500).json({ error: 'Erro ao verificar status na Assinafy' });
     }
   }
