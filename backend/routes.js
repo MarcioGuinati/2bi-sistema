@@ -27,6 +27,7 @@ routes.post('/2fa/verify-login', AuthController.verify2FALogin);
 routes.post('/register-lead', AuthController.registerLead);
 routes.post('/forgot-password', AuthController.forgotPassword);
 routes.post('/reset-password', AuthController.resetPassword);
+routes.post('/webhooks/assinafy', BillingController.handleAssinafyWebhook);
 routes.post('/logout', authMiddleware, AuthController.logout);
 
 // Protected routes
@@ -93,8 +94,7 @@ routes.delete('/goals/:id', GoalController.delete);
 routes.get('/contracts/:userId', BillingController.listContracts);
 routes.post('/contracts', BillingController.storeContract);
 routes.post('/contracts/:id/signature', BillingController.sendToAssinafy);
-routes.post('/webhooks/assinafy', BillingController.handleAssinafyWebhook);
-routes.get('/contracts/:id/signature/status', authMiddleware, BillingController.getSignatureStatus);
+routes.get('/contracts/:id/signature/status', BillingController.getSignatureStatus);
 routes.put('/contracts/:id', BillingController.updateContract);
 routes.delete('/contracts/:id', BillingController.deleteContract);
 routes.get('/payments/:userId', BillingController.listPayments);
