@@ -357,6 +357,7 @@ const AdminAIConfig = () => {
                                       <th className="px-10 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Data e Hora</th>
                                       <th className="px-10 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Cliente</th>
                                       <th className="px-10 py-5 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Referência</th>
+                                      <th className="px-10 py-5 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Tipo de Uso</th>
                                       <th className="px-10 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-500">Status</th>
                                   </tr>
                               </thead>
@@ -381,6 +382,21 @@ const AdminAIConfig = () => {
                                                   Mês {d.month}/{d.year}
                                               </div>
                                           </td>
+                                          <td className="px-10 py-6 text-center">
+                                              {d.content?.startsWith('Categorização OFX') ? (
+                                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[9px] font-black uppercase tracking-widest">
+                                                      <Database size={10} /> Categorização OFX
+                                                  </span>
+                                              ) : d.content?.startsWith('Extração de Texto') ? (
+                                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-[9px] font-black uppercase tracking-widest">
+                                                      <MessageCircle size={10} /> Extração de Texto
+                                                  </span>
+                                              ) : (
+                                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gold/10 text-gold rounded-full text-[9px] font-black uppercase tracking-widest">
+                                                      <Activity size={10} /> Insight Mensal
+                                                  </span>
+                                              )}
+                                          </td>
                                           <td className="px-10 py-6 text-right">
                                               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-[9px] font-black uppercase tracking-widest">
                                                   <Check size={10} /> Sucesso
@@ -390,7 +406,7 @@ const AdminAIConfig = () => {
                                   ))}
                                   {filteredDetailed.length === 0 && (
                                       <tr>
-                                          <td colSpan="4" className="px-10 py-24 text-center">
+                                          <td colSpan="5" className="px-10 py-24 text-center">
                                               <div className="flex flex-col items-center gap-4 opacity-30">
                                                   <Activity size={48} />
                                                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nenhum registro encontrado</span>

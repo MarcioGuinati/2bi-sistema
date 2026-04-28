@@ -1,5 +1,5 @@
 const { parse } = require('ofx-js');
-const { Transaction, Setting, Category } = require('../models');
+const { Transaction, Setting, Category, Insight } = require('../models');
 const axios = require('axios');
 
 class ImportController {
@@ -98,10 +98,21 @@ class ImportController {
             const parsedContent = JSON.parse(content);
             const mapping = parsedContent.categorias || [];
 
+            let categorizedCount = 0;
+
             mapping.forEach(m => {
               if (processed[m.id_transacao]) {
                 processed[m.id_transacao].category_id = m.category_id || null;
+                if (m.category_id) categorizedCount++;
               }
+            });
+
+            const now = new Date();
+            await Insight.create({
+              user_id: req.userId,
+              month: now.getMonth() + 1,
+              year: now.getFullYear(),
+              content: `Categorização OFX via IA: ${processed.length} transações analisadas, ${categorizedCount} mapeadas.`
             });
           }
         }
@@ -225,6 +236,14 @@ class ImportController {
           isDuplicate: false
         });
       }
+
+      const now = new Date();
+      await Insight.create({
+        user_id: req.userId,
+        month: now.getMonth() + 1,
+        year: now.getFullYear(),
+        content: `Extração de Texto via IA: ${text.length} caracteres analisados, ${processed.length} transações extraídas.`
+      });
 
       return res.json(processed);
     } catch (error) {

@@ -824,7 +824,7 @@ const FinanceManagement = () => {
       <AnimatePresence>
         {showTextModal && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
-            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-xl shadow-2xl border border-[var(--border-primary)] flex flex-col">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col">
               <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
                 <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar por Texto (IA)</h3>
                 <button onClick={() => setShowTextModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
