@@ -59,7 +59,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Parceiros', path: '/admin/partners', icon: Briefcase },
     { name: 'Relatórios Master', path: '/admin/reports', icon: FileText },
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
-    { name: 'Financeiro Global', path: '/admin/finances', icon: TrendingUp },
+    { name: 'Finanças', path: '/admin/finances', icon: TrendingUp },
     { name: 'Mentoria Master', path: '/admin/mentorship', icon: Calendar },
     { name: 'Segurança', path: '/admin/security', icon: ShieldCheck },
     { name: 'Logs de Auditoria', path: '/admin/audit-logs', icon: Shield },
@@ -74,37 +74,37 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
       ${isCollapsed ? 'lg:w-[110px]' : 'lg:w-[280px]'}
     `}>
       <div className="flex flex-col h-full bg-navy-900 lg:rounded-[3.5rem] shadow-[0_40px_80px_-20px_rgba(1,22,56,0.5)] relative overflow-hidden">
-        
+
         {/* Header & Logo Section */}
         <div className="p-8 flex flex-col items-center gap-6 relative z-10 w-full mb-2">
-           <Link to="/panel" className="group">
-             <div className="flex items-center justify-center transition-all duration-500 group-hover:scale-110">
-                <img src="/logo_2bi.png" alt="2BI" className="w-full max-w-[160px] object-contain brightness-0 invert opacity-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
-             </div>
-           </Link>
+          <Link to="/panel" className="group">
+            <div className="flex items-center justify-center transition-all duration-500 group-hover:scale-110">
+              <img src="/logo_2bi.png" alt="2BI" className="w-full max-w-[160px] object-contain brightness-0 invert opacity-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+            </div>
+          </Link>
 
-           {/* User Profile Section (Restored) */}
-           {!isCollapsed && (
-             <Link 
-              to="/profile" 
+          {/* User Profile Section (Restored) */}
+          {!isCollapsed && (
+            <Link
+              to="/profile"
               className="w-full bg-white/5 border border-white/5 p-4 rounded-[2rem] flex items-center gap-4 hover:bg-white/10 transition-all group"
-             >
-                <div className="relative">
-                  {user?.avatar_url ? (
-                    <img src={user.avatar_url} alt={user.name} className="w-12 h-12 rounded-2xl object-cover border border-gold/20" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold font-black border border-gold/20">
-                      {user?.name?.charAt(0)}
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-navy-900 shadow-lg"></div>
-                </div>
-                <div className="overflow-hidden">
-                   <div className="text-white text-xs font-black truncate tracking-tight">{user?.name?.split(' ')[0]}</div>
-                   <div className="text-[9px] text-gold font-black uppercase tracking-[0.2em] opacity-70">Acesso Premium</div>
-                </div>
-             </Link>
-           )}
+            >
+              <div className="relative">
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt={user.name} className="w-12 h-12 rounded-2xl object-cover border border-gold/20" />
+                ) : (
+                  <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold font-black border border-gold/20">
+                    {user?.name?.charAt(0)}
+                  </div>
+                )}
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-navy-900 shadow-lg"></div>
+              </div>
+              <div className="overflow-hidden">
+                <div className="text-white text-xs font-black truncate tracking-tight">{user?.name?.split(' ')[0]}</div>
+                <div className="text-[9px] text-gold font-black uppercase tracking-[0.2em] opacity-70">Acesso Premium</div>
+              </div>
+            </Link>
+          )}
         </div>
 
         {/* Navigation */}
@@ -126,10 +126,11 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
                 flex items-center rounded-3xl transition-all duration-500 group relative
                 gap-5 px-6 py-4.5
                 ${isCollapsed ? 'lg:justify-center lg:px-0 lg:w-16 lg:mx-auto' : ''}
-                ${isActive 
-                  ? 'bg-white/10 text-gold font-black italic uppercase text-[10px] tracking-widest' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5 font-bold uppercase text-[10px] tracking-widest'}
-              `;}}
+                ${isActive
+                    ? 'bg-white/10 text-gold font-black italic uppercase text-[10px] tracking-widest'
+                    : 'text-white/40 hover:text-white hover:bg-white/5 font-bold uppercase text-[10px] tracking-widest'}
+              `;
+              }}
             >
               {() => {
                 const [pathname, search] = link.path.split('?');
@@ -139,55 +140,56 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
                 const isActive = isPathMatch && (currentSearch === targetSearch || (!search && !currentSearch));
 
                 return (
-                <>
-                  {isActive && (
-                    <motion.div 
-                      layoutId="sidebar-active-indicator"
-                      className="absolute left-0 w-1.5 h-6 bg-gold rounded-full"
+                  <>
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-active-indicator"
+                        className="absolute left-0 w-1.5 h-6 bg-gold rounded-full"
+                      />
+                    )}
+                    <link.icon
+                      size={20}
+                      className={`${isCollapsed ? '' : 'shrink-0'} group-hover:scale-110 transition-transform duration-500`}
+                      strokeWidth={isActive ? 2.5 : 1.5}
                     />
-                  )}
-                  <link.icon 
-                    size={20} 
-                    className={`${isCollapsed ? '' : 'shrink-0'} group-hover:scale-110 transition-transform duration-500`} 
-                    strokeWidth={isActive ? 2.5 : 1.5} 
-                  />
-                  <span className={`truncate ${isCollapsed ? 'hidden' : 'block'}`}>{link.name}</span>
-                </>
-              );}}
+                    <span className={`truncate ${isCollapsed ? 'hidden' : 'block'}`}>{link.name}</span>
+                  </>
+                );
+              }}
             </NavLink>
           ))}
         </nav>
 
         {/* Bottom Utility Card (Adapted for Dark/Light) */}
         <div className="p-6 mt-auto relative z-10 w-full mb-2">
-           <div className={`
+          <div className={`
               bg-white dark:bg-navy-800/80 dark:backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl transition-all duration-500 border border-slate-100 dark:border-white/5
               ${isCollapsed ? 'items-center px-4' : ''}
            `}>
-              {!isCollapsed && (
-                 <div className="mb-4">
-                    <div className="text-navy-900 dark:text-white font-black italic uppercase tracking-tighter text-sm">Workspace</div>
-                    <div className="text-slate-400 dark:text-navy-400 text-[9px] font-black uppercase tracking-widest opacity-80">Ambiente Protegido</div>
-                 </div>
-              )}
-              
-              <div className={`flex gap-2 ${isCollapsed ? 'flex-col' : ''}`}>
-                 <button 
-                  onClick={toggleTheme}
-                  className="flex-1 h-12 bg-slate-50 dark:bg-navy-900/50 hover:bg-slate-100 dark:hover:bg-navy-900 rounded-2xl flex items-center justify-center text-slate-400 dark:text-slate-300 hover:text-gold transition-all border border-transparent dark:border-white/5"
-                  title="Alterar Tema"
-                 >
-                   {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-                 </button>
-                 <button 
-                  onClick={logout}
-                  className="flex-1 h-12 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-2xl flex items-center justify-center text-red-500 transition-all hover:scale-105 active:scale-95 shadow-sm border border-transparent dark:border-red-500/20"
-                  title="Sair"
-                 >
-                    <LogOut size={18} strokeWidth={3} />
-                 </button>
+            {!isCollapsed && (
+              <div className="mb-4">
+                <div className="text-navy-900 dark:text-white font-black italic uppercase tracking-tighter text-sm">Workspace</div>
+                <div className="text-slate-400 dark:text-navy-400 text-[9px] font-black uppercase tracking-widest opacity-80">Ambiente Protegido</div>
               </div>
-           </div>
+            )}
+
+            <div className={`flex gap-2 ${isCollapsed ? 'flex-col' : ''}`}>
+              <button
+                onClick={toggleTheme}
+                className="flex-1 h-12 bg-slate-50 dark:bg-navy-900/50 hover:bg-slate-100 dark:hover:bg-navy-900 rounded-2xl flex items-center justify-center text-slate-400 dark:text-slate-300 hover:text-gold transition-all border border-transparent dark:border-white/5"
+                title="Alterar Tema"
+              >
+                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+              </button>
+              <button
+                onClick={logout}
+                className="flex-1 h-12 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-2xl flex items-center justify-center text-red-500 transition-all hover:scale-105 active:scale-95 shadow-sm border border-transparent dark:border-red-500/20"
+                title="Sair"
+              >
+                <LogOut size={18} strokeWidth={3} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Mobile Close Button / Expand for desktop */}
