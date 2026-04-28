@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  Calendar, 
-  PieChart, 
+import {
+  LayoutDashboard,
+  Wallet,
+  Calendar,
+  PieChart,
   Menu,
   Users,
   TrendingUp,
@@ -19,7 +19,7 @@ const MobileNav = ({ onOpenMenu }) => {
   const clientBottomLinks = [
     { name: 'Início', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Finanças', path: '/finance', icon: Wallet },
-    { name: 'Estratégia', path: '/dashboard?tab=dashboard', icon: PieChart },
+    { name: 'Dashboard', path: '/dashboard?tab=dashboard', icon: PieChart },
     { name: 'Contas', path: '/accounts', icon: CreditCard },
   ];
 
@@ -55,14 +55,14 @@ const MobileNav = ({ onOpenMenu }) => {
             </NavLink>
           );
         })}
-        
+
         {/* Mobile Menu Trigger */}
         <button
           onClick={onOpenMenu}
           className="flex flex-col items-center justify-center flex-1 py-3 text-white/40 active:scale-95 transition-all"
         >
           <div className="w-10 h-10 bg-gold/10 rounded-2xl flex items-center justify-center mb-1 group">
-             <Menu size={20} className="text-gold group-hover:rotate-90 transition-transform duration-500" />
+            <Menu size={20} className="text-gold group-hover:rotate-90 transition-transform duration-500" />
           </div>
           <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Menu</span>
         </button>

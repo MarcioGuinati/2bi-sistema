@@ -36,14 +36,14 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
 
   const clientLinks = [
     { name: 'Visão Geral', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Estratégia', path: '/dashboard?tab=dashboard', icon: PieChart },
-    { name: 'Planejamento', path: '/my-planning', icon: Target },
-    { name: 'Lançamentos', path: '/finance', icon: Wallet },
+    { name: 'Dashboard', path: '/dashboard?tab=dashboard', icon: PieChart },
+    { name: 'Finanças', path: '/finance', icon: Wallet },
     { name: 'Categorias', path: '/categories', icon: Layers },
     { name: 'Contas & Cartões', path: '/accounts', icon: CreditCard },
     { name: 'Orçamentos', path: '/budgets', icon: Star },
     ...(user?.hasReportAccess ? [{ name: 'Relatórios PDF', path: '/reports', icon: FileText }] : []),
     ...(user?.hasAIAccess ? [{ name: 'IA Insights', path: '/insights', icon: Zap }] : []),
+    { name: 'Planejamento', path: '/my-planning', icon: Target },
     { name: 'Mentoria 2BI', path: '/mentoria', icon: Calendar },
   ];
 
