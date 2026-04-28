@@ -697,18 +697,18 @@ const AdminDashboard = () => {
               <CreditCard size={24} />
             </div>
             <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Receita Ativa</div>
-            <div className="text-2xl font-black text-[var(--text-primary)]">R$ {Number(billingStats.totalActiveValue).toLocaleString()}</div>
+            <div className="text-2xl font-black text-[var(--text-primary)]">R$ {Number(billingStats.totalActiveValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           </div>
           <div className="card-premium p-6">
             <div className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-4">
               <Briefcase size={24} />
             </div>
             <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">A Receber</div>
-            <div className="text-2xl font-black text-red-600">R$ {Number(billingStats.pendingAmount).toLocaleString()}</div>
+            <div className="text-2xl font-black text-red-600">R$ {Number(billingStats.pendingAmount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           </div>
           <div className="card-premium p-6 flex flex-col justify-center text-center relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-            <div className="text-gold font-black text-2xl mb-1 italic">R$ {Number(billingStats.paidMonth).toLocaleString()}</div>
+            <div className="text-gold font-black text-2xl mb-1 italic">R$ {Number(billingStats.paidMonth || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
             <div className="text-[var(--text-secondary)] text-[10px] uppercase font-black tracking-widest">Recebido este Mês</div>
           </div>
         </div>
