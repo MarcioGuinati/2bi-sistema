@@ -162,7 +162,7 @@ const AdminFinances = () => {
                             </div>
                         </div>
                         <div>
-                            <h4 className="text-3xl font-bold tracking-tighter">R$ {Number(stats.totalActiveValue).toLocaleString('pt-BR')}</h4>
+                            <h4 className="text-3xl font-bold tracking-tighter">{Number(stats.totalActiveValue).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h4>
                             <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">Contratos ativos</p>
                         </div>
                     </motion.div>
@@ -178,7 +178,7 @@ const AdminFinances = () => {
                             </div>
                         </div>
                         <div className="relative z-10">
-                            <h4 className="text-3xl font-black text-gold tracking-tighter italic">R$ {Number(stats.paidMonth).toLocaleString('pt-BR')}</h4>
+                            <h4 className="text-3xl font-black text-gold tracking-tighter italic">{Number(stats.paidMonth).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h4>
                             <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest mt-1">Liquidação no período</p>
                         </div>
                     </motion.div>
@@ -193,7 +193,7 @@ const AdminFinances = () => {
                             </div>
                         </div>
                         <div>
-                            <h4 className="text-3xl font-bold tracking-tighter">R$ {Number(stats.pendingAmount).toLocaleString('pt-BR')}</h4>
+                            <h4 className="text-3xl font-bold tracking-tighter">{Number(stats.pendingAmount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h4>
                             <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">{payments.filter(p => p.status === 'pending').length} faturas abertas</p>
                         </div>
                     </motion.div>
@@ -300,7 +300,7 @@ const AdminFinances = () => {
                                                 {new Date(p.dueDate).toLocaleDateString('pt-BR')}
                                             </td>
                                             <td className="px-8 py-5 text-sm font-bold">
-                                                R$ {Number(p.amount).toLocaleString('pt-BR')}
+                                                {Number(p.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                             </td>
                                             <td className="px-8 py-5">
                                                 <span className={`text-[10px] font-bold uppercase px-3 py-1 rounded-lg border shadow-sm ${p.status === 'paid' ? 'bg-green-100 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-100'
