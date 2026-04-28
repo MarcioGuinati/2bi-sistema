@@ -1157,126 +1157,271 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
         ];
 
         return (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center justify-center min-h-[40vh]">
-            <div className="w-full max-w-4xl space-y-12">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+            <div className="relative group overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-[var(--border-primary)] shadow-2xl bg-[var(--bg-secondary)]">
               
-              <div className="text-center space-y-4">
-                <p className="text-gold font-black uppercase tracking-[0.4em] text-xs">Investimento para Implementação</p>
-                <div className="bg-navy-900 border-2 border-gold rounded-[2.5rem] p-12 md:p-16 shadow-[0_0_50px_rgba(197,160,89,0.2)] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
-                  <div className="relative z-10">
-                    <h2 className="text-4xl md:text-7xl font-black text-white italic tracking-tighter">
-                      {fee.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </h2>
-                    <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mt-6">Taxa de Setup e Mapeamento 360°</p>
+
+
+              <div className="p-8 md:p-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  {/* OBJECTIVES PROGRESS */}
+                  <div className="space-y-6">
+                    <h5 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-[var(--text-primary)]">
+                      <TrendingUp className="text-gold" size={18} /> Objetivos vs Realidade
+                    </h5>
+                    <div className="space-y-4">
+                      {data.objectives.filter(o => o.selected).map(obj => {
+                        const goal = parseFloat(obj.value.replace(/\D/g, '') || 1) / 100;
+                        const saved = parseFloat(obj.saved.replace(/\D/g, '') || 0) / 100;
+                        const missing = Math.max(0, goal - saved);
+                        const perc = Math.min(100, (saved / goal * 100)).toFixed(1);
+
+                        return (
+                          <div key={obj.id} className="bg-[var(--bg-secondary)] p-6 rounded-3xl border border-[var(--border-primary)] shadow-sm">
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="font-bold text-sm text-[var(--text-primary)]">{obj.label}</span>
+                              <span className="text-[10px] font-black bg-gold/10 text-gold px-3 py-1 rounded-full">{perc}%</span>
+                            </div>
+                            <div className="w-full h-2 bg-[var(--bg-primary)] rounded-full overflow-hidden mb-3">
+                              <div className="h-full bg-gold shadow-[0_0_10px_rgba(197,160,89,0.5)]" style={{ width: `${perc}%` }}></div>
+                            </div>
+                            <div className="flex justify-between text-[9px] font-black text-[var(--text-secondary)] uppercase">
+                              <span>JÁ TEM: {saved.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                              <span className="text-red-500">FALTA: {missing.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* GAP ANALYSIS */}
+                  <div className="space-y-6">
+                    <h5 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-[var(--text-primary)]">
+                      <AlertTriangle className="text-red-500" size={18} /> Pontos Cegos (Riscos)
+                    </h5>
+                    <div className="bg-red-500/5 dark:bg-red-500/10 rounded-3xl p-6 border border-red-500/20 space-y-4">
+                      {gaps.length > 0 ? gaps.map((gap, i) => (
+                        <div key={i} className="flex gap-3 items-center text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-tight">
+                          <X className="text-red-600 bg-white dark:bg-navy-900 rounded-full p-1 shadow-sm border border-red-100 dark:border-red-900/40" size={20} /> {gap}
+                        </div>
+                      )) : (
+                        <div className="text-green-600 font-bold text-sm">Parabéns! Nenhuma vulnerabilidade crítica identificada.</div>
+                      )}
+                    </div>
+                    <div className="p-8 bg-navy-900 dark:bg-navy-800 rounded-3xl text-white shadow-xl relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl group-hover:bg-gold/10 transition-all"></div>
+                      <p className="text-[10px] uppercase font-bold text-white/40 mb-3 tracking-widest">Observação Estratégica</p>
+                      <p className="text-sm leading-relaxed italic opacity-90 font-medium">"A falta de blindagem patrimonial coloca em risco não apenas o seu futuro, mas a estabilidade de toda a família. A implementação deve priorizar estes GAPs."</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CHARTS SECTION */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 border-t border-[var(--border-primary)] pt-12 mt-12">
+                  <div className="h-[350px] flex flex-col">
+                    <h5 className="text-sm font-black uppercase tracking-widest mb-8 flex items-center gap-2 text-[var(--text-primary)]">
+                      <Activity className="text-gold" size={18} /> Projeção de Acúmulo (20 Anos)
+                    </h5>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={projectionData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-primary)" />
+                        <XAxis dataKey="year" fontSize={10} tickLine={false} axisLine={false} stroke="var(--text-secondary)" />
+                        <YAxis
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v)}
+                          stroke="var(--text-secondary)"
+                          width={80}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'var(--bg-secondary)',
+                            borderColor: 'var(--border-primary)',
+                            borderRadius: '16px',
+                            color: 'var(--text-primary)',
+                            fontSize: '12px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                          }}
+                          itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
+                          formatter={(value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+                        />
+                        <Line type="monotone" dataKey="Rentabilidade 8%" stroke="#64748b" strokeWidth={3} dot={false} />
+                        <Line type="monotone" dataKey="Rentabilidade 10%" stroke="#c5a059" strokeWidth={4} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="h-[350px] flex flex-col">
+                    <h5 className="text-sm font-black uppercase tracking-widest mb-8 flex items-center gap-2 text-[var(--text-primary)]">
+                      <PieChart className="text-orange-500" size={18} /> Fluxo de Caixa Atual
+                    </h5>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'var(--bg-secondary)',
+                            borderColor: 'var(--border-primary)',
+                            borderRadius: '16px',
+                            color: 'var(--text-primary)',
+                            fontSize: '12px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                          }}
+                          itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
+                          formatter={(value) => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        />
+                        <Pie
+                          data={cashFlowData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={5}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {cashFlowData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-8">
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => setShowFee(!showFee)}
-                    className="group flex items-center gap-3 bg-[var(--bg-secondary)] border-2 border-gold/30 hover:border-gold px-10 py-5 rounded-3xl transition-all shadow-xl hover:scale-105 active:scale-95"
-                  >
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
-                      {showFee ? 'Ocultar Planos' : 'Ver Planos de Acompanhamento'}
-                    </span>
-                    <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
-                      <ChevronDown size={18} className="text-gold" />
-                    </motion.div>
-                  </button>
+            {/* ESTRATÉGIA VISUAL */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="relative group overflow-hidden rounded-[2.5rem] md:rounded-[3.5rem] border border-[var(--border-primary)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white my-16"
+            >
+              <img 
+                src="/apresentacao.png" 
+                alt="Estratégia 2BI" 
+                className="w-full h-auto"
+              />
+            </motion.div>
+
+            <div className="text-center space-y-4">
+              <p className="text-gold font-black uppercase tracking-[0.4em] text-xs">Investimento para Implementação</p>
+              <div className="bg-navy-900 border-2 border-gold rounded-[2.5rem] p-12 md:p-16 shadow-[0_0_50px_rgba(197,160,89,0.2)] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+                <div className="relative z-10">
+                  <h2 className="text-4xl md:text-7xl font-black text-white italic tracking-tighter">
+                    {fee.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </h2>
+                  <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mt-6">Taxa de Setup e Mapeamento 360°</p>
                 </div>
+              </div>
+            </div>
 
-                <AnimatePresence>
-                  {showFee && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="space-y-8"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[
-                          { id: 'convencional', price: 49.90, label: 'Convencional', desc: 'Acompanhamento estratégico e suporte' },
-                          { id: 'ia', price: 59.90, label: 'IA Plus', desc: 'Acompanhamento + Inteligência Artificial 2BI' },
-                          { id: 'vip', price: 69.90, label: 'VIP Mentoring', desc: 'IA + Reunião Mensal de Acompanhamento' }
-                        ].map((plan) => (
-                          <div
-                            key={plan.id}
-                            onClick={() => setData({ ...data, selectedPlan: plan.id })}
-                            className={`p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer relative flex flex-col items-center gap-4 text-center group ${data.selectedPlan === plan.id 
-                              ? 'bg-gold border-gold text-navy-900 scale-105 shadow-2xl' 
-                              : 'bg-[var(--bg-secondary)] border-[var(--border-primary)] text-[var(--text-primary)] hover:border-gold/40'}`}
-                          >
-                            {data.selectedPlan === plan.id && (
-                              <motion.div 
-                                layoutId="selected-plan-badge"
-                                className="absolute -top-3 bg-navy-900 text-gold px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border border-gold"
-                              >
-                                Selecionado
-                              </motion.div>
-                            )}
-                            <div className={`text-[10px] font-black uppercase tracking-widest ${data.selectedPlan === plan.id ? 'text-navy-900/60' : 'text-slate-400'}`}>{plan.label}</div>
-                            <div className="text-3xl font-black italic tracking-tighter">
-                              {plan.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                            </div>
-                            <p className={`text-[10px] font-bold leading-relaxed ${data.selectedPlan === plan.id ? 'text-navy-900/80' : 'text-[var(--text-secondary)]'}`}>
-                              {plan.desc}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {!isReadOnly && (
-                        <div className="flex flex-col items-center gap-4 pt-10 border-t border-[var(--border-primary)]">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowAdjustment(!showAdjustment);
-                            }}
-                            className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-gold flex items-center gap-2"
-                          >
-                            {showAdjustment ? 'OCULTAR CONTROLE DE AJUSTE' : 'APLICAR DESCONTO OU AJUSTE %'}
-                          </button>
-                          
-                          {showAdjustment && (
-                            <motion.div 
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              className="bg-[var(--bg-primary)] p-6 rounded-3xl border border-[var(--border-primary)] flex items-center gap-6"
-                            >
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ajuste de Valor:</span>
-                              <div className="flex items-center gap-4">
-                                <button 
-                                  onClick={() => setData({...data, adjustmentPercentage: (parseFloat(data.adjustmentPercentage || 0) - 5)})}
-                                  className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all font-black"
-                                >
-                                  -5%
-                                </button>
-                                <input 
-                                  type="number" 
-                                  value={data.adjustmentPercentage}
-                                  onChange={(e) => setData({...data, adjustmentPercentage: e.target.value})}
-                                  className="bg-[var(--bg-secondary)] border-2 border-[var(--border-primary)] rounded-xl text-[var(--text-primary)] font-black text-center w-20 py-2 outline-none focus:border-gold"
-                                />
-                                <button 
-                                  onClick={() => setData({...data, adjustmentPercentage: (parseFloat(data.adjustmentPercentage || 0) + 5)})}
-                                  className="w-10 h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all font-black"
-                                >
-                                  +5%
-                                </button>
-                              </div>
-                            </motion.div>
-                          )}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+            <div className="space-y-8">
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setShowFee(!showFee)}
+                  className="group flex items-center gap-3 bg-[var(--bg-secondary)] border-2 border-gold/30 hover:border-gold px-10 py-5 rounded-3xl transition-all shadow-xl hover:scale-105 active:scale-95"
+                >
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
+                    {showFee ? 'Ocultar Planos' : 'Ver Planos de Acompanhamento'}
+                  </span>
+                  <motion.div animate={{ rotate: showFee ? 180 : 0 }}>
+                    <ChevronDown size={18} className="text-gold" />
+                  </motion.div>
+                </button>
               </div>
 
+              <AnimatePresence>
+                {showFee && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="space-y-8"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[
+                        { id: 'convencional', price: 49.90, label: 'Convencional', desc: 'Acompanhamento estratégico e suporte' },
+                        { id: 'ia', price: 59.90, label: 'IA Plus', desc: 'Acompanhamento + Inteligência Artificial 2BI' },
+                        { id: 'vip', price: 69.90, label: 'VIP Mentoring', desc: 'IA + Reunião Mensal de Acompanhamento' }
+                      ].map((plan) => (
+                        <div
+                          key={plan.id}
+                          onClick={() => setData({ ...data, selectedPlan: plan.id })}
+                          className={`p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer relative flex flex-col items-center gap-4 text-center group ${data.selectedPlan === plan.id 
+                            ? 'bg-gold border-gold text-navy-900 scale-105 shadow-2xl' 
+                            : 'bg-[var(--bg-secondary)] border-[var(--border-primary)] text-[var(--text-primary)] hover:border-gold/40'}`}
+                        >
+                          {data.selectedPlan === plan.id && (
+                            <motion.div 
+                              layoutId="selected-plan-badge"
+                              className="absolute -top-3 bg-navy-900 text-gold px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border border-gold"
+                            >
+                              Selecionado
+                            </motion.div>
+                          )}
+                          <div className={`text-[10px] font-black uppercase tracking-widest ${data.selectedPlan === plan.id ? 'text-navy-900/60' : 'text-slate-400'}`}>{plan.label}</div>
+                          <div className="text-3xl font-black italic tracking-tighter">
+                            {plan.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </div>
+                          <p className={`text-[10px] font-bold leading-relaxed ${data.selectedPlan === plan.id ? 'text-navy-900/80' : 'text-[var(--text-secondary)]'}`}>
+                            {plan.desc}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
+            {!isReadOnly && (
+              <div className="flex flex-col items-center gap-4 pt-10 border-t border-[var(--border-primary)]">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAdjustment(!showAdjustment);
+                  }}
+                  className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-gold flex items-center gap-2"
+                >
+                  {showAdjustment ? 'OCULTAR CONTROLE DE AJUSTE' : 'APLICAR DESCONTO OU AJUSTE %'}
+                </button>
+                
+                {showAdjustment && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="bg-[var(--bg-primary)] p-6 rounded-3xl border border-[var(--border-primary)] flex items-center gap-6"
+                  >
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ajuste de Valor:</span>
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={() => setData({...data, adjustmentPercentage: (parseFloat(data.adjustmentPercentage || 0) - 5)})}
+                        className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all font-black"
+                      >
+                        -5%
+                      </button>
+                      <input 
+                        type="number" 
+                        value={data.adjustmentPercentage}
+                        onChange={(e) => setData({...data, adjustmentPercentage: e.target.value})}
+                        className="bg-[var(--bg-secondary)] border-2 border-[var(--border-primary)] rounded-xl text-[var(--text-primary)] font-black text-center w-20 py-2 outline-none focus:border-gold"
+                      />
+                      <button 
+                        onClick={() => setData({...data, adjustmentPercentage: (parseFloat(data.adjustmentPercentage || 0) + 5)})}
+                        className="w-10 h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all font-black"
+                      >
+                        +5%
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            )}
           </motion.div>
         );
       default:
