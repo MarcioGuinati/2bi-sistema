@@ -54,13 +54,22 @@ const AccountManagement = () => {
   const [previewTransactions, setPreviewTransactions] = useState([]);
   const [selectedTxIds, setSelectedTxIds] = useState([]);
 
+  const [showTextModal, setShowTextModal] = useState(false);
+  const [rawText, setRawText] = useState('');
+  const [textImporting, setTextImporting] = useState(false);
+  const [categories, setCategories] = useState([]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/accounts');
-      setAccounts(response.data);
+      const [accRes, catRes] = await Promise.all([
+        api.get('/accounts'),
+        api.get('/categories')
+      ]);
+      setAccounts(accRes.data);
+      setCategories(catRes.data);
     } catch (err) {
-      console.error('Error fetching accounts');
+      console.error('Error fetching data');
     } finally {
       setLoading(false);
     }
@@ -165,6 +174,37 @@ const AccountManagement = () => {
     }
   };
 
+  const handleOpenTextImport = (accId) => {
+    setImportingAccId(accId);
+    setRawText('');
+    setShowTextModal(true);
+  };
+
+  const handleProcessTextImport = async () => {
+    if (!rawText.trim()) {
+      error('Cole o texto do extrato primeiro.');
+      return;
+    }
+
+    try {
+      setTextImporting(true);
+      success('Analisando texto com IA...');
+      const response = await api.post('/import/text-preview', {
+        account_id: importingAccId,
+        text: rawText
+      });
+
+      setPreviewTransactions(response.data);
+      setSelectedTxIds(response.data.map((_, i) => i));
+      setShowTextModal(false);
+      setShowPreviewModal(true);
+    } catch (err) {
+      error(err.response?.data?.error || 'Falha ao processar texto.');
+    } finally {
+      setTextImporting(false);
+    }
+  };
+
   const handleConfirmImport = async () => {
     if (selectedTxIds.length === 0) {
       error('Nenhuma transação selecionada');
@@ -205,6 +245,12 @@ const AccountManagement = () => {
       .filter(i => i !== index)
       .map(i => i > index ? i - 1 : i)
     );
+  };
+
+  const updatePreviewTxCategory = (index, categoryId) => {
+    const newPreview = [...previewTransactions];
+    newPreview[index] = { ...newPreview[index], category_id: categoryId || null };
+    setPreviewTransactions(newPreview);
   };
 
   const handleOpenInvoice = async (acc, page = 1, offset = 0) => {
@@ -304,6 +350,7 @@ const AccountManagement = () => {
                   onEdit={handleOpenEdit}
                   onDelete={handleDelete}
                   onImport={handleImportOFX}
+                  onImportText={handleOpenTextImport}
                 />
               ))
             ) : (
@@ -371,6 +418,14 @@ const AccountManagement = () => {
                         >
                           <FileDigit size={16} />
                           <span className="hidden lg:inline text-[9px] font-black uppercase tracking-widest">OFX</span>
+                        </button>
+                        <button
+                          onClick={() => handleOpenTextImport(acc.id)}
+                          className="p-2 text-slate-400 hover:text-purple-600 bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-primary)] flex items-center gap-2"
+                          title="Importar por Texto"
+                        >
+                          <Upload size={16} />
+                          <span className="hidden lg:inline text-[9px] font-black uppercase tracking-widest">TXT</span>
                         </button>
                       </div>
                     </td>
@@ -733,6 +788,17 @@ const AccountManagement = () => {
                               <AlertTriangle size={10} /> POSSÍVEL DUPLICATA
                             </span>
                           )}
+                          <select
+                            value={t.category_id || ''}
+                            onChange={(e) => updatePreviewTxCategory(idx, e.target.value)}
+                            className="text-[10px] p-1 px-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-primary)] text-[var(--text-primary)] font-bold outline-none ml-2"
+                            title="Categoria"
+                          >
+                            <option value="">Sem Categoria</option>
+                            {categories.map(c => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
@@ -769,6 +835,56 @@ const AccountManagement = () => {
                     className="order-1 md:order-2 flex-[2] py-4 bg-navy-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold disabled:opacity-50 transition-all shadow-xl shadow-navy-900/10 flex items-center justify-center gap-2 text-xs"
                   >
                     <Check size={20} /> Confirmar Importação ({selectedTxIds.length})
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Text Import Modal */}
+      <AnimatePresence>
+        {showTextModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-xl shadow-2xl border border-[var(--border-primary)] flex flex-col"
+            >
+              <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
+                <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar por Texto (IA)</h3>
+                <button
+                  onClick={() => setShowTextModal(false)}
+                  className="p-2 hover:bg-white/10 rounded-full transition-all"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-6 md:p-8 space-y-4">
+                <p className="text-sm text-slate-500 font-medium">
+                  Cole o texto do seu extrato bancário abaixo. A Inteligência Artificial irá identificar as transações, formatar datas e valores, e sugerir as melhores categorias automaticamente.
+                </p>
+                <textarea
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold min-h-[200px] text-sm resize-y font-mono"
+                  placeholder="Ex:&#10;05/10/2023 COMPRA SUPERMERCADO - 150,50&#10;06/10/2023 TRANSFERENCIA PIX - 50,00"
+                />
+                <div className="pt-4 flex gap-4">
+                  <button
+                    onClick={() => setShowTextModal(false)}
+                    className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleProcessTextImport}
+                    disabled={textImporting}
+                    className="flex-1 py-4 bg-navy-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold disabled:opacity-50 transition-all text-xs"
+                  >
+                    {textImporting ? 'Analisando...' : 'Analisar com IA'}
                   </button>
                 </div>
               </div>

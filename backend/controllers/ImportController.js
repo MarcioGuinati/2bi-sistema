@@ -1,5 +1,6 @@
 const { parse } = require('ofx-js');
-const { Transaction } = require('../models');
+const { Transaction, Setting, Category } = require('../models');
+const axios = require('axios');
 
 class ImportController {
   async preview(req, res) {
@@ -47,6 +48,67 @@ class ImportController {
         });
       }
 
+      // AI Categorization
+      try {
+        const settings = await Setting.findAll({
+          where: { key: ['openai_key', 'openai_model'] }
+        });
+        const config = {};
+        settings.forEach(s => config[s.key] = s.value);
+
+        if (config.openai_key && processed.length > 0) {
+          const categories = await Category.findAll({ where: { user_id: req.userId }, raw: true });
+          if (categories.length > 0) {
+            const categoriesMap = categories.map(c => `ID: ${c.id} - ${c.name}`).join('\n');
+            const descriptionsMap = processed.map((t, idx) => `ID_TRANSACAO: ${idx} - Descrição: ${t.description} - Tipo: ${t.type}`).join('\n');
+
+            const systemPrompt = `Você é um assistente financeiro especialista em categorizar transações. 
+            Mapeie cada transação fornecida para a ID da categoria mais adequada com base nas categorias do usuário.
+            
+            Retorne APENAS um JSON válido no formato:
+            {
+              "categorias": [
+                { "id_transacao": 0, "category_id": "123e4567-e89b-12d3-a456-426614174000" },
+                { "id_transacao": 1, "category_id": null }
+              ]
+            }
+            Se não tiver certeza absoluta, use null.
+            
+            CATEGORIAS DISPONÍVEIS:
+            ${categoriesMap}`;
+
+            const userPrompt = `TRANSAÇÕES:\n${descriptionsMap}`;
+
+            const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+              model: config.openai_model || 'gpt-3.5-turbo',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+              ],
+              temperature: 0.1,
+              response_format: { type: 'json_object' }
+            }, {
+              headers: {
+                'Authorization': `Bearer ${config.openai_key}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            const content = response.data.choices[0].message.content;
+            const parsedContent = JSON.parse(content);
+            const mapping = parsedContent.categorias || [];
+
+            mapping.forEach(m => {
+              if (processed[m.id_transacao]) {
+                processed[m.id_transacao].category_id = m.category_id || null;
+              }
+            });
+          }
+        }
+      } catch (aiError) {
+        console.error('Erro ao categorizar com IA no OFX:', aiError.response?.data || aiError.message);
+      }
+
       return res.json(processed);
     } catch (error) {
       console.error('Erro no preview OFX:', error);
@@ -88,6 +150,86 @@ class ImportController {
     } catch (error) {
       console.error('Erro ao confirmar importação:', error);
       return res.status(500).json({ error: 'Falha ao salvar transações. Verifique se há duplicatas ou dados inválidos.' });
+    }
+  }
+
+  async textPreview(req, res) {
+    try {
+      const { account_id, text } = req.body;
+      if (!text) return res.status(400).json({ error: 'Nenhum texto enviado' });
+
+      const settings = await Setting.findAll({
+        where: { key: ['openai_key', 'openai_model'] }
+      });
+      const config = {};
+      settings.forEach(s => config[s.key] = s.value);
+
+      if (!config.openai_key) {
+        return res.status(400).json({ error: 'Integração com IA não configurada. Configure no painel Admin.' });
+      }
+
+      const categories = await Category.findAll({ where: { user_id: req.userId }, raw: true });
+      const categoriesMap = categories.length > 0 ? categories.map(c => `ID: ${c.id} - ${c.name}`).join('\n') : 'Nenhuma categoria cadastrada.';
+
+      const systemPrompt = `Você é um assistente financeiro especialista em extrair transações bancárias de texto bruto copiado de extratos.
+      Extraia cada transação identificando Data (no formato YYYY-MM-DD), Valor (sempre positivo), Descrição original e Tipo (income ou expense).
+      Além disso, tente mapear para a melhor Categoria do usuário. Se não tiver certeza, category_id será null.
+
+      Retorne APENAS um JSON válido no formato:
+      {
+        "transacoes": [
+          {
+            "date": "2023-10-05",
+            "amount": 150.50,
+            "description": "COMPRA SUPERMERCADO",
+            "type": "expense",
+            "category_id": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        ]
+      }
+      Se o texto não contiver transações válidas, retorne "transacoes": [].
+      
+      CATEGORIAS DISPONÍVEIS:
+      ${categoriesMap}`;
+
+      const userPrompt = `TEXTO BRUTO DO EXTRATO:\n${text}`;
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: config.openai_model || 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.1,
+        response_format: { type: 'json_object' }
+      }, {
+        headers: {
+          'Authorization': `Bearer ${config.openai_key}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const content = response.data.choices[0].message.content;
+      const parsedContent = JSON.parse(content);
+      const extracted = parsedContent.transacoes || [];
+
+      const processed = [];
+      for (const t of extracted) {
+        processed.push({
+          amount: Math.abs(t.amount || 0),
+          description: t.description || 'Transação Extraída',
+          type: t.type || 'expense',
+          date: t.date || new Date().toISOString().split('T')[0],
+          external_id: null,
+          category_id: t.category_id || null,
+          isDuplicate: false
+        });
+      }
+
+      return res.json(processed);
+    } catch (error) {
+      console.error('Erro no preview Texto:', error.response?.data || error.message);
+      return res.status(500).json({ error: 'Falha ao processar texto bruto com IA.' });
     }
   }
 }

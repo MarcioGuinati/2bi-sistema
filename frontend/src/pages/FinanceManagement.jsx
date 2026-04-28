@@ -56,6 +56,17 @@ const FinanceManagement = () => {
   const [editingTrans, setEditingTrans] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // Import State
+  const [showImportOptionsModal, setShowImportOptionsModal] = useState(false);
+  const [importingAccId, setImportingAccId] = useState('');
+  const [showTextModal, setShowTextModal] = useState(false);
+  const [rawText, setRawText] = useState('');
+  const [textImporting, setTextImporting] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewTransactions, setPreviewTransactions] = useState([]);
+  const [selectedTxIds, setSelectedTxIds] = useState([]);
+  const fileInputRef = React.useRef(null);
+
   const [form, setForm] = useState({
     amount: maskCurrency('0'),
     description: '',
@@ -204,6 +215,131 @@ const FinanceManagement = () => {
     });
   };
 
+  // Import Functions
+  const handleOpenImportOptions = () => {
+    setImportingAccId('');
+    setShowImportOptionsModal(true);
+  };
+
+  const handleStartOFXImport = () => {
+    if (!importingAccId) {
+      error('Selecione uma conta primeiro');
+      return;
+    }
+    setShowImportOptionsModal(false);
+    fileInputRef.current.click();
+  };
+
+  const handleStartTextImport = () => {
+    if (!importingAccId) {
+      error('Selecione uma conta primeiro');
+      return;
+    }
+    setShowImportOptionsModal(false);
+    setRawText('');
+    setShowTextModal(true);
+  };
+
+  const onFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('account_id', importingAccId);
+
+    try {
+      success('Analisando arquivo OFX...');
+      const response = await api.post('/import/ofx-preview', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setPreviewTransactions(response.data);
+      const nonDuplicates = response.data
+        .map((t, idx) => t.isDuplicate ? null : idx)
+        .filter(idx => idx !== null);
+
+      setSelectedTxIds(nonDuplicates);
+      setShowPreviewModal(true);
+    } catch (err) {
+      error('Falha ao ler arquivo OFX. Verifique o formato.');
+    } finally {
+      e.target.value = null;
+    }
+  };
+
+  const handleProcessTextImport = async () => {
+    if (!rawText.trim()) {
+      error('Cole o texto do extrato primeiro.');
+      return;
+    }
+
+    try {
+      setTextImporting(true);
+      success('Analisando texto com IA...');
+      const response = await api.post('/import/text-preview', {
+        account_id: importingAccId,
+        text: rawText
+      });
+
+      setPreviewTransactions(response.data);
+      setSelectedTxIds(response.data.map((_, i) => i));
+      setShowTextModal(false);
+      setShowPreviewModal(true);
+    } catch (err) {
+      error(err.response?.data?.error || 'Falha ao processar texto.');
+    } finally {
+      setTextImporting(false);
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (selectedTxIds.length === 0) {
+      error('Nenhuma transação selecionada');
+      return;
+    }
+
+    const selectedTxs = selectedTxIds.map(idx => previewTransactions[idx]);
+
+    try {
+      success('Importando transações selecionadas...');
+      const response = await api.post('/import/ofx-confirm', {
+        account_id: importingAccId,
+        transactions: selectedTxs
+      });
+
+      success(`${response.data.imported} transações importadas com sucesso!`);
+      setShowPreviewModal(false);
+      fetchData();
+    } catch (err) {
+      error('Erro ao confirmar importação.');
+    }
+  };
+
+  const toggleTxSelection = (index) => {
+    if (selectedTxIds.includes(index)) {
+      setSelectedTxIds(selectedTxIds.filter(i => i !== index));
+    } else {
+      setSelectedTxIds([...selectedTxIds, index]);
+    }
+  };
+
+  const removeTxFromPreview = (index) => {
+    const newPreview = [...previewTransactions];
+    newPreview.splice(index, 1);
+    setPreviewTransactions(newPreview);
+    setSelectedTxIds(selectedTxIds
+      .filter(i => i !== index)
+      .map(i => i > index ? i - 1 : i)
+    );
+  };
+
+  const updatePreviewTxCategory = (index, categoryId) => {
+    const newPreview = [...previewTransactions];
+    newPreview[index] = { ...newPreview[index], category_id: categoryId || null };
+    setPreviewTransactions(newPreview);
+  };
+
   return (
     <SystemLayout>
       <div className="space-y-8">
@@ -214,6 +350,12 @@ const FinanceManagement = () => {
             <p className="text-[var(--text-secondary)] font-medium tracking-tight">Análise detalhada do seu fluxo de caixa estratégico.</p>
           </div>
           <div className="flex gap-4">
+            <button
+              onClick={handleOpenImportOptions}
+              className="btn-secondary flex items-center gap-2 bg-[var(--bg-secondary)] border border-[var(--border-primary)] text-[var(--text-primary)] font-bold px-4 py-2 rounded-xl"
+            >
+              Importar Lançamentos
+            </button>
             <button
               onClick={() => { 
                 setEditingTrans(null); 
@@ -633,6 +775,155 @@ const FinanceManagement = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* IMPORT OPTIONS MODAL */}
+      <AnimatePresence>
+        {showImportOptionsModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col">
+              <div className="bg-navy-900 p-6 text-white flex justify-between items-center">
+                <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar Lançamentos</h3>
+                <button onClick={() => setShowImportOptionsModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all"><X size={20} /></button>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-black text-slate-400">Conta Destino</label>
+                  <select
+                    value={importingAccId}
+                    onChange={e => setImportingAccId(e.target.value)}
+                    className="select-premium font-bold w-full"
+                  >
+                    <option value="">Selecione a conta para importação...</option>
+                    {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={handleStartOFXImport}
+                    className="p-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-gold hover:text-gold transition-all text-[var(--text-secondary)] font-bold shadow-sm"
+                  >
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Arquivo</span>
+                    <span className="text-sm">OFX</span>
+                  </button>
+                  <button
+                    onClick={handleStartTextImport}
+                    className="p-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl flex flex-col items-center justify-center gap-2 hover:border-gold hover:text-gold transition-all text-[var(--text-secondary)] font-bold shadow-sm"
+                  >
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inteligência</span>
+                    <span className="text-sm">Texto / IA</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* TEXT IMPORT MODAL */}
+      <AnimatePresence>
+        {showTextModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
+            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-xl shadow-2xl border border-[var(--border-primary)] flex flex-col">
+              <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
+                <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar por Texto (IA)</h3>
+                <button onClick={() => setShowTextModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
+              </div>
+              <div className="p-6 md:p-8 space-y-4">
+                <p className="text-sm text-slate-500 font-medium">
+                  Cole o texto do seu extrato bancário abaixo. A Inteligência Artificial irá identificar as transações, formatar datas e valores, e sugerir as melhores categorias automaticamente.
+                </p>
+                <textarea
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold min-h-[200px] text-sm resize-y font-mono"
+                  placeholder="Ex:&#10;05/10/2023 COMPRA SUPERMERCADO - 150,50&#10;06/10/2023 TRANSFERENCIA PIX - 50,00"
+                />
+                <div className="pt-4 flex gap-4">
+                  <button onClick={() => setShowTextModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs">Cancelar</button>
+                  <button onClick={handleProcessTextImport} disabled={textImporting} className="flex-1 py-4 bg-navy-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold disabled:opacity-50 transition-all text-xs">
+                    {textImporting ? 'Analisando...' : 'Analisar com IA'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* OFX PREVIEW MODAL */}
+      <AnimatePresence>
+        {showPreviewModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
+              <div className="bg-navy-900 p-6 md:p-8 text-white flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-black font-heading tracking-tight !text-white">Revisar Importação</h3>
+                  <p className="text-white/50 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1">Selecione os lançamentos para inclusão</p>
+                </div>
+                <button onClick={() => setShowPreviewModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all shrink-0"><X size={20} /></button>
+              </div>
+              <div className="p-6 md:p-8 flex-1 overflow-hidden flex flex-col">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                  <div className="flex gap-4">
+                    <button onClick={() => setSelectedTxIds(previewTransactions.map((_, i) => i))} className="text-[10px] font-black uppercase text-gold hover:underline">Selecionar Todos</button>
+                    <button onClick={() => setSelectedTxIds([])} className="text-[10px] font-black uppercase text-slate-400 hover:underline">Desmarcar Todos</button>
+                  </div>
+                  <div className="text-[10px] font-black uppercase text-slate-400">{selectedTxIds.length} de {previewTransactions.length} selecionados</div>
+                </div>
+                <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                  {previewTransactions.map((t, idx) => (
+                    <div key={idx} className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-4 rounded-2xl border transition-all ${selectedTxIds.includes(idx) ? 'border-gold bg-gold/5 shadow-sm' : 'border-[var(--border-primary)] bg-[var(--bg-primary)] opacity-60'}`}>
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <input type="checkbox" checked={selectedTxIds.includes(idx)} onChange={() => toggleTxSelection(idx)} className="w-5 h-5 rounded-lg border-2 border-slate-300 checked:bg-gold checked:border-gold transition-all shrink-0" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-navy-900 font-black text-xs shrink-0">{new Date(t.date).getUTCDate()}</div>
+                        <div className="flex-1 min-w-0 sm:hidden">
+                          <div className={`font-black text-sm text-right ${t.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>{t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0 w-full">
+                        <div className="font-bold text-sm text-[var(--text-primary)] truncate">{t.description}</div>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase">{t.date.split('-').reverse().join('/')}</span>
+                          <select
+                            value={t.category_id || ''}
+                            onChange={(e) => updatePreviewTxCategory(idx, e.target.value)}
+                            className="text-[10px] p-1 px-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-primary)] text-[var(--text-primary)] font-bold outline-none"
+                            title="Categoria"
+                          >
+                            <option value="">Sem Categoria</option>
+                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="hidden sm:block text-right shrink-0">
+                        <div className={`font-black text-sm ${t.type === 'income' ? 'text-green-600' : 'text-red-500'}`}>{t.type === 'income' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                      </div>
+                      <div className="flex justify-end w-full sm:w-auto border-t sm:border-t-0 border-slate-100 mt-2 sm:mt-0 pt-2 sm:pt-0">
+                        <button onClick={() => removeTxFromPreview(idx)} className="p-1 px-3 sm:p-2 text-slate-400 hover:text-red-500 transition-colors flex items-center gap-2 sm:block" title="Remover da lista">
+                          <span className="sm:hidden text-[10px] font-black uppercase">Excluir da Prévia</span><X size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 flex flex-col md:flex-row gap-3 md:gap-4">
+                  <button onClick={() => setShowPreviewModal(false)} className="order-2 md:order-1 flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs">Cancelar</button>
+                  <button onClick={handleConfirmImport} disabled={selectedTxIds.length === 0} className="order-1 md:order-2 flex-[2] py-4 bg-navy-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold disabled:opacity-50 transition-all shadow-xl shadow-navy-900/10 flex items-center justify-center gap-2 text-xs">Confirmar Importação ({selectedTxIds.length})</button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={onFileChange}
+        accept=".ofx"
+        style={{ display: 'none' }}
+      />
     </SystemLayout>
   );
 };

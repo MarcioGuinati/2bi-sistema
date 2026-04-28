@@ -127,6 +127,7 @@ routes.delete('/reports/:id', ReportController.delete);
 
 // Import
 routes.post('/import/ofx-preview', upload.single('file'), ImportController.preview);
+routes.post('/import/text-preview', ImportController.textPreview);
 routes.post('/import/ofx-confirm', ImportController.confirm);
 
 module.exports = routes;

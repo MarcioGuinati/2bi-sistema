@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { CreditCard as CardIcon, Edit2, Trash2, FileDigit, ArrowRight } from 'lucide-react';
+import { CreditCard as CardIcon, Edit2, Trash2, FileDigit, ArrowRight, Upload } from 'lucide-react';
 
-const CreditCard = ({ account, onClick, onEdit, onDelete, onImport }) => {
+const CreditCard = ({ account, onClick, onEdit, onDelete, onImport, onImportText }) => {
   const usedLimit = Math.abs(Number(account.used_limit || 0));
   const totalLimit = Number(account.credit_limit || 1); // Avoid division by zero
   const percentage = Math.min(100, Math.round((usedLimit / totalLimit) * 100));
@@ -29,21 +29,28 @@ const CreditCard = ({ account, onClick, onEdit, onDelete, onImport }) => {
         <div className="flex gap-4">
           <button 
             onClick={(e) => { e.stopPropagation(); onEdit(account); }}
-            className="p-4 bg-white/20 hover:bg-white/40 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
+            className="p-3 bg-white/20 hover:bg-white/40 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
             title="Editar"
           >
             <Edit2 size={20} />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onImport(account.id); }}
-            className="p-4 bg-white/20 hover:bg-white/40 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
+            className="p-3 bg-white/20 hover:bg-white/40 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
             title="Importar OFX"
           >
             <FileDigit size={20} />
           </button>
           <button 
+            onClick={(e) => { e.stopPropagation(); onImportText(account.id); }}
+            className="p-3 bg-white/20 hover:bg-white/40 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
+            title="Importar por Texto"
+          >
+            <Upload size={20} />
+          </button>
+          <button 
             onClick={(e) => { e.stopPropagation(); onDelete(account.id); }}
-            className="p-4 bg-red-500/40 hover:bg-red-500 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
+            className="p-3 bg-red-500/40 hover:bg-red-500 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all hover:scale-110"
             title="Excluir"
           >
             <Trash2 size={20} />
