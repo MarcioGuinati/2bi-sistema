@@ -181,8 +181,8 @@ const CategoryManagement = () => {
               <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                 <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
                   <div>
-                    <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingCat ? 'Editar Categoria' : 'Nova Categoria'}</h3>
-                    <p className="text-gold text-[10px] font-black uppercase tracking-widest mt-1">Organização 2BI</p>
+                    <h3 className="text-2xl font-black font-heading tracking-tight !text-white">{editingCat ? 'Editar Categoria' : 'Nova Categoria'}</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-widest font-medium">Organização 2BI</p>
                   </div>
                   <button type="button" onClick={() => setShowModal(false)} className="text-white/50 hover:text-white transition-colors">
                     <X size={24} />
