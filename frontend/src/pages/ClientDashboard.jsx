@@ -50,6 +50,7 @@ const ClientDashboard = () => {
   const { success, error } = useNotification();
   const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
   const [dashboardData, setDashboardData] = useState({ monthlyData: [], categoryData: [] });
+  const formatCurrency = (val) => `R$ ${Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [goals, setGoals] = useState([]);
@@ -602,8 +603,12 @@ const ClientDashboard = () => {
                     <BarChart data={data} barGap={12}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 'bold' }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} />
-                      <Tooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} width={65} tickFormatter={formatCurrency} />
+                      <Tooltip 
+                        cursor={{ fill: '#F1F5F9' }} 
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
+                        formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                      />
                       <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={60}>
                         {data.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -855,8 +860,9 @@ const ClientDashboard = () => {
                       <YAxis
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#94A3B8', fontSize: 11 }}
-                        tickFormatter={(val) => `R$ ${val.toLocaleString()}`}
+                        tick={{ fill: '#94A3B8', fontSize: 10 }}
+                        width={65}
+                        tickFormatter={formatCurrency}
                       />
                       <Tooltip
                         contentStyle={{
@@ -867,6 +873,7 @@ const ClientDashboard = () => {
                           padding: '20px'
                         }}
                         itemStyle={{ color: '#c5a059', fontWeight: 'bold' }}
+                        formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                       />
                       <Area
                         type="monotone"
@@ -965,10 +972,11 @@ const ClientDashboard = () => {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} tickFormatter={(val) => `R$ ${val}`} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 9 }} width={65} tickFormatter={formatCurrency} />
                     <Tooltip
                       contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
                       itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                      formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                     />
                     <Area type="monotone" dataKey="receita" stroke="#4ADE80" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
                     <Area type="monotone" dataKey="despesa" stroke="#F87171" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
@@ -1029,10 +1037,11 @@ const ClientDashboard = () => {
                     <BarChart data={dashboardData.monthlyData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 9 }} width={65} tickFormatter={formatCurrency} />
                       <Tooltip
                         cursor={{ fill: 'transparent' }}
                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                        formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                       />
                       <Bar dataKey="saldo" radius={[8, 8, 0, 0]}>
                         {dashboardData.monthlyData.map((entry, index) => (
@@ -1066,10 +1075,11 @@ const ClientDashboard = () => {
                   <BarChart data={dashboardData.monthlyData} barGap={10}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 'bold' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10 }} tickFormatter={(val) => `R$ ${val}`} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 9 }} width={65} tickFormatter={formatCurrency} />
                     <Tooltip
                       cursor={{ fill: '#F1F5F9' }}
                       contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
+                      formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                     />
                     <Bar dataKey="receita" name="Receita" fill="#4ADE80" radius={[6, 6, 0, 0]} barSize={25} />
                     <Bar dataKey="despesa" name="Despesa" fill="#F87171" radius={[6, 6, 0, 0]} barSize={25} />
