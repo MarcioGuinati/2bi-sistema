@@ -141,7 +141,15 @@ Responda em Markdown, use títulos claros e seja muito preciso com os números f
       const offset = (page - 1) * limit;
 
       const { count, rows } = await Insight.findAndCountAll({
-        where: { user_id: req.userId },
+        where: { 
+          user_id: req.userId,
+          content: {
+            [Op.notLike]: 'Categorização OFX%'
+          },
+          [Op.and]: [
+            { content: { [Op.notLike]: 'Extração de Texto%' } }
+          ]
+        },
         order: [['createdAt', 'DESC']],
         limit: parseInt(limit),
         offset: parseInt(offset)
