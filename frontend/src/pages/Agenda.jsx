@@ -15,7 +15,8 @@ import {
   isToday,
   startOfDay,
   setHours,
-  setMinutes
+  setMinutes,
+  addMinutes
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -32,7 +33,9 @@ import {
   MoreVertical,
   CheckCircle2,
   AlertCircle,
-  Users
+  Users,
+  ExternalLink,
+  Share2
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +46,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Agenda = () => {
   const { user } = useAuth();
   const { success, error, confirm } = useNotification();
+  
+  const generateGoogleCalendarUrl = (schedule) => {
+    const startDate = parseISO(schedule.date);
+    const endDate = addMinutes(startDate, parseInt(schedule.duration) || 60);
+    
+    const fmt = (date) => format(date, "yyyyMMdd'T'HHmmss");
+    const dates = `${fmt(startDate)}/${fmt(endDate)}`;
+    
+    const title = encodeURIComponent(schedule.title);
+    const details = encodeURIComponent(
+      `Cliente: ${schedule.Client?.name || schedule.clientName || 'N/A'}\n\n${schedule.description || ''}`
+    );
+    const location = encodeURIComponent(schedule.meet_url || '');
+
+    return `https://calendar.google.com/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+  };
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [schedules, setSchedules] = useState([]);
@@ -351,22 +371,36 @@ const Agenda = () => {
                           )}
                         </div>
                         
-                        {!schedule.isMasked && (user.role === 'admin' || schedule.userId === user.id) && (
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
-                              onClick={() => handleOpenModal(schedule)}
-                              className="p-1.5 hover:bg-gold/10 rounded-lg text-gold transition-colors"
-                              title="Editar"
+                        {!schedule.isMasked && (
+                          <div className="flex gap-2 items-center">
+                            <a 
+                              href={generateGoogleCalendarUrl(schedule)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-600 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-md border border-blue-500/20"
+                              title="Sincronizar com Google Agenda"
                             >
-                              <Edit2 size={14} />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(schedule.id)}
-                              className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
-                              title="Excluir"
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                              <Share2 size={12} /> Google
+                            </a>
+                            
+                            {(user.role === 'admin' || schedule.userId === user.id) && (
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button 
+                                  onClick={() => handleOpenModal(schedule)}
+                                  className="p-1.5 hover:bg-gold/10 rounded-lg text-gold transition-colors"
+                                  title="Editar"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDelete(schedule.id)}
+                                  className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors"
+                                  title="Excluir"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -448,6 +482,16 @@ const Agenda = () => {
                   <h3 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-3">
                     <CalendarIcon className="text-gold" />
                     {editingSchedule ? 'Editar Agendamento' : 'Novo Agendamento'}
+                    {editingSchedule && (
+                      <a 
+                        href={generateGoogleCalendarUrl(editingSchedule)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg"
+                      >
+                        <Share2 size={14} /> Sincronizar Google
+                      </a>
+                    )}
                   </h3>
                   <button 
                     onClick={() => setShowModal(false)}
