@@ -3,8 +3,12 @@ const AuditService = require('../services/AuditService');
 
 class CategoryController {
   async index(req, res) {
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+      ? req.query.userId 
+      : req.userId;
+
     const categories = await Category.findAll({
-      where: { user_id: req.userId },
+      where: { user_id: targetUserId },
       order: [['name', 'ASC']]
     });
 
@@ -12,15 +16,19 @@ class CategoryController {
   }
 
   async store(req, res) {
-    const { name, type } = req.body;
+    const { name, type, userId } = req.body;
+    
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && userId 
+      ? userId 
+      : req.userId;
 
     const category = await Category.create({
       name,
       type,
-      user_id: req.userId
+      user_id: targetUserId
     });
 
-    await AuditService.log(req.userId, 'CATEGORY_CREATE', 'Finance', { id: category.id, name, type }, req.ip);
+    await AuditService.log(req.userId, 'CATEGORY_CREATE', 'Finance', { id: category.id, name, type, targetUserId }, req.ip);
 
     return res.json(category);
   }

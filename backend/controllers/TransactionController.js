@@ -18,8 +18,11 @@ class TransactionController {
     } = req.query;
 
     const offset = (page - 1) * limit;
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+      ? req.query.userId 
+      : req.userId;
 
-    const where = { user_id: req.userId };
+    const where = { user_id: targetUserId };
 
     if (type) where.type = type;
     if (category_id) where.category_id = category_id;
@@ -75,8 +78,13 @@ class TransactionController {
       recurrenceType,
       installmentsCount,
       repeatUntil,
-      is_paid
+      is_paid,
+      userId
     } = req.body;
+
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && userId 
+      ? userId 
+      : req.userId;
 
     const t = await sequelize.transaction();
 
@@ -119,7 +127,7 @@ class TransactionController {
             type,
             category_id,
             account_id,
-            user_id: req.userId,
+            user_id: targetUserId,
             date: currentMonth.toISOString().split('T')[0],
             is_paid: transactions.length === 0 ? is_paid : false
           });
@@ -150,7 +158,7 @@ class TransactionController {
         req.userId, 
         createdTransactions.length > 1 ? 'TRANSACTION_BULK_CREATE' : 'TRANSACTION_CREATE', 
         'Finance', 
-        { count: createdTransactions.length, firstDescription: createdTransactions[0].description },
+        { count: createdTransactions.length, firstDescription: createdTransactions[0].description, targetUserId },
         req.ip
       );
 

@@ -391,7 +391,7 @@ class AuthController {
         'id', 'name', 'email', 'phone', 'cpf', 'income', 'occupation',
         'financialGoal', 'customFields', 'onboardingData', 'isLead',
         'isActive', 'leadSource', 'partner_id', 'createdAt',
-        'hasReportAccess', 'hasAIAccess'
+        'hasReportAccess', 'hasAIAccess', 'consultancyStage'
       ],
       include: [
         { model: User, as: 'Partner', attributes: ['id', 'name'] }
@@ -412,7 +412,7 @@ class AuthController {
       const {
         name, email, password, phone, cpf, income, occupation,
         financialGoal, customFields, onboardingData,
-        hasReportAccess, hasAIAccess
+        hasReportAccess, hasAIAccess, consultancyStage
       } = req.body;
 
       const user = await User.findByPk(id);
@@ -430,7 +430,7 @@ class AuthController {
       const fields = {
         name, email, phone, cpf, income, occupation,
         financialGoal, customFields, onboardingData,
-        hasReportAccess, hasAIAccess
+        hasReportAccess, hasAIAccess, consultancyStage
       };
       const updateData = {};
 

@@ -108,6 +108,10 @@ module.exports = (sequelize, DataTypes) => {
     trustedDeviceExpires: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    consultancyStage: {
+      type: DataTypes.ENUM('COLETA_DE_DADOS', 'DIAGNOSTICO', 'PLANO_DE_ACAO', 'ACOMPANHAMENTO'),
+      defaultValue: 'COLETA_DE_DADOS'
     }
   });
 

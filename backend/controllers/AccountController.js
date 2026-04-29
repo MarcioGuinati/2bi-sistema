@@ -3,9 +3,13 @@ const AuditService = require('../services/AuditService');
 
 class AccountController {
   async index(req, res) {
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+      ? req.query.userId 
+      : req.userId;
+
     const { Transaction } = require('../models');
     const accounts = await Account.findAll({
-      where: { user_id: req.userId },
+      where: { user_id: targetUserId },
       include: [{ model: Transaction }],
       order: [['name', 'ASC']]
     });
@@ -31,7 +35,11 @@ class AccountController {
   }
 
   async store(req, res) {
-    const { name, type, initial_balance, credit_limit, invoice_closing_day, due_day, color } = req.body;
+    const { name, type, initial_balance, credit_limit, invoice_closing_day, due_day, color, userId } = req.body;
+
+    const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && userId 
+      ? userId 
+      : req.userId;
 
     const account = await Account.create({
       name,
@@ -41,10 +49,10 @@ class AccountController {
       invoice_closing_day,
       due_day,
       color,
-      user_id: req.userId
+      user_id: targetUserId
     });
 
-    await AuditService.log(req.userId, 'ACCOUNT_CREATE', 'Finance', { id: account.id, name, type }, req.ip);
+    await AuditService.log(req.userId, 'ACCOUNT_CREATE', 'Finance', { id: account.id, name, type, targetUserId }, req.ip);
 
     return res.json(account);
   }
