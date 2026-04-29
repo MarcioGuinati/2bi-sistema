@@ -56,7 +56,9 @@ class ConfigController {
       const { startDate, endDate } = req.query;
       const whereInsight = {};
       if (startDate && endDate) {
-        whereInsight.created_at = { [Op.between]: [startDate, endDate] };
+        whereInsight.createdAt = { 
+          [Op.between]: [`${startDate} 00:00:00`, `${endDate} 23:59:59`] 
+        };
       }
 
       // Invertemos a lógica: buscamos usuários que possuem insights para garantir os dados do usuário
@@ -66,7 +68,7 @@ class ConfigController {
           'name',
           'email',
           [sequelize.fn('COUNT', sequelize.col('Insights.id')), 'total_insights'],
-          [sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'last_use']
+          [sequelize.fn('MAX', sequelize.col('Insights.createdAt')), 'last_use']
         ],
         include: [{
           model: Insight,
@@ -75,7 +77,7 @@ class ConfigController {
           where: whereInsight
         }],
         group: ['User.id'],
-        order: [[sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'DESC']],
+        order: [[sequelize.fn('MAX', sequelize.col('Insights.createdAt')), 'DESC']],
         raw: true
       });
 
@@ -91,7 +93,9 @@ class ConfigController {
       const { startDate, endDate } = req.query;
       const where = {};
       if (startDate && endDate) {
-        where.created_at = { [Op.between]: [startDate, endDate] };
+        where.createdAt = { 
+          [Op.between]: [`${startDate} 00:00:00`, `${endDate} 23:59:59`] 
+        };
       }
 
       const usage = await Insight.findAll({
