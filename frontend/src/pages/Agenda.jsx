@@ -184,6 +184,24 @@ const Agenda = () => {
     setFormData({ ...formData, participantIds: current });
   };
 
+  const handleDelete = (id) => {
+    confirm({
+      title: 'Excluir Agendamento',
+      message: 'Deseja realmente remover esta reunião?',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/schedules/${id}`);
+          success('Agendamento excluído');
+          fetchSchedules();
+        } catch (error) {
+          console.error('Error deleting schedule:', error);
+          error('Erro ao excluir agendamento');
+        }
+      }
+    });
+  };
+
   const selectedDaySchedules = getSchedulesForDay(selectedDate);
 
   return (
@@ -333,7 +351,7 @@ const Agenda = () => {
                           )}
                         </div>
                         
-                        {!schedule.isMasked && (
+                        {!schedule.isMasked && (user.role === 'admin' || schedule.userId === user.id) && (
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
                               onClick={() => handleOpenModal(schedule)}
