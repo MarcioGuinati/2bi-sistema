@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import {
   Plus,
   Search,
@@ -65,6 +67,8 @@ const FinanceManagement = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewTransactions, setPreviewTransactions] = useState([]);
   const [selectedTxIds, setSelectedTxIds] = useState([]);
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false);
+  const [bulkDate, setBulkDate] = useState(new Date().toISOString().split('T')[0]);
   const fileInputRef = React.useRef(null);
 
   const [form, setForm] = useState({
@@ -139,6 +143,21 @@ const FinanceManagement = () => {
       success(editingTrans ? 'Lançamento atualizado!' : 'Lançamento registrado com sucesso!');
       fetchData();
     } catch (err) { error('Erro ao processar transação'); }
+  };
+
+  const handleBulkUpdate = async () => {
+    try {
+      await api.post('/transactions/bulk-update', {
+        ids: selectedIds,
+        date: bulkDate
+      });
+      setShowBulkEditModal(false);
+      setSelectedIds([]);
+      success('Transações atualizadas com sucesso!');
+      fetchData();
+    } catch (err) {
+      error('Erro ao realizar edição em massa');
+    }
   };
 
   const handleDeleteTrans = (id) => {
@@ -539,6 +558,20 @@ const FinanceManagement = () => {
                       R$ {selectionStats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                   </div>
+                  <div className="flex items-center gap-2 border-l border-gold/20 pl-6">
+                    <button 
+                      onClick={() => setShowBulkEditModal(true)}
+                      className="p-3 bg-gold text-white rounded-xl hover:bg-gold/80 transition-all shadow-md flex items-center gap-2 text-xs font-bold"
+                    >
+                      <Edit2 size={16} /> Editar Vencimento
+                    </button>
+                    <button 
+                      onClick={handleBulkDelete}
+                      className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all shadow-md flex items-center gap-2 text-xs font-bold"
+                    >
+                      <Trash2 size={16} /> Excluir
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -598,7 +631,9 @@ const FinanceManagement = () => {
                       />
                     </td>
                     <td className="px-8 py-5">
-                      <div className="text-sm font-bold text-[var(--text-primary)]">{new Date(t.date).toLocaleDateString('pt-BR')}</div>
+                      <div className="text-sm font-bold text-[var(--text-primary)]">
+                        {format(parseISO(t.date), 'dd/MM/yyyy')}
+                      </div>
                     </td>
                     <td className="px-8 py-5">
                       <div className="text-sm font-bold tracking-tight">{t.description}</div>
@@ -843,6 +878,48 @@ const FinanceManagement = () => {
                   <button onClick={() => setShowTextModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs">Cancelar</button>
                   <button onClick={handleProcessTextImport} disabled={textImporting} className="flex-1 py-4 bg-navy-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold disabled:opacity-50 transition-all text-xs">
                     {textImporting ? 'Analisando...' : 'Analisar com IA'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* BULK EDIT MODAL */}
+      <AnimatePresence>
+        {showBulkEditModal && (
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[var(--border-primary)]">
+              <div className="bg-gold p-6 text-navy-900 flex justify-between items-center">
+                <h3 className="text-xl font-black font-heading tracking-tight">Edição em Massa</h3>
+                <button onClick={() => setShowBulkEditModal(false)} className="p-2 hover:bg-black/5 rounded-full transition-all"><X size={24} /></button>
+              </div>
+              <div className="p-8 space-y-6">
+                <div className="bg-gold/5 p-4 rounded-2xl border border-gold/20 flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gold text-white rounded-xl flex items-center justify-center font-black">
+                    {selectedIds.length}
+                  </div>
+                  <p className="text-xs font-bold text-navy-900/60 uppercase tracking-widest">Itens selecionados para alteração</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-black text-slate-400 ml-4 tracking-widest">Novo Vencimento</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="date"
+                      value={bulkDate}
+                      onChange={(e) => setBulkDate(e.target.value)}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] pl-14 pr-6 py-4 rounded-2xl outline-none focus:border-gold font-bold text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button onClick={() => setShowBulkEditModal(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs">Cancelar</button>
+                  <button onClick={handleBulkUpdate} className="flex-1 py-4 bg-gold text-white rounded-2xl font-black uppercase tracking-widest hover:bg-gold/80 transition-all text-xs shadow-lg shadow-gold/20">
+                    Salvar Alterações
                   </button>
                 </div>
               </div>

@@ -435,6 +435,39 @@ class TransactionController {
       return res.status(500).json({ error: 'Erro ao excluir transações em lote' });
     }
   }
+
+  async bulkUpdate(req, res) {
+    const { ids, date } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'IDs must be a non-empty array' });
+    }
+
+    try {
+      await Transaction.update(
+        { date },
+        {
+          where: {
+            id: ids,
+            user_id: req.userId
+          }
+        }
+      );
+
+      await AuditService.log(
+        req.userId, 
+        'TRANSACTION_BULK_UPDATE', 
+        'Finance', 
+        { count: ids.length, date, ids },
+        req.ip
+      );
+
+      return res.status(200).json({ message: 'Transações atualizadas com sucesso' });
+    } catch (error) {
+      console.error('Error in bulk update:', error);
+      return res.status(500).json({ error: 'Erro ao atualizar transações em lote' });
+    }
+  }
 }
 
 module.exports = new TransactionController();
