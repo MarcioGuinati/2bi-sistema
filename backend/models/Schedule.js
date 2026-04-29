@@ -5,13 +5,29 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     date: {
       type: DataTypes.DATE,
       allowNull: false
     },
+    endDate: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    clientName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     meet_url: {
       type: DataTypes.STRING,

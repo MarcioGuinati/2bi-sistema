@@ -38,6 +38,7 @@ import AdminReports from './pages/AdminReports';
 import UserProfile from './pages/UserProfile';
 import AppLandingPage from './pages/AppLandingPage';
 import ForgotPassword from './pages/ForgotPassword';
+import Agenda from './pages/Agenda';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -90,6 +91,14 @@ function App() {
             element={
               <ProtectedRoute role={['admin', 'partner']}>
                 <AdminFinances />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/agenda" 
+            element={
+              <ProtectedRoute role={['admin', 'partner']}>
+                <Agenda />
               </ProtectedRoute>
             } 
           />

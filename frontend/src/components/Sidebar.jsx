@@ -49,18 +49,19 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
 
   const partnerLinks = [
     { name: 'Carteira', path: '/admin', icon: Users },
-    { name: 'Mentoria & CRM', path: '/admin/mentorship', icon: Calendar },
+    { name: 'Agenda', path: '/agenda', icon: Calendar },
+    { name: 'Mentoria & CRM', path: '/admin/mentorship', icon: Star },
     { name: 'Financeiro', path: '/admin/finances', icon: TrendingUp },
-    { name: 'Minha Mentoria', path: '/mentoria', icon: Star },
   ];
 
   const adminLinks = [
     { name: 'Gestão Clientes', path: '/admin', icon: Users },
+    { name: 'Agenda Master', path: '/agenda', icon: Calendar },
     { name: 'Parceiros', path: '/admin/partners', icon: Briefcase },
     { name: 'Relatórios Master', path: '/admin/reports', icon: FileText },
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Finanças', path: '/admin/finances', icon: TrendingUp },
-    { name: 'Mentoria Master', path: '/admin/mentorship', icon: Calendar },
+    { name: 'Mentoria Master', path: '/admin/mentorship', icon: Star },
     { name: 'Segurança', path: '/admin/security', icon: ShieldCheck },
     { name: 'Logs de Auditoria', path: '/admin/audit-logs', icon: Shield },
   ];

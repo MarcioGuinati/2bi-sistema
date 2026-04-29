@@ -14,6 +14,7 @@ const ConfigController = require('./controllers/ConfigController');
 const AIController = require('./controllers/AIController');
 const AuditController = require('./controllers/AuditController');
 const ReportController = require('./controllers/ReportController');
+const ScheduleController = require('./controllers/ScheduleController');
 const authMiddleware = require('./middleware/auth');
 const multer = require('multer');
 
@@ -47,6 +48,7 @@ routes.post('/2fa/disable', AuthController.disable2FA);
 routes.post('/register-client', AuthController.registerClient);
 routes.get('/clients', AuthController.listClients);
 routes.get('/admin/partners', AdminController.listPartners);
+routes.get('/admin/list-admins', AdminController.listAdmins);
 routes.post('/admin/register-partner', AuthController.registerPartner);
 routes.put('/admin/partners/:id', AuthController.updatePartner);
 routes.delete('/admin/partners/:id', AuthController.deletePartner);
@@ -129,5 +131,11 @@ routes.delete('/reports/:id', ReportController.delete);
 routes.post('/import/ofx-preview', upload.single('file'), ImportController.preview);
 routes.post('/import/text-preview', ImportController.textPreview);
 routes.post('/import/ofx-confirm', ImportController.confirm);
+
+// Agenda (Schedules)
+routes.get('/schedules', ScheduleController.index);
+routes.post('/schedules', ScheduleController.store);
+routes.put('/schedules/:id', ScheduleController.update);
+routes.delete('/schedules/:id', ScheduleController.delete);
 
 module.exports = routes;

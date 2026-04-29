@@ -115,6 +115,20 @@ class AdminController {
       return res.status(500).json({ error: 'Erro ao listar parceiros' });
     }
   }
+
+  async listAdmins(req, res) {
+    try {
+      const admins = await User.findAll({
+        where: { role: 'admin' },
+        attributes: ['id', 'name', 'email'],
+        order: [['name', 'ASC']]
+      });
+
+      return res.json(admins);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao listar administradores' });
+    }
+  }
 }
 
 module.exports = new AdminController();

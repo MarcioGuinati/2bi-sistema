@@ -67,10 +67,12 @@ User.hasMany(Contract, { foreignKey: 'user_id' });
 Contract.belongsTo(User, { foreignKey: 'user_id' });
 
 // User & Schedules
-User.hasMany(Schedule, { as: 'AdminSchedules', foreignKey: 'adminId' });
+User.hasMany(Schedule, { as: 'Schedules', foreignKey: 'userId' });
 User.hasMany(Schedule, { as: 'ClientSchedules', foreignKey: 'clientId' });
-Schedule.belongsTo(User, { as: 'Admin', foreignKey: 'adminId' });
+User.hasMany(Schedule, { as: 'InvitedSchedules', foreignKey: 'invitedAdminId' });
+Schedule.belongsTo(User, { as: 'User', foreignKey: 'userId' });
 Schedule.belongsTo(User, { as: 'Client', foreignKey: 'clientId' });
+Schedule.belongsTo(User, { as: 'InvitedAdmin', foreignKey: 'invitedAdminId' });
 
 // User & Payments
 User.hasMany(Payment, { foreignKey: 'user_id' });
