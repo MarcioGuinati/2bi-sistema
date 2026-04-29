@@ -80,7 +80,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
         <div className="p-8 flex flex-col items-center gap-6 relative z-10 w-full mb-2">
           <Link to="/panel" className="group">
             <div className="flex items-center justify-center transition-all duration-500 group-hover:scale-110">
-              <img src="/logo_2bi.png" alt="2BI" className="w-full max-w-[160px] object-contain brightness-0 invert opacity-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+              <img src="/logo_2bi.png" alt="2BI" className="w-full max-w-[160px] object-contain opacity-100" />
             </div>
           </Link>
 

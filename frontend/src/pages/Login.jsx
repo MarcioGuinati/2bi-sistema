@@ -87,7 +87,7 @@ const Login = () => {
                 <img 
                     src="/logo_2bi.png" 
                     alt="2BI Planejamento" 
-                    className="w-40 h-auto filter brightness-0 invert"
+                    className="w-40 h-auto"
                 />
             </motion.div>
 
@@ -223,7 +223,11 @@ const Login = () => {
             className="max-w-md w-full relative z-10"
         >
             <div className="lg:hidden flex justify-center mb-12">
-                 <img src="/logo_2bi.png" alt="2BI" className="w-32 h-auto dark:brightness-0 dark:invert" />
+                 <img 
+                    src="/logo_2bi.png" 
+                    alt="2BI" 
+                    className={`w-32 h-auto transition-all duration-500 ${theme === 'light' ? 'brightness-0 opacity-80' : ''}`} 
+                  />
             </div>
 
             {/* Theme Toggle */}
