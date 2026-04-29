@@ -132,6 +132,7 @@ routes.delete('/reports/:id', ReportController.delete);
 routes.post('/import/ofx-preview', upload.single('file'), ImportController.preview);
 routes.post('/import/text-preview', ImportController.textPreview);
 routes.post('/import/ofx-confirm', ImportController.confirm);
+routes.post('/import/confirm', ImportController.confirm);
 
 // Agenda (Schedules)
 routes.get('/schedules', ScheduleController.index);

@@ -143,11 +143,15 @@ class ImportController {
         const suffix = `_manual_${Date.now()}_${idx}`;
         const finalExternalId = cleanData.external_id ? (isDuplicate ? `${cleanData.external_id}${suffix}` : cleanData.external_id) : null;
 
+        const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+          ? req.query.userId 
+          : req.userId;
+
         return {
           ...cleanData,
           external_id: finalExternalId,
           account_id,
-          user_id: req.userId,
+          user_id: targetUserId,
           is_paid: true
         };
       });
@@ -179,7 +183,11 @@ class ImportController {
         return res.status(400).json({ error: 'Integração com IA não configurada. Configure no painel Admin.' });
       }
 
-      const categories = await Category.findAll({ where: { user_id: req.userId }, raw: true });
+      const targetUserId = (req.userRole === 'admin' || req.userRole === 'partner') && req.query.userId 
+        ? req.query.userId 
+        : req.userId;
+
+      const categories = await Category.findAll({ where: { user_id: targetUserId }, raw: true });
       const categoriesMap = categories.length > 0 ? categories.map(c => `ID: ${c.id} - ${c.name}`).join('\n') : 'Nenhuma categoria cadastrada.';
 
       const systemPrompt = `Você é um assistente financeiro especialista em extrair transações bancárias de texto bruto copiado de extratos.
@@ -239,7 +247,7 @@ class ImportController {
 
       const now = new Date();
       await Insight.create({
-        user_id: req.userId,
+        user_id: targetUserId,
         month: now.getMonth() + 1,
         year: now.getFullYear(),
         content: `Extração de Texto via IA: ${text.length} caracteres analisados, ${processed.length} transações extraídas.`
