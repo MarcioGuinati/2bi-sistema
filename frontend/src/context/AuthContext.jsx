@@ -22,7 +22,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const response = await api.post('/login', { email, password });
+    const trustedDeviceToken = localStorage.getItem('@2BI:trusted_device');
+    const response = await api.post('/login', { email, password, trustedDeviceToken });
     
     if (response.data.twoFactorRequired) {
       return response.data; // Return to trigger 2FA UI
@@ -36,9 +37,13 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
-  const verify2FALogin = async (tempToken, code) => {
-    const response = await api.post('/2fa/verify-login', { tempToken, code });
-    const { user: userData, token } = response.data;
+  const verify2FALogin = async (tempToken, code, rememberDevice = false) => {
+    const response = await api.post('/2fa/verify-login', { tempToken, code, rememberDevice });
+    const { user: userData, token, trustedDeviceToken } = response.data;
+
+    if (trustedDeviceToken) {
+      localStorage.setItem('@2BI:trusted_device', trustedDeviceToken);
+    }
 
     setUser(userData);
     localStorage.setItem('@2BI:user', JSON.stringify(userData));

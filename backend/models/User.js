@@ -100,6 +100,14 @@ module.exports = (sequelize, DataTypes) => {
     resetPasswordExpires: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    trustedDeviceToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    trustedDeviceExpires: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   });
 

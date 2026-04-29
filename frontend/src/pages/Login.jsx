@@ -16,6 +16,7 @@ const Login = () => {
   const [require2FA, setRequire2FA] = useState(false);
   const [tempToken, setTempToken] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [rememberDevice, setRememberDevice] = useState(false);
   
   const { login, verify2FALogin } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -36,7 +37,7 @@ const Login = () => {
 
     try {
       if (require2FA) {
-        await verify2FALogin(tempToken, twoFactorCode);
+        await verify2FALogin(tempToken, twoFactorCode, rememberDevice);
         navigate('/panel');
         return;
       }
@@ -328,6 +329,18 @@ const Login = () => {
                                 placeholder="000000"
                                 autoFocus
                             />
+                        </div>
+
+                        <div className="flex items-center justify-center px-4 text-[11px]">
+                            <label className="flex items-center gap-2 text-[var(--text-secondary)] font-bold cursor-pointer group">
+                                <input 
+                                    type="checkbox" 
+                                    checked={rememberDevice}
+                                    onChange={(e) => setRememberDevice(e.target.checked)}
+                                    className="w-4 h-4 rounded border-[var(--border-primary)] bg-[var(--bg-primary)] text-gold focus:ring-gold transition-all" 
+                                />
+                                Confiar neste dispositivo por 15 dias
+                            </label>
                         </div>
 
                         <button 

@@ -11,7 +11,7 @@ require('dotenv').config();
 class AuthController {
   async login(req, res) {
     try {
-      const { email: rawEmail, password } = req.body;
+      const { email: rawEmail, password, trustedDeviceToken } = req.body;
       const email = rawEmail.toLowerCase();
 
       const user = await User.findOne({ where: { email } });
@@ -30,16 +30,25 @@ class AuthController {
 
       // If 2FA is enabled, return a temporary flag but no final token yet
       if (twoFactorEnabled && role === 'admin') {
-        const tempToken = jwt.sign({ id, role, isTemp: true }, process.env.JWT_SECRET, {
-          expiresIn: '5m', // Short-lived
-        });
+        // Check if device is trusted
+        const isTrusted = user.trustedDeviceToken && 
+                         user.trustedDeviceToken === trustedDeviceToken && 
+                         user.trustedDeviceExpires > new Date();
 
-        await AuditService.log(user.id, 'LOGIN_2FA_REQUIRED', 'Auth', { email }, req.ip);
+        if (!isTrusted) {
+          const tempToken = jwt.sign({ id, role, isTemp: true }, process.env.JWT_SECRET, {
+            expiresIn: '5m', // Short-lived
+          });
 
-        return res.json({
-          twoFactorRequired: true,
-          tempToken
-        });
+          await AuditService.log(user.id, 'LOGIN_2FA_REQUIRED', 'Auth', { email }, req.ip);
+
+          return res.json({
+            twoFactorRequired: true,
+            tempToken
+          });
+        }
+        
+        await AuditService.log(user.id, 'LOGIN_TRUSTED_DEVICE', 'Auth', { email }, req.ip);
       }
 
       await AuditService.log(user.id, 'LOGIN_SUCCESS', 'Auth', { email, role }, req.ip);
@@ -66,7 +75,7 @@ class AuthController {
 
   async verify2FALogin(req, res) {
     try {
-      const { tempToken, code } = req.body;
+      const { tempToken, code, rememberDevice } = req.body;
 
       if (!tempToken || !code) {
         return res.status(400).json({ error: 'Token temporário e código são obrigatórios' });
@@ -94,6 +103,17 @@ class AuthController {
 
       const { id, name, email, role } = user;
 
+      let newTrustedDeviceToken = null;
+      if (rememberDevice) {
+        newTrustedDeviceToken = require('crypto').randomBytes(32).toString('hex');
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 15); // 15 days
+        await user.update({
+          trustedDeviceToken: newTrustedDeviceToken,
+          trustedDeviceExpires: expires
+        });
+      }
+
       await AuditService.log(user.id, '2FA_VERIFY_SUCCESS', 'Auth', { email: user.email, role }, req.ip);
 
       return res.json({
@@ -101,6 +121,7 @@ class AuthController {
         token: jwt.sign({ id, role }, process.env.JWT_SECRET, {
           expiresIn: '7d',
         }),
+        trustedDeviceToken: newTrustedDeviceToken
       });
     } catch (err) {
       console.error('Error in 2FA verification:', err);
