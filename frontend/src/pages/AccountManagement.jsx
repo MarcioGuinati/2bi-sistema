@@ -445,7 +445,7 @@ const AccountManagement = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] shadow-2xl border border-[var(--border-primary)] flex flex-col overflow-hidden"
+              className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md max-h-[90vh] shadow-2xl border border-[var(--border-primary)] flex flex-col overflow-hidden"
             >
               <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                 <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
@@ -578,13 +578,6 @@ const AccountManagement = () => {
                   <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30">
                     {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="w-full sm:hidden py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest"
-                  >
-                    Cancelar e Voltar
-                  </button>
                 </div>
               </form>
             </motion.div>
@@ -600,7 +593,7 @@ const AccountManagement = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-xl h-full sm:h-auto sm:max-h-[85vh] overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
+              className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-xl max-h-[90vh] overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
             >
               <div className="bg-navy-900 p-6 text-white relative shrink-0">
                 <div className="flex justify-between items-start">

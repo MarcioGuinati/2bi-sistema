@@ -683,7 +683,7 @@ const FinanceManagement = () => {
               <form onSubmit={handleTransSubmit} className="flex flex-col h-full overflow-hidden">
                 <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
                   <div>
-                    <h3 className="text-2xl font-black font-heading tracking-tight">{editingTrans ? 'Alterar Lançamento' : 'Novo Registro'}</h3>
+                    <h3 className="text-2xl font-black font-heading tracking-tight !text-white">{editingTrans ? 'Alterar Lançamento' : 'Novo Registro'}</h3>
                     <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Controle de Fluxo 2BI</p>
                   </div>
                   <button type="button" onClick={() => setShowTransModal(false)} className="text-white/50 hover:text-white"><X size={20} /></button>
