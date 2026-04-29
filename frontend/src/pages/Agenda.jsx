@@ -50,7 +50,7 @@ const Agenda = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [clients, setClients] = useState([]);
-  const [partners, setPartners] = useState([]);
+  const [allUsers, setAllUsers] = useState([]); // Admins + Partners
   
   // Form state
   const [formData, setFormData] = useState({
@@ -61,18 +61,14 @@ const Agenda = () => {
     description: '',
     clientId: '',
     clientName: '',
-    invitedAdminId: '',
+    participantIds: [], // Novo: array de IDs
     meet_url: ''
   });
 
   useEffect(() => {
     fetchSchedules();
-    if (user.role === 'admin' || user.role === 'partner') {
-      fetchClients();
-    }
-    if (user.role === 'partner') {
-      fetchPartners(); // To allow inviting admins
-    }
+    fetchClients();
+    fetchAllUsers();
   }, [currentDate]);
 
   const fetchSchedules = async () => {
@@ -96,12 +92,12 @@ const Agenda = () => {
     }
   };
 
-  const fetchPartners = async () => {
+  const fetchAllUsers = async () => {
     try {
-      const response = await api.get('/admin/list-admins');
-      setPartners(response.data);
+      const response = await api.get('/admin/list-admins'); // Retorna admins e parceiros
+      setAllUsers(response.data);
     } catch (error) {
-      console.error('Error fetching admins:', error);
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -119,7 +115,7 @@ const Agenda = () => {
 
   const handleOpenModal = (schedule = null) => {
     if (schedule) {
-      if (schedule.isMasked) return; // Cannot edit masked schedules
+      if (schedule.isMasked) return;
       
       setEditingSchedule(schedule);
       const dateObj = parseISO(schedule.date);
@@ -131,7 +127,7 @@ const Agenda = () => {
         description: schedule.description || '',
         clientId: schedule.clientId || '',
         clientName: schedule.clientName || '',
-        invitedAdminId: schedule.invitedAdminId || '',
+        participantIds: schedule.Participants?.map(p => p.id) || [],
         meet_url: schedule.meet_url || ''
       });
     } else {
@@ -144,7 +140,7 @@ const Agenda = () => {
         description: '',
         clientId: '',
         clientName: '',
-        invitedAdminId: '',
+        participantIds: [],
         meet_url: ''
       });
     }
@@ -159,8 +155,7 @@ const Agenda = () => {
         ...formData,
         date: dateTime.toISOString(),
         duration: parseInt(formData.duration),
-        clientId: formData.clientId || null,
-        invitedAdminId: formData.invitedAdminId || null
+        clientId: formData.clientId || null
       };
 
       if (editingSchedule) {
@@ -178,22 +173,15 @@ const Agenda = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    confirm({
-      title: 'Excluir Agendamento',
-      message: 'Deseja realmente remover este compromisso? Esta ação não pode ser desfeita.',
-      isDestructive: true,
-      onConfirm: async () => {
-        try {
-          await api.delete(`/schedules/${id}`);
-          fetchSchedules();
-          success('Agendamento excluído com sucesso!');
-        } catch (err) {
-          console.error('Error deleting schedule:', err);
-          error('Erro ao excluir agendamento');
-        }
-      }
-    });
+  const toggleParticipant = (userId) => {
+    const current = [...formData.participantIds];
+    const index = current.indexOf(userId);
+    if (index > -1) {
+      current.splice(index, 1);
+    } else {
+      current.push(userId);
+    }
+    setFormData({ ...formData, participantIds: current });
   };
 
   const selectedDaySchedules = getSchedulesForDay(selectedDate);
@@ -289,11 +277,6 @@ const Agenda = () => {
                           {format(parseISO(schedule.date), "HH:mm")} {schedule.title}
                         </div>
                       ))}
-                      {daySchedules.length > 3 && (
-                        <div className="text-[10px] text-[var(--text-secondary)] pl-1 font-medium italic">
-                          + {daySchedules.length - 3} mais
-                        </div>
-                      )}
                     </div>
                   </div>
                 );
@@ -336,7 +319,7 @@ const Agenda = () => {
                         p-4 rounded-2xl border transition-all duration-300 relative group
                         ${schedule.isMasked 
                           ? 'bg-slate-50 border-slate-200 dark:bg-navy-800 dark:border-navy-700' 
-                          : 'bg-[var(--bg-primary)] border-[var(--border-primary)] hover:border-gold'}
+                          : 'bg-[var(--bg-secondary)] border-[var(--border-primary)] hover:border-gold'}
                       `}
                     >
                       <div className="flex justify-between items-start mb-2">
@@ -398,12 +381,17 @@ const Agenda = () => {
                               Link da Reunião
                             </a>
                           )}
-                          {schedule.invitedAdminId && (
-                            <div className="flex items-center gap-2 text-[10px] bg-gold/5 text-gold-600 px-2 py-1 rounded-full w-fit mt-2">
-                              <Users size={10} />
-                              Com Admin: {schedule.InvitedAdmin?.name}
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            <div className="flex items-center gap-1 text-[9px] font-bold text-gold uppercase tracking-tighter bg-gold/5 px-2 py-1 rounded-full border border-gold/10">
+                              Agendado por: {schedule.User?.name || 'Sistema'}
                             </div>
-                          )}
+                            {schedule.Participants && schedule.Participants.length > 0 && schedule.Participants.map(p => (
+                              <div key={p.id} className="flex items-center gap-1 text-[9px] bg-gold/5 text-gold-600 px-2 py-1 rounded-full border border-gold/10">
+                                <Users size={10} />
+                                {p.name}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
 
@@ -525,21 +513,32 @@ const Agenda = () => {
                       />
                     </div>
 
-                    {user.role === 'partner' && (
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-sm font-bold text-[var(--text-secondary)] px-1">Convidar Administrador</label>
-                        <select 
-                          className="select-premium"
-                          value={formData.invitedAdminId}
-                          onChange={e => setFormData({...formData, invitedAdminId: e.target.value})}
-                        >
-                          <option value="">Nenhum (opcional)</option>
-                          {partners.map(admin => (
-                            <option key={admin.id} value={admin.id}>{admin.name}</option>
-                          ))}
-                        </select>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-bold text-[var(--text-secondary)] px-1">Convidar Participantes (Admins/Parceiros)</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[var(--bg-primary)] p-4 rounded-2xl border border-[var(--border-primary)]">
+                        {allUsers.filter(u => u.id !== user.id).map(u => (
+                          <div 
+                            key={u.id}
+                            onClick={() => toggleParticipant(u.id)}
+                            className={`
+                              flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border
+                              ${formData.participantIds.includes(u.id) 
+                                ? 'bg-gold/10 border-gold/30 text-gold ring-1 ring-gold/20' 
+                                : 'bg-[var(--bg-secondary)] border-transparent text-[var(--text-secondary)] hover:border-slate-200'}
+                            `}
+                          >
+                            <div className={`
+                              w-4 h-4 rounded-full border-2 flex items-center justify-center
+                              ${formData.participantIds.includes(u.id) ? 'bg-gold border-gold' : 'border-slate-300'}
+                            `}>
+                              {formData.participantIds.includes(u.id) && <Plus size={10} className="text-white rotate-45" />}
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-tight">{u.name}</span>
+                            <span className="ml-auto text-[8px] font-black uppercase opacity-40">{u.role === 'admin' ? 'Admin' : 'Parceiro'}</span>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
 
                     <div className="space-y-2 md:col-span-2">
                       <label className="text-sm font-bold text-[var(--text-secondary)] px-1">Link da Reunião (Meet/Zoom)</label>

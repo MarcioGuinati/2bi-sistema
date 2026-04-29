@@ -6,6 +6,7 @@ const Category = require('./Category')(sequelize, DataTypes);
 const Transaction = require('./Transaction')(sequelize, DataTypes);
 const Goal = require('./Goal')(sequelize, DataTypes);
 const Schedule = require('./Schedule')(sequelize, DataTypes);
+const ScheduleParticipant = require('./ScheduleParticipant')(sequelize, DataTypes);
 const Note = require('./Note')(sequelize, DataTypes);
 const Contract = require('./Contract')(sequelize, DataTypes);
 const Account = require('./Account')(sequelize, DataTypes);
@@ -74,6 +75,20 @@ Schedule.belongsTo(User, { as: 'User', foreignKey: 'userId' });
 Schedule.belongsTo(User, { as: 'Client', foreignKey: 'clientId' });
 Schedule.belongsTo(User, { as: 'InvitedAdmin', foreignKey: 'invitedAdminId' });
 
+// Multi-participants associations
+Schedule.belongsToMany(User, { 
+  through: ScheduleParticipant, 
+  as: 'Participants', 
+  foreignKey: 'scheduleId',
+  otherKey: 'userId'
+});
+User.belongsToMany(Schedule, { 
+  through: ScheduleParticipant, 
+  as: 'ParticipatingSchedules', 
+  foreignKey: 'userId',
+  otherKey: 'scheduleId'
+});
+
 // User & Payments
 User.hasMany(Payment, { foreignKey: 'user_id' });
 Payment.belongsTo(User, { foreignKey: 'user_id' });
@@ -95,6 +110,7 @@ module.exports = {
   Transaction,
   Goal,
   Schedule,
+  ScheduleParticipant,
   Note,
   Contract,
   Account,

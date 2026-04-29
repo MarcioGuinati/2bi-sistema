@@ -262,7 +262,7 @@ const ClientDashboard = () => {
       doc.roundedRect(20, y - 5, (pageWidth - 40) / (hasMonthly ? 2.1 : 1), 25, 3, 3, 'F');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
-      doc.text('Taxa de Implementação (Setup):', 30, y + 5);
+      doc.text('Valor Projeto:', 30, y + 5);
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(197, 160, 89);
@@ -271,7 +271,7 @@ const ClientDashboard = () => {
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text('* Taxa de Implementação (Setup) Isenta', 20, y + 5);
+      doc.text('* Valor Projeto Isento', 20, y + 5);
     }
 
     if (hasMonthly) {
@@ -732,7 +732,7 @@ const ClientDashboard = () => {
                       <div className="space-y-4">
                         {Number(c.setupValue) > 0 && (
                           <div className="flex justify-between items-end border-b border-white/5 pb-3">
-                            <span className="text-[10px] uppercase font-black text-white/40">Taxa de Setup</span>
+                            <span className="text-[10px] uppercase font-black text-white/40">Valor Projeto</span>
                             <span className="text-lg font-black text-gold">R$ {Number(c.setupValue).toLocaleString()}</span>
                           </div>
                         )}

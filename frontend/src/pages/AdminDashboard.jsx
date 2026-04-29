@@ -26,7 +26,8 @@ import {
   Star,
   Activity,
   PenTool,
-  ShieldCheck
+  ShieldCheck,
+  Clock
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -149,8 +150,8 @@ const AdminDashboard = () => {
     setEditingBillingContract(null);
     setContractForm({
       title: '',
-      setupValue: '0',
-      monthlyValue: '0',
+      setupValue: maskCurrency('0'),
+      monthlyValue: maskCurrency('0'),
       billingCycle: 'monthly',
       startDate: new Date().toISOString().split('T')[0],
       recurrence: 1,
@@ -165,8 +166,8 @@ const AdminDashboard = () => {
     setEditingBillingContract(contract);
     setContractForm({
       title: contract.title,
-      setupValue: contract.setupValue.toString(),
-      monthlyValue: contract.monthlyValue.toString(),
+      setupValue: maskCurrency(contract.setupValue || '0'),
+      monthlyValue: maskCurrency(contract.monthlyValue || '0'),
       billingCycle: contract.billingCycle,
       startDate: new Date(contract.startDate).toISOString().split('T')[0],
       recurrence: contract.recurrence,
@@ -401,7 +402,7 @@ const AdminDashboard = () => {
       doc.roundedRect(20, y - 5, (pageWidth - 40) / (hasMonthly ? 2.1 : 1), 25, 3, 3, 'F');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
-      doc.text('Taxa de Implementação (Setup):', 30, y + 5);
+      doc.text('Valor Projeto:', 30, y + 5);
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(197, 160, 89);
@@ -410,7 +411,7 @@ const AdminDashboard = () => {
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text('* Taxa de Implementação (Setup) Isenta', 20, y + 5);
+      doc.text('* Valor Projeto Isento', 20, y + 5);
     }
 
     // Monthly Box
@@ -544,12 +545,19 @@ const AdminDashboard = () => {
 
   const handleBillingSubmit = async (e) => {
     e.preventDefault();
+    const sanitizedForm = {
+      ...contractForm,
+      setupValue: sanitizeValue(contractForm.setupValue),
+      monthlyValue: sanitizeValue(contractForm.monthlyValue),
+      user_id: selectedClient.id
+    };
+
     try {
       if (editingBillingContract) {
-        await api.put(`/contracts/${editingBillingContract.id}`, contractForm);
+        await api.put(`/contracts/${editingBillingContract.id}`, sanitizedForm);
         success('Plano atualizado!');
       } else {
-        await api.post('/contracts', { ...contractForm, user_id: selectedClient.id });
+        await api.post('/contracts', sanitizedForm);
         success(`Contrato unificado ativado para ${selectedClient.name}!`);
       }
       setShowContractModal(false);
@@ -1175,10 +1183,10 @@ const AdminDashboard = () => {
                             </div>
                             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                               <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Acordo Total (Setup+Mes)</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Acordo Total (Projeto+Mes)</p>
                                 <div className="text-3xl font-black text-[var(--text-primary)]">R$ {Number(c.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                                 <div className="flex gap-2 mt-1">
-                                  {Number(c.setupValue) > 0 && <span className="text-[8px] font-bold text-gold uppercase tracking-tighter">Setup: R${Number(c.setupValue).toLocaleString()}</span>}
+                                  {Number(c.setupValue) > 0 && <span className="text-[8px] font-bold text-gold uppercase tracking-tighter">Projeto: R${Number(c.setupValue).toLocaleString()}</span>}
                                   {Number(c.monthlyValue) > 0 && <span className="text-[8px] font-bold text-blue-400 uppercase tracking-tighter">Mensal: R${Number(c.monthlyValue).toLocaleString()}</span>}
                                 </div>
                               </div>
@@ -1316,7 +1324,7 @@ const AdminDashboard = () => {
                   <div
                     onClick={() => setContractForm({
                       ...contractForm,
-                      title: 'Plano Estratégico 360 (Setup + Mensal)',
+                      title: 'Plano Estratégico 360 (Projeto + Mensal)',
                       setupValue: (Number(selectedClient.income || 0) * 12 * 0.02).toFixed(2),
                       monthlyValue: '49.90',
                       billingCycle: 'monthly',
@@ -1326,7 +1334,7 @@ const AdminDashboard = () => {
                     })}
                     className="p-4 bg-navy-900 rounded-2xl border border-gold/20 cursor-pointer hover:bg-navy-800 transition-all flex flex-col items-center text-center gap-1.5 group shadow-lg"
                   >
-                    <span className="text-gold text-[10px] font-black uppercase tracking-[0.2em]">Setup + Mensal (360)</span>
+                    <span className="text-gold text-[10px] font-black uppercase tracking-[0.2em]">Projeto + Mensal (360)</span>
                     <span className="text-white text-sm font-black italic">R$ {(Number(selectedClient.income || 0) * 12 * 0.02 + 49.9).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     <span className="text-white/40 text-[9px] font-bold">Completo com IA e Relatórios</span>
                   </div>
@@ -1334,7 +1342,7 @@ const AdminDashboard = () => {
                   <div
                     onClick={() => setContractForm({
                       ...contractForm,
-                      title: 'Convencional (Setup Isento)',
+                      title: 'Convencional (Projeto Isento)',
                       setupValue: '0',
                       monthlyValue: '49.90',
                       billingCycle: 'monthly',
@@ -1434,18 +1442,18 @@ const AdminDashboard = () => {
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Taxa Setup (R$)</label>
+                    <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Valor Projeto</label>
                     <input
-                      type="number" required placeholder="0.00"
-                      value={contractForm.setupValue} onChange={e => setContractForm({ ...contractForm, setupValue: e.target.value })}
+                      type="text" required placeholder="R$ 0,00"
+                      value={contractForm.setupValue} onChange={e => setContractForm({ ...contractForm, setupValue: maskCurrency(e.target.value) })}
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 ml-2">Mensalidade (R$)</label>
                     <input
-                      type="number" required placeholder="0.00"
-                      value={contractForm.monthlyValue} onChange={e => setContractForm({ ...contractForm, monthlyValue: e.target.value })}
+                      type="text" required placeholder="R$ 0,00"
+                      value={contractForm.monthlyValue} onChange={e => setContractForm({ ...contractForm, monthlyValue: maskCurrency(e.target.value) })}
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black transition-all"
                     />
                   </div>

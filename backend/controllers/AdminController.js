@@ -119,8 +119,8 @@ class AdminController {
   async listAdmins(req, res) {
     try {
       const admins = await User.findAll({
-        where: { role: 'admin' },
-        attributes: ['id', 'name', 'email'],
+        where: { role: { [Op.in]: ['admin', 'partner'] } },
+        attributes: ['id', 'name', 'email', 'role'],
         order: [['name', 'ASC']]
       });
 

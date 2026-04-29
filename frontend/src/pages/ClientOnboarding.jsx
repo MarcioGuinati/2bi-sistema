@@ -1313,7 +1313,7 @@ const ClientOnboarding = ({ isReadOnly = false }) => {
                   <h2 className="text-4xl md:text-7xl font-black text-white italic tracking-tighter">
                     {fee.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </h2>
-                  <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mt-6">Taxa de Setup e Mapeamento 360°</p>
+                  <p className="text-white/40 text-[10px] uppercase font-black tracking-widest mt-6">Valor Projeto e Mapeamento 360°</p>
                 </div>
               </div>
             </div>
