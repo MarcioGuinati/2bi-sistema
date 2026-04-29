@@ -440,24 +440,26 @@ const AccountManagement = () => {
       {/* Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border-primary)] flex flex-col"
+              className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] shadow-2xl border border-[var(--border-primary)] flex flex-col overflow-hidden"
             >
-              <div className="bg-navy-900 p-6 text-white flex justify-between items-center sticky top-0 z-20 shrink-0">
-                <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingAcc ? 'Editar Conta' : 'Nova Conta'}</h3>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 hover:bg-white/10 rounded-full transition-all"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-4">
+              <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+                <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
+                  <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingAcc ? 'Editar Conta' : 'Nova Conta'}</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="p-2 hover:bg-white/10 rounded-full transition-all"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400">Nome da Conta / Banco</label>
                     <input
@@ -495,6 +497,7 @@ const AccountManagement = () => {
                       />
                     </div>
                   </div>
+                  
                   {form.type === 'Cartão de Crédito' && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -566,20 +569,21 @@ const AccountManagement = () => {
                       </div>
                     </motion.div>
                   )}
-                  <div className="pt-4 space-y-3">
-                    <button type="submit" className="w-full btn-primary py-4 font-black">
-                      {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowModal(false)}
-                      className="w-full sm:hidden py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest"
-                    >
-                      Cancelar e Voltar
-                    </button>
-                  </div>
-                </form>
-              </div>
+                </div>
+
+                <div className="p-6 bg-[var(--bg-secondary)] border-t border-[var(--border-primary)] shrink-0 space-y-3">
+                  <button type="submit" className="w-full btn-primary py-4 font-black">
+                    {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="w-full sm:hidden py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest"
+                  >
+                    Cancelar e Voltar
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
@@ -588,7 +592,7 @@ const AccountManagement = () => {
       {/* Invoice Details Modal */}
       <AnimatePresence>
         {showInvoiceModal && selectedAccInvoice && (
-          <div className="fixed inset-0 bg-navy-900/80 backdrop-blur-md z-[110] flex items-center justify-center p-0 sm:p-4">
+          <div className="fixed inset-0 bg-navy-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -718,7 +722,7 @@ const AccountManagement = () => {
       {/* OFX Preview Modal */}
       <AnimatePresence>
         {showPreviewModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
               <div className="bg-navy-900 p-6 md:p-8 text-white flex justify-between items-center">
                 <div>
@@ -846,12 +850,12 @@ const AccountManagement = () => {
       {/* Text Import Modal */}
       <AnimatePresence>
         {showTextModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center sm:p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col"
+              className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col max-h-[90vh]"
             >
               <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
                 <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar por Texto (IA)</h3>
@@ -862,7 +866,7 @@ const AccountManagement = () => {
                   <X size={24} />
                 </button>
               </div>
-              <div className="p-6 md:p-8 space-y-4">
+              <div className="p-6 md:p-8 space-y-4 overflow-y-auto custom-scrollbar">
                 <p className="text-sm text-slate-500 font-medium">
                   Cole o texto do seu extrato bancário abaixo. A Inteligência Artificial irá identificar as transações, formatar datas e valores, e sugerir as melhores categorias automaticamente.
                 </p>

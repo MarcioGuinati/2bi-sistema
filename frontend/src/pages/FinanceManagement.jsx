@@ -678,127 +678,134 @@ const FinanceManagement = () => {
       {/* TRANSACTION MODAL */}
       <AnimatePresence>
         {showTransModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl">
-              <div className="bg-navy-900 p-8 text-white flex justify-between items-center">
-                <div>
-                  <h3 className="text-2xl font-black font-heading tracking-tight">{editingTrans ? 'Alterar Lançamento' : 'Novo Registro'}</h3>
-                  <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Controle de Fluxo 2BI</p>
-                </div>
-                <button onClick={() => setShowTransModal(false)} className="text-white/50 hover:text-white"><X size={20} /></button>
-              </div>
-              <form onSubmit={handleTransSubmit} className="p-8 space-y-4 font-medium">
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, type: 'income' })}
-                    className={`py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${form.type === 'income' ? 'bg-green-50 border-green-600 text-green-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
-                  >
-                    <ArrowUpRight size={20} /> Receita
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, type: 'expense' })}
-                    className={`py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${form.type === 'expense' ? 'bg-red-50 border-red-600 text-red-600' : 'bg-[var(--bg-primary)] border-[var(--border-primary)] text-slate-400'}`}
-                  >
-                    <ArrowDownLeft size={20} /> Despesa
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Valor</label>
-                    <input type="text" required value={form.amount} onChange={e => setForm({ ...form, amount: maskCurrency(e.target.value) })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-lg font-black" placeholder="R$ 0,00" />
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+              <form onSubmit={handleTransSubmit} className="flex flex-col h-full overflow-hidden">
+                <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
+                  <div>
+                    <h3 className="text-2xl font-black font-heading tracking-tight">{editingTrans ? 'Alterar Lançamento' : 'Novo Registro'}</h3>
+                    <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Controle de Fluxo 2BI</p>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Descrição</label>
-                    <input type="text" required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold" placeholder="Ex: Investimento Ativo" />
-                  </div>
+                  <button type="button" onClick={() => setShowTransModal(false)} className="text-white/50 hover:text-white"><X size={20} /></button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400">Categoria</label>
-                      <select required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} className="select-premium font-bold">
-                        <option value="">Selecionar</option>
-                        {categories.filter(c => c.type === form.type).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400">Conta Destino</label>
-                      <select required value={form.account_id} onChange={e => setForm({ ...form, account_id: e.target.value })} className="select-premium font-bold">
-                        <option value="">Selecionar</option>
-                        {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Data da Operação</label>
-                    <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="input-premium font-bold" />
-                  </div>
-
-                  <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between">
-                    <div>
-                      <label className="text-[10px] uppercase font-black text-slate-400 block mb-1">Status de Pagamento</label>
-                      <p className="text-[10px] text-slate-400 italic">Marque se esta transação já foi liquidada.</p>
-                    </div>
                     <button
-                       type="button"
-                       onClick={() => setForm({ ...form, is_paid: !form.is_paid })}
-                       className={`w-14 h-8 rounded-full relative transition-all duration-300 ${form.is_paid ? 'bg-green-500' : 'bg-slate-300'}`}
+                      type="button"
+                      onClick={() => setForm({ ...form, type: 'income' })}
+                      className={`py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${form.type === 'income' ? 'bg-green-50 border-green-600 text-green-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                     >
-                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-sm ${form.is_paid ? 'translate-x-6' : 'translate-x-0'}`} />
+                      <ArrowUpRight size={20} /> Receita
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, type: 'expense' })}
+                      className={`py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${form.type === 'expense' ? 'bg-red-50 border-red-600 text-red-600' : 'bg-[var(--bg-primary)] border-[var(--border-primary)] text-slate-400'}`}
+                    >
+                      <ArrowDownLeft size={20} /> Despesa
                     </button>
                   </div>
 
-                  {!editingTrans && (
-                    <div className="space-y-4 pt-4 border-t border-[var(--border-primary)]">
-                      <label className="text-[10px] uppercase font-black text-slate-400">Tipo de Repetição</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'none', label: 'Único' },
-                          { id: 'fixed', label: 'Fixo' },
-                          { id: 'installments', label: 'Parcelado' }
-                        ].map((mode) => (
-                          <button
-                            key={mode.id}
-                            type="button"
-                            onClick={() => setForm({ ...form, recurrenceType: mode.id })}
-                            className={`py-3 rounded-xl text-xs font-bold border-2 transition-all ${form.recurrenceType === mode.id ? 'border-gold bg-gold/10 text-gold' : 'border-[var(--border-primary)] text-slate-400'}`}
-                          >
-                            {mode.label}
-                          </button>
-                        ))}
-                      </div>
-
-                      {form.recurrenceType === 'fixed' && (
-                        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                          <label className="text-[10px] uppercase font-black text-slate-400">Repetir Até (Opcional)</label>
-                          <input 
-                            type="date" 
-                            value={form.repeatUntil} 
-                            onChange={e => setForm({ ...form, repeatUntil: e.target.value })} 
-                            className="input-premium font-bold" 
-                          />
-                        </div>
-                      )}
-
-                      {form.recurrenceType === 'installments' && (
-                        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                          <label className="text-[10px] uppercase font-black text-slate-400">Número de Parcelas</label>
-                          <input 
-                            type="number" 
-                            min="2" 
-                            required
-                            value={form.installmentsCount} 
-                            onChange={e => setForm({ ...form, installmentsCount: e.target.value })} 
-                            className="input-premium font-bold" 
-                            placeholder="Ex: 12"
-                          />
-                          <p className="text-[10px] text-gold font-bold italic mt-1">O valor informado será dividido entre as parcelas.</p>
-                        </div>
-                      )}
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Valor</label>
+                      <input type="text" required value={form.amount} onChange={e => setForm({ ...form, amount: maskCurrency(e.target.value) })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-lg font-black" placeholder="R$ 0,00" />
                     </div>
-                  )}
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Descrição</label>
+                      <input type="text" required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold" placeholder="Ex: Investimento Ativo" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-black text-slate-400">Categoria</label>
+                        <select required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} className="select-premium font-bold">
+                          <option value="">Selecionar</option>
+                          {categories.filter(c => c.type === form.type).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-black text-slate-400">Conta Destino</label>
+                        <select required value={form.account_id} onChange={e => setForm({ ...form, account_id: e.target.value })} className="select-premium font-bold">
+                          <option value="">Selecionar</option>
+                          {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400">Data da Operação</label>
+                      <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="input-premium font-bold" />
+                    </div>
+
+                    <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between">
+                      <div>
+                        <label className="text-[10px] uppercase font-black text-slate-400 block mb-1">Status de Pagamento</label>
+                        <p className="text-[10px] text-slate-400 italic">Marque se esta transação já foi liquidada.</p>
+                      </div>
+                      <button
+                         type="button"
+                         onClick={() => setForm({ ...form, is_paid: !form.is_paid })}
+                         className={`w-14 h-8 rounded-full relative transition-all duration-300 ${form.is_paid ? 'bg-green-500' : 'bg-slate-300'}`}
+                      >
+                        <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform duration-300 shadow-sm ${form.is_paid ? 'translate-x-6' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+
+                    {!editingTrans && (
+                      <div className="space-y-4 pt-4 border-t border-[var(--border-primary)]">
+                        <label className="text-[10px] uppercase font-black text-slate-400">Tipo de Repetição</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { id: 'none', label: 'Único' },
+                            { id: 'fixed', label: 'Fixo' },
+                            { id: 'installments', label: 'Parcelado' }
+                          ].map((mode) => (
+                            <button
+                              key={mode.id}
+                              type="button"
+                              onClick={() => setForm({ ...form, recurrenceType: mode.id })}
+                              className={`py-3 rounded-xl text-xs font-bold border-2 transition-all ${form.recurrenceType === mode.id ? 'border-gold bg-gold/10 text-gold' : 'border-[var(--border-primary)] text-slate-400'}`}
+                            >
+                              {mode.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {form.recurrenceType === 'fixed' && (
+                          <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                            <label className="text-[10px] uppercase font-black text-slate-400">Repetir Até (Opcional)</label>
+                            <input 
+                              type="date" 
+                              value={form.repeatUntil} 
+                              onChange={e => setForm({ ...form, repeatUntil: e.target.value })} 
+                              className="input-premium font-bold" 
+                            />
+                          </div>
+                        )}
+
+                        {form.recurrenceType === 'installments' && (
+                          <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                            <label className="text-[10px] uppercase font-black text-slate-400">Número de Parcelas</label>
+                            <input 
+                              type="number" 
+                              min="2" 
+                              required
+                              value={form.installmentsCount} 
+                              onChange={e => setForm({ ...form, installmentsCount: e.target.value })} 
+                              className="input-premium font-bold" 
+                              placeholder="Ex: 12"
+                            />
+                            <p className="text-[10px] text-gold font-bold italic mt-1">O valor informado será dividido entre as parcelas.</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30 mt-4">Confirmar Lançamento</button>
+
+                <div className="p-8 border-t border-[var(--border-primary)] bg-[var(--bg-secondary)] shrink-0">
+                  <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30">Confirmar Lançamento</button>
+                </div>
               </form>
             </motion.div>
           </div>
@@ -808,9 +815,9 @@ const FinanceManagement = () => {
       {/* IMPORT OPTIONS MODAL */}
       <AnimatePresence>
         {showImportOptionsModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col">
-              <div className="bg-navy-900 p-6 text-white flex justify-between items-center">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col max-h-[90vh]">
+              <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
                 <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar Lançamentos</h3>
                 <button onClick={() => setShowImportOptionsModal(false)} className="bg-white/10 p-2 rounded-xl hover:bg-white/20 transition-all"><X size={20} /></button>
               </div>
@@ -852,13 +859,13 @@ const FinanceManagement = () => {
       {/* TEXT IMPORT MODAL */}
       <AnimatePresence>
         {showTextModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center sm:p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl border border-[var(--border-primary)] flex flex-col max-h-[90vh]">
               <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
                 <h3 className="text-xl font-black font-heading tracking-tight !text-white">Importar por Texto (IA)</h3>
                 <button onClick={() => setShowTextModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
               </div>
-              <div className="p-6 md:p-8 space-y-4">
+              <div className="p-6 md:p-8 space-y-4 overflow-y-auto custom-scrollbar">
                 <p className="text-sm text-slate-500 font-medium">
                   Cole o texto do seu extrato bancário abaixo. A Inteligência Artificial irá identificar as transações, formatar datas e valores, e sugerir as melhores categorias automaticamente.
                 </p>
@@ -883,7 +890,7 @@ const FinanceManagement = () => {
       {/* BULK EDIT MODAL */}
       <AnimatePresence>
         {showBulkEditModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[var(--border-primary)]">
               <div className="bg-gold p-6 text-navy-900 flex justify-between items-center">
                 <h3 className="text-xl font-black font-heading tracking-tight">Edição em Massa</h3>
@@ -925,7 +932,7 @@ const FinanceManagement = () => {
       {/* OFX PREVIEW MODAL */}
       <AnimatePresence>
         {showPreviewModal && (
-          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[120] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
               <div className="bg-navy-900 p-6 md:p-8 text-white flex justify-between items-center">
                 <div>
