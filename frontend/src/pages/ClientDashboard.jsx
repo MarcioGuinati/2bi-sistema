@@ -818,20 +818,20 @@ const ClientDashboard = () => {
                     <TrendingUp size={120} className="text-gold" />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mb-10 relative z-10">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 relative z-20">
                   <div className="flex items-center gap-2">
                     <div>
-                      <h3 className="text-xl font-bold font-heading italic">Evolução Patrimonial</h3>
-                      <p className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Crescimento Líquido Acumulado</p>
+                      <h3 className="text-lg md:text-xl font-bold font-heading italic">Evolução Patrimonial</h3>
+                      <p className="text-[9px] md:text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Crescimento Líquido Acumulado</p>
                     </div>
                     <div className="group/tip relative">
                       <Info size={12} className="text-gold cursor-help opacity-50" />
-                      <div className="absolute bottom-full left-0 mb-2 w-56 p-3 bg-navy-900 text-[11px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10 normal-case font-medium">
+                      <div className="absolute bottom-full right-0 sm:left-0 sm:right-auto mb-2 w-56 p-3 bg-navy-900 text-[11px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-[100] shadow-2xl border border-white/10 normal-case font-medium">
                         Cálculo Acumulado: Saldo Anterior + (Receitas - Despesas do mês). Mostra a variação real do seu patrimônio ao longo do ano.
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-full">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gold/10 border border-gold/20 rounded-full shrink-0">
                     <span className="text-[10px] font-black text-gold uppercase tracking-widest">Ano {selectedYear}</span>
                   </div>
                 </div>
@@ -927,26 +927,26 @@ const ClientDashboard = () => {
             </div>
 
             {/* Row 2: Provisionamento Anual (Standard chart but moved) */}
-            <div className="card-premium p-8 relative">
-              <div className="flex justify-between items-center mb-10 relative z-10">
+            <div className="card-premium p-6 md:p-8 relative">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 relative z-20">
                 <div className="flex items-center gap-2">
                   <div>
-                    <h3 className="text-xl font-bold font-heading">Provisionamento Anual</h3>
-                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Fluxo projetado de Receitas vs Despesas</p>
+                    <h3 className="text-lg md:text-xl font-bold font-heading">Provisionamento Anual</h3>
+                    <p className="text-[9px] md:text-[10px] uppercase font-black text-slate-400 tracking-widest">Fluxo projetado de Receitas vs Despesas</p>
                   </div>
                   <div className="group/tip relative">
                     <Info size={12} className="text-gold cursor-help opacity-50" />
-                    <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-navy-900 text-[11px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl border border-white/10 normal-case font-medium">
+                    <div className="absolute bottom-full right-0 sm:left-0 sm:right-auto mb-2 w-48 p-3 bg-navy-900 text-[11px] text-white rounded-xl opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-[100] shadow-2xl border border-white/10 normal-case font-medium">
                       Exibe a tendência mensal de entradas e saídas, permitindo visualizar sazonalidades nos seus ganhos e gastos.
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-400" /> Receitas
+                <div className="flex gap-4 bg-[var(--bg-primary)] px-4 py-2 rounded-full border border-[var(--border-primary)]">
+                  <div className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-400">
+                    <div className="w-2 h-2 rounded-full bg-green-400" /> Receitas
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-400" /> Despesas
+                  <div className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-400">
+                    <div className="w-2 h-2 rounded-full bg-red-400" /> Despesas
                   </div>
                 </div>
               </div>
@@ -1047,17 +1047,17 @@ const ClientDashboard = () => {
 
             {/* Comparativo de Fluxo Anual */}
             <div className="card-premium p-8">
-              <div className="flex justify-between items-center mb-10">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
                 <div>
-                  <h3 className="text-xl font-bold font-heading">Comparativo de Fluxo Anual</h3>
-                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Receitas vs Despesas (Mensal)</p>
+                  <h3 className="text-lg md:text-xl font-bold font-heading">Comparativo de Fluxo Anual</h3>
+                  <p className="text-[9px] md:text-[10px] uppercase font-black text-slate-400 tracking-widest">Receitas vs Despesas (Mensal)</p>
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500" /> Receitas
+                <div className="flex gap-4 bg-[var(--bg-primary)] px-4 py-2 rounded-full border border-[var(--border-primary)] shrink-0">
+                  <div className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-400">
+                    <div className="w-2 h-2 rounded-full bg-green-500" /> Receitas
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" /> Despesas
+                  <div className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-400">
+                    <div className="w-2 h-2 rounded-full bg-red-500" /> Despesas
                   </div>
                 </div>
               </div>

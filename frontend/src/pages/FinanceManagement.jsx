@@ -393,14 +393,6 @@ const FinanceManagement = () => {
             >
               <Plus size={20} /> Novo Lançamento
             </button>
-            {selectedIds.length > 0 && (
-              <button
-                onClick={handleBulkDelete}
-                className="bg-red-50 text-red-600 border border-red-100 flex items-center gap-2 px-6 py-3 rounded-2xl font-bold hover:bg-red-100 transition-all shadow-sm"
-              >
-                <Trash2 size={18} /> Excluir ({selectedIds.length})
-              </button>
-            )}
           </div>
         </div>
 
@@ -539,37 +531,39 @@ const FinanceManagement = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
+              className="overflow-hidden mb-6"
             >
-              <div className="bg-gold/10 border border-gold/20 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-                <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 bg-gold text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-gold/20">
+              <div className="bg-gold/10 border border-gold/20 p-6 rounded-[2.5rem] flex flex-col xl:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="flex items-center gap-6 w-full xl:w-auto">
+                  <div className="w-14 h-14 bg-gold text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-gold/20 shrink-0">
                     {selectedIds.length}
                   </div>
                   <div>
                     <p className="text-[10px] uppercase font-black text-gold tracking-widest">Transações Selecionadas</p>
-                    <p className="text-sm font-bold text-[var(--text-primary)]">Resumo financeiro dos itens marcados.</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">Gerencie os itens marcados.</p>
                   </div>
                 </div>
-                <div className="flex gap-10">
-                  <div className="text-right">
+                
+                <div className="flex flex-col sm:flex-row items-center gap-6 w-full xl:w-auto">
+                  <div className="text-center xl:text-right w-full sm:w-auto">
                     <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Líquido Selecionado</p>
                     <p className={`text-2xl font-black transition-colors ${selectionStats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       R$ {selectionStats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 border-l border-gold/20 pl-6">
+                  
+                  <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto sm:border-l border-gold/20 sm:pl-6">
                     <button 
                       onClick={() => setShowBulkEditModal(true)}
-                      className="p-3 bg-gold text-white rounded-xl hover:bg-gold/80 transition-all shadow-md flex items-center gap-2 text-xs font-bold"
+                      className="flex-1 sm:flex-none p-4 bg-gold text-white rounded-2xl hover:bg-gold/80 transition-all shadow-md flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
                     >
-                      <Edit2 size={16} /> Editar Vencimento
+                      <Edit2 size={16} /> <span className="hidden sm:inline">Vencimento</span><span className="sm:hidden">Editar Vencimento</span>
                     </button>
                     <button 
                       onClick={handleBulkDelete}
-                      className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all shadow-md flex items-center gap-2 text-xs font-bold"
+                      className="p-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all shadow-md flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest"
                     >
-                      <Trash2 size={16} /> Excluir
+                      <Trash2 size={16} /> <span className="hidden sm:inline">Excluir</span><span className="sm:hidden">Excluir</span>
                     </button>
                   </div>
                 </div>
