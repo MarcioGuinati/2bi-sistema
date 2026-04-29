@@ -448,12 +448,15 @@ const AccountManagement = () => {
               className="bg-[var(--bg-secondary)] sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto sm:max-h-[90vh] shadow-2xl border border-[var(--border-primary)] flex flex-col overflow-hidden"
             >
               <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
-                <div className="bg-navy-900 p-6 text-white flex justify-between items-center shrink-0">
-                  <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingAcc ? 'Editar Conta' : 'Nova Conta'}</h3>
+                <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
+                  <div>
+                    <h3 className="text-2xl font-black font-heading tracking-tight !text-white">{editingAcc ? 'Editar Conta' : 'Nova Conta'}</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-widest mt-1 font-medium">Patrimônio 2BI</p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="p-2 hover:bg-white/10 rounded-full transition-all"
+                    className="p-2 hover:bg-white/10 rounded-full transition-all text-white/50 hover:text-white"
                   >
                     <X size={24} />
                   </button>
@@ -571,8 +574,8 @@ const AccountManagement = () => {
                   )}
                 </div>
 
-                <div className="p-6 bg-[var(--bg-secondary)] border-t border-[var(--border-primary)] shrink-0 space-y-3">
-                  <button type="submit" className="w-full btn-primary py-4 font-black">
+                <div className="p-8 bg-[var(--bg-secondary)] border-t border-[var(--border-primary)] shrink-0 space-y-3">
+                  <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30">
                     {editingAcc ? 'Salvar Alterações' : 'Criar Conta'}
                   </button>
                   <button

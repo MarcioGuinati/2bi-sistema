@@ -177,43 +177,57 @@ const CategoryManagement = () => {
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-white">
-              <div className="bg-gold p-8 text-navy-900 flex justify-between items-center text-center">
-                <h3 className="text-xl font-black font-heading">{editingCat ? 'Editar Categoria' : 'Nova Categoria'}</h3>
-                <button onClick={() => setShowModal(false)}><X size={20} /></button>
-              </div>
-              <form onSubmit={handleSubmit} className="p-8 space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400">Nome</label>
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
-                    placeholder="Ex: Alimentação"
-                  />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
+              <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+                <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
+                  <div>
+                    <h3 className="text-xl font-black font-heading tracking-tight !text-white">{editingCat ? 'Editar Categoria' : 'Nova Categoria'}</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-widest mt-1">Organização 2BI</p>
+                  </div>
+                  <button type="button" onClick={() => setShowModal(false)} className="text-white/50 hover:text-white transition-colors">
+                    <X size={24} />
+                  </button>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400">Tipo de Fluxo</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, type: 'income' })}
-                      className={`py-3 rounded-xl font-bold border-2 transition-all ${form.type === 'income' ? 'border-green-600 bg-green-50 text-green-600' : 'border-slate-100 text-slate-400'}`}
-                    >
-                      Receita
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, type: 'expense' })}
-                      className={`py-3 rounded-xl font-bold border-2 transition-all ${form.type === 'expense' ? 'border-red-600 bg-red-50 text-red-600' : 'bg-[var(--bg-primary)] border-[var(--border-primary)] text-slate-400'}`}
-                    >
-                      Despesa
-                    </button>
+
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Nome da Categoria</label>
+                    <input
+                      type="text"
+                      required
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                      placeholder="Ex: Alimentação, Transporte..."
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-black text-slate-400">Tipo de Fluxo</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, type: 'income' })}
+                        className={`py-4 rounded-2xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${form.type === 'income' ? 'border-green-600 bg-green-50 text-green-600' : 'border-slate-100 text-slate-400'}`}
+                      >
+                        <ArrowUpRight size={18} /> Receita
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, type: 'expense' })}
+                        className={`py-4 rounded-2xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${form.type === 'expense' ? 'border-red-600 bg-red-50 text-red-600' : 'bg-[var(--bg-primary)] border-[var(--border-primary)] text-slate-400'}`}
+                      >
+                        <ArrowDownLeft size={18} /> Despesa
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <button type="submit" className="w-full btn-primary py-4 font-black mt-4">Confirmar</button>
+
+                <div className="p-8 border-t border-[var(--border-primary)] bg-[var(--bg-secondary)] shrink-0">
+                  <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30">
+                    {editingCat ? 'Salvar Alterações' : 'Criar Categoria'}
+                  </button>
+                </div>
               </form>
             </motion.div>
           </div>
