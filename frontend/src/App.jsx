@@ -40,6 +40,8 @@ import AppLandingPage from './pages/AppLandingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import Agenda from './pages/Agenda';
 import KnowledgeBase from './pages/KnowledgeBase';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -77,6 +79,8 @@ function App() {
           <Route path="/app" element={<AppLandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
 
           {/* Admin Protected Routes */}
           <Route 

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ solid = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { signed, user } = useAuth();
@@ -18,21 +18,23 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Sobre', href: '#about' },
-    { name: 'Sócios', href: '#partners' },
-    { name: 'Serviços', href: '#services' },
-    { name: 'Como Funciona', href: '#how-it-works' },
-    { name: 'Contato', href: '#contact' },
+    { name: 'Sobre', href: '/home#about' },
+    { name: 'Sócios', href: '/home#partners' },
+    { name: 'Serviços', href: '/home#services' },
+    { name: 'Como Funciona', href: '/home#how-it-works' },
+    { name: 'Contato', href: '/home#contact' },
   ];
 
+  const isSolid = solid || scrolled;
+
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[var(--bg-secondary)]/80 backdrop-blur-xl border-b border-[var(--border-primary)] py-3 shadow-lg' : 'bg-transparent py-6'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${isSolid ? 'bg-[var(--bg-secondary)]/80 backdrop-blur-xl border-b border-[var(--border-primary)] py-3 shadow-lg' : 'bg-transparent py-6'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center transition-all duration-300">
         <Link to="/" className="flex items-center group">
           <img 
             src="/logo_2bi.png" 
             alt="2BI Planejamento" 
-            className={`h-auto transition-all duration-300 drop-shadow-xl ${scrolled ? 'w-32 md:w-36' : 'w-40 md:w-48'}`}
+            className={`h-auto transition-all duration-300 drop-shadow-xl ${isSolid ? 'w-32 md:w-36' : 'w-40 md:w-48'}`}
           />
         </Link>
 
@@ -42,7 +44,7 @@ const Navbar = () => {
             <a 
               key={link.name} 
               href={link.href} 
-              className={`font-bold text-xs uppercase tracking-widest transition-all relative group py-2 ${scrolled ? 'text-slate-600 hover:text-navy-900' : 'text-white/80 hover:text-white'}`}
+              className={`font-bold text-xs uppercase tracking-widest transition-all relative group py-2 ${isSolid ? 'text-slate-600 hover:text-navy-900' : 'text-white/80 hover:text-white'}`}
             >
               {link.name}
               <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gold transition-all duration-300 group-hover:w-full" />

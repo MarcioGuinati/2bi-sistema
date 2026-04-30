@@ -61,8 +61,8 @@ const Footer = () => {
             © {new Date().getFullYear()} 2BI Planejamento Financeiro. Todos os direitos reservados.
           </p>
           <div className="flex gap-6 text-slate-500 text-xs">
-            <a href="#" className="hover:text-white">Política de Privacidade</a>
-            <a href="#" className="hover:text-white">Termos de Uso</a>
+            <a href="/privacy-policy" className="hover:text-white transition-colors">Política de Privacidade</a>
+            <a href="/terms" className="hover:text-white transition-colors">Termos de Uso</a>
           </div>
         </div>
       </div>
