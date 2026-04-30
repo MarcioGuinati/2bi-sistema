@@ -16,6 +16,7 @@ import {
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
+import { maskCurrency, sanitizeValue } from '../utils/masks';
 
 const BudgetManagement = () => {
   const { success, error, confirm } = useNotification();
@@ -27,8 +28,8 @@ const BudgetManagement = () => {
 
   const [form, setForm] = useState({
     title: '',
-    targetAmount: '',
-    currentAmount: '',
+    targetAmount: maskCurrency('0'),
+    currentAmount: maskCurrency('0'),
     deadline: '',
     category_id: ''
   });
@@ -57,13 +58,27 @@ const BudgetManagement = () => {
     e.preventDefault();
     try {
       if (editingGoal) {
-        await api.put(`/goals/${editingGoal.id}`, form);
+        await api.put(`/goals/${editingGoal.id}`, {
+          ...form,
+          targetAmount: sanitizeValue(form.targetAmount),
+          currentAmount: sanitizeValue(form.currentAmount)
+        });
       } else {
-        await api.post('/goals', form);
+        await api.post('/goals', {
+          ...form,
+          targetAmount: sanitizeValue(form.targetAmount),
+          currentAmount: sanitizeValue(form.currentAmount)
+        });
       }
       setShowModal(false);
       setEditingGoal(null);
-      setForm({ title: '', targetAmount: '', currentAmount: '', deadline: '', category_id: '' });
+      setForm({
+        title: '',
+        targetAmount: maskCurrency('0'),
+        currentAmount: maskCurrency('0'),
+        deadline: '',
+        category_id: ''
+      });
       success(editingGoal ? 'Estratégia atualizada!' : 'Nova meta definida com sucesso!');
       fetchData();
     } catch (err) { error('Erro ao salvar meta'); }
@@ -88,8 +103,8 @@ const BudgetManagement = () => {
     setEditingGoal(goal);
     setForm({
       title: goal.title,
-      targetAmount: goal.targetAmount,
-      currentAmount: goal.currentAmount,
+      targetAmount: maskCurrency(goal.targetAmount),
+      currentAmount: maskCurrency(goal.currentAmount || '0'),
       deadline: goal.deadline || '',
       category_id: goal.category_id || ''
     });
@@ -106,7 +121,17 @@ const BudgetManagement = () => {
             <p className="text-[var(--text-secondary)] font-medium tracking-tight">Defina seus limites de gastos e alvos de poupança.</p>
           </div>
           <button
-            onClick={() => { setEditingGoal(null); setForm({ title: '', targetAmount: '', currentAmount: '', deadline: '', category_id: '' }); setShowModal(true); }}
+            onClick={() => {
+              setEditingGoal(null);
+              setForm({
+                title: '',
+                targetAmount: maskCurrency('0'),
+                currentAmount: maskCurrency('0'),
+                deadline: '',
+                category_id: ''
+              });
+              setShowModal(true);
+            }}
             className="btn-primary flex items-center gap-2"
           >
             <Plus size={20} /> Nova Meta / Orçamento
@@ -214,9 +239,9 @@ const BudgetManagement = () => {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-white flex flex-col max-h-[90vh]">
               <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
                 <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
-                  <div>
+                  <div className="text-left">
                     <h3 className="text-2xl font-black font-heading tracking-tight !text-white">{editingGoal ? 'Ajustar Meta' : 'Definir Meta / Orçamento'}</h3>
-                    <p className="text-gold text-[10px] font-black uppercase tracking-widest font-medium">Bússola Financeira 2BI</p>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-widest font-medium">Fronteira Financeira 2BI</p>
                   </div>
                   <button type="button" onClick={() => setShowModal(false)} className="text-white/50 hover:text-white transition-colors">
                     <X size={24} />
@@ -225,34 +250,34 @@ const BudgetManagement = () => {
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 font-medium">Título da Meta</label>
+                    <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Título da Meta</label>
                     <input
                       type="text"
                       required
                       value={form.title}
                       onChange={e => setForm({ ...form, title: e.target.value })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold"
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold text-[var(--text-primary)]"
                       placeholder="Ex: Reserva Emergência ou Orçamento Mercado"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400 font-medium">Valor Alvo (Limite)</label>
+                      <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Valor Alvo (Limite)</label>
                       <input
-                        type="number"
+                        type="text"
                         required
                         value={form.targetAmount}
-                        onChange={e => setForm({ ...form, targetAmount: e.target.value })}
-                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black"
-                        placeholder="0.00"
+                        onChange={e => setForm({ ...form, targetAmount: maskCurrency(e.target.value) })}
+                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black text-[var(--text-primary)]"
+                        placeholder="R$ 0,00"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400 font-medium">Vincular Categoria (Budget)</label>
+                      <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Vincular Categoria (Budget)</label>
                       <select
                         value={form.category_id}
                         onChange={e => setForm({ ...form, category_id: e.target.value })}
-                        className="select-premium font-bold"
+                        className="select-premium font-bold text-[var(--text-primary)]"
                       >
                         <option value="">Nenhuma (Meta Geral)</option>
                         {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name} ({cat.type})</option>)}
@@ -261,23 +286,23 @@ const BudgetManagement = () => {
                   </div>
                   {!form.category_id && (
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-black text-slate-400 font-medium">Valor Já Acumulado</label>
+                      <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Valor Já Acumulado</label>
                       <input
-                        type="number"
+                        type="text"
                         value={form.currentAmount}
-                        onChange={e => setForm({ ...form, currentAmount: e.target.value })}
-                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
-                        placeholder="0.00"
+                        onChange={e => setForm({ ...form, currentAmount: maskCurrency(e.target.value) })}
+                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-[var(--text-primary)]"
+                        placeholder="R$ 0,00"
                       />
                     </div>
                   )}
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 font-medium">Prazo Estimado</label>
+                    <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Prazo Estimado</label>
                     <input
                       type="date"
                       value={form.deadline}
                       onChange={e => setForm({ ...form, deadline: e.target.value })}
-                      className="input-premium font-bold"
+                      className="input-premium font-bold text-[var(--text-primary)]"
                     />
                   </div>
                 </div>

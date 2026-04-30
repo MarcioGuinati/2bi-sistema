@@ -43,6 +43,7 @@ import { useTheme } from '../context/ThemeContext';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
 import AnnouncementPanel from '../components/AnnouncementPanel';
+import { maskCurrency, sanitizeValue } from '../utils/masks';
 
 const ClientDashboard = () => {
   const { user } = useAuth();
@@ -81,7 +82,13 @@ const ClientDashboard = () => {
 
   // Modals
   const [showGoalModal, setShowGoalModal] = useState(false);
-  const [goalForm, setGoalForm] = useState({ title: '', targetAmount: '', category_id: '', deadline: '' });
+  const [goalForm, setGoalForm] = useState({
+    title: '',
+    targetAmount: maskCurrency('0'),
+    currentAmount: maskCurrency('0'),
+    deadline: '',
+    category_id: ''
+  });
 
   const fetchData = async () => {
     try {
@@ -126,9 +133,19 @@ const ClientDashboard = () => {
   const handleGoalSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/goals', goalForm);
+      await api.post('/goals', {
+        ...goalForm,
+        targetAmount: sanitizeValue(goalForm.targetAmount),
+        currentAmount: sanitizeValue(goalForm.currentAmount)
+      });
       setShowGoalModal(false);
-      setGoalForm({ title: '', targetAmount: '', category_id: '', deadline: '' });
+      setGoalForm({
+        title: '',
+        targetAmount: maskCurrency('0'),
+        currentAmount: maskCurrency('0'),
+        deadline: '',
+        category_id: ''
+      });
       success('Novo limite orçamentário definido!');
       fetchData();
     } catch (err) { error('Falha ao registrar orçamento'); }
@@ -375,7 +392,16 @@ const ClientDashboard = () => {
             </div>
 
             <button
-              onClick={() => setShowGoalModal(true)}
+              onClick={() => {
+                setGoalForm({
+                  title: '',
+                  targetAmount: maskCurrency('0'),
+                  currentAmount: maskCurrency('0'),
+                  deadline: '',
+                  category_id: ''
+                });
+                setShowGoalModal(true);
+              }}
               className="btn-primary flex items-center gap-2"
             >
               <Target size={20} /> Definir Orçamento
@@ -604,9 +630,9 @@ const ClientDashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 'bold' }} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 12 }} width={65} tickFormatter={formatCurrency} />
-                      <Tooltip 
-                        cursor={{ fill: '#F1F5F9' }} 
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} 
+                      <Tooltip
+                        cursor={{ fill: '#F1F5F9' }}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                         formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                       />
                       <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={60}>
@@ -669,7 +695,16 @@ const ClientDashboard = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowGoalModal(true)}
+                  onClick={() => {
+                    setGoalForm({
+                      title: '',
+                      targetAmount: maskCurrency('0'),
+                      currentAmount: maskCurrency('0'),
+                      deadline: '',
+                      category_id: ''
+                    });
+                    setShowGoalModal(true);
+                  }}
                   className="w-full mt-8 py-4 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl text-[10px] font-black uppercase tracking-widest text-gold hover:bg-gold hover:text-white transition-all shadow-sm"
                 >
                   Configurar Novo Limite
@@ -1105,53 +1140,84 @@ const ClientDashboard = () => {
       <AnimatePresence>
         {showGoalModal && (
           <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[1.5rem] md:rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl">
-              <div className="bg-navy-900 p-8 text-white flex justify-between items-center text-center">
-                <div>
-                  <h3 className="text-2xl font-black font-heading">Definir Orçamento</h3>
-                  <p className="text-gold text-xs font-black uppercase tracking-widest font-medium">Fronteira Financeira 2BI</p>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--bg-secondary)] rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-white/10 flex flex-col max-h-[90vh]">
+              <form onSubmit={handleGoalSubmit} className="flex flex-col h-full overflow-hidden">
+                <div className="bg-navy-900 p-8 text-white flex justify-between items-center shrink-0">
+                  <div className="text-left">
+                    <h3 className="text-2xl font-black font-heading tracking-tight !text-white">Definir Orçamento</h3>
+                    <p className="text-gold text-[10px] font-black uppercase tracking-widest font-medium">Fronteira Financeira 2BI</p>
+                  </div>
+                  <button type="button" onClick={() => setShowGoalModal(false)} className="text-white/50 hover:text-white transition-colors">
+                    <X size={24} />
+                  </button>
                 </div>
-                <button onClick={() => setShowGoalModal(false)}><X size={20} /></button>
-              </div>
-              <form onSubmit={handleGoalSubmit} className="p-8 space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400">Título do Orçamento</label>
-                  <input
-                    type="text"
-                    required
-                    value={goalForm.title}
-                    onChange={e => setGoalForm({ ...goalForm, title: e.target.value })}
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold"
-                    placeholder="Ex: Gasto com Alimentação"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Limite Mensal (R$)</label>
+                    <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Título do Orçamento</label>
                     <input
-                      type="number"
+                      type="text"
                       required
-                      value={goalForm.targetAmount}
-                      onChange={e => setGoalForm({ ...goalForm, targetAmount: e.target.value })}
-                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black"
-                      placeholder="0.00"
+                      value={goalForm.title}
+                      onChange={e => setGoalForm({ ...goalForm, title: e.target.value })}
+                      className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold text-[var(--text-primary)]"
+                      placeholder="Ex: Gasto com Alimentação"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400">Vincular Categoria</label>
-                    <select
-                      required
-                      value={goalForm.category_id}
-                      onChange={e => setGoalForm({ ...goalForm, category_id: e.target.value })}
-                      className="select-premium"
-                    >
-                      <option value="">Selecione...</option>
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.name} ({c.type})</option>)}
-                    </select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Limite Mensal (R$)</label>
+                      <input
+                        type="text"
+                        required
+                        value={goalForm.targetAmount}
+                        onChange={e => setGoalForm({ ...goalForm, targetAmount: maskCurrency(e.target.value) })}
+                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-black text-[var(--text-primary)]"
+                        placeholder="R$ 0,00"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Vincular Categoria</label>
+                      <select
+                        required
+                        value={goalForm.category_id}
+                        onChange={e => setGoalForm({ ...goalForm, category_id: e.target.value })}
+                        className="select-premium font-bold text-[var(--text-primary)]"
+                      >
+                        <option value="">Selecione...</option>
+                        {categories.map(c => <option key={c.id} value={c.id}>{c.name} ({c.type})</option>)}
+                      </select>
+                    </div>
                   </div>
+                  {!goalForm.category_id && (
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Valor Já Acumulado</label>
+                      <input
+                        type="text"
+                        value={goalForm.currentAmount}
+                        onChange={e => setGoalForm({ ...goalForm, currentAmount: maskCurrency(e.target.value) })}
+                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold text-[var(--text-primary)]"
+                        placeholder="R$ 0,00"
+                      />
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-[var(--text-secondary)] font-medium">Prazo Estimado</label>
+                    <input
+                      type="date"
+                      value={goalForm.deadline}
+                      onChange={e => setGoalForm({ ...goalForm, deadline: e.target.value })}
+                      className="input-premium font-bold text-[var(--text-primary)]"
+                    />
+                  </div>
+                  <p className="text-[10px] text-[var(--text-secondary)] italic">O sistema calculará automaticamente seus gastos nesta categoria do dia 1º até hoje.</p>
                 </div>
-                <p className="text-[10px] text-slate-400 italic">O sistema calculará automaticamente seus gastos nesta categoria do dia 1º até hoje.</p>
-                <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30 mt-4">Ativar Orçamento</button>
+
+                <div className="p-8 border-t border-[var(--border-primary)] bg-[var(--bg-secondary)] shrink-0">
+                  <button type="submit" className="w-full btn-primary py-5 font-black text-lg shadow-gold/30">
+                    Ativar Orçamento
+                  </button>
+                </div>
               </form>
             </motion.div>
           </div>
