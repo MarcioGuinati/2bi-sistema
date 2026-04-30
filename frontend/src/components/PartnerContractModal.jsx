@@ -148,30 +148,30 @@ const PartnerContractModal = ({ isOpen, onClose, partner }) => {
             className="bg-[var(--bg-secondary)] rounded-[3rem] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/10"
           >
             {/* Header */}
-            <div className="p-8 border-b border-[var(--border-primary)] flex justify-between items-center bg-navy-900 text-white">
+            <div className="p-8 border-b border-[var(--border-primary)] flex justify-between items-center bg-navy-900">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center border border-gold/20">
                   <ShieldCheck className="text-gold" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-heading italic">Contrato de Parceria</h3>
+                  <h3 className="text-2xl font-black font-heading italic text-white">Contrato de Parceria</h3>
                   <p className="text-gold text-[10px] font-black uppercase tracking-widest">{partner?.name}</p>
                 </div>
               </div>
-              <button onClick={onClose} className="w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center transition-all">
+              <button onClick={onClose} className="w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center transition-all text-white">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8 custom-scrollbar bg-[var(--bg-secondary)]">
               {/* List Section */}
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Contratos Registrados</h4>
+                  <div className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Contratos Registrados</div>
                   {contracts.length === 0 && (
                     <button 
                       onClick={handleGenerateContract}
-                      className="text-[10px] font-black uppercase bg-gold text-navy-900 px-4 py-2 rounded-xl hover:bg-white transition-all shadow-lg"
+                      className="text-[10px] font-black uppercase bg-gold text-navy-900 px-4 py-2 rounded-xl hover:bg-navy-900 hover:text-white transition-all shadow-lg"
                     >
                       Gerar Agora
                     </button>
@@ -192,8 +192,13 @@ const PartnerContractModal = ({ isOpen, onClose, partner }) => {
                               {contract.signature_status === 'signed' ? <CheckCircle2 size={18} /> : <Clock size={18} />}
                             </div>
                             <div>
-                              <div className="text-xs font-black uppercase tracking-tight">{contract.title}</div>
-                              <div className="text-[9px] font-bold text-slate-400">Gerado em: {new Date(contract.createdAt).toLocaleDateString('pt-BR')}</div>
+                              <div 
+                                className="text-xs font-black uppercase tracking-tight" 
+                                style={{ color: 'var(--text-primary)' }}
+                              >
+                                {contract.title}
+                              </div>
+                              <div className="text-[9px] font-bold text-slate-500">Gerado em: {new Date(contract.createdAt).toLocaleDateString('pt-BR')}</div>
                             </div>
                           </div>
                           {contract.signature_status === 'signed' && (
@@ -204,13 +209,15 @@ const PartnerContractModal = ({ isOpen, onClose, partner }) => {
                         <div className="grid grid-cols-2 gap-2 pt-4">
                           <button 
                             onClick={() => handlePreview(contract)}
-                            className="flex items-center justify-center gap-2 py-2 bg-white dark:bg-navy-900 rounded-xl text-[9px] font-black uppercase border border-[var(--border-primary)] hover:border-gold transition-all"
+                            className="flex items-center justify-center gap-2 py-2 bg-[var(--bg-secondary)] rounded-xl text-[9px] font-black uppercase border border-[var(--border-primary)] hover:border-gold transition-all"
+                            style={{ color: 'var(--text-primary)' }}
                           >
                             <Eye size={12} /> Preview
                           </button>
                           <button 
                             onClick={() => handleDownload(contract)}
-                            className="flex items-center justify-center gap-2 py-2 bg-white dark:bg-navy-900 rounded-xl text-[9px] font-black uppercase border border-[var(--border-primary)] hover:border-gold transition-all"
+                            className="flex items-center justify-center gap-2 py-2 bg-[var(--bg-secondary)] rounded-xl text-[9px] font-black uppercase border border-[var(--border-primary)] hover:border-gold transition-all"
+                            style={{ color: 'var(--text-primary)' }}
                           >
                             <Download size={12} /> PDF
                           </button>
@@ -218,7 +225,7 @@ const PartnerContractModal = ({ isOpen, onClose, partner }) => {
                           {!contract.signature_id ? (
                             <button 
                               onClick={() => handleSendToAssinafy(contract)}
-                              className="col-span-2 flex items-center justify-center gap-2 py-3 bg-navy-900 text-white dark:bg-gold dark:text-navy-900 rounded-xl text-[10px] font-black uppercase hover:scale-[1.02] transition-all shadow-lg"
+                              className="col-span-2 flex items-center justify-center gap-2 py-3 bg-navy-900 text-white rounded-xl text-[10px] font-black uppercase hover:scale-[1.02] transition-all shadow-lg"
                             >
                               <Send size={14} /> Enviar Assinafy
                             </button>
@@ -243,19 +250,19 @@ const PartnerContractModal = ({ isOpen, onClose, partner }) => {
                   </div>
                 ) : (
                   <div className="py-20 text-center border-2 border-dashed border-[var(--border-primary)] rounded-[2rem]">
-                    <FileText className="mx-auto text-slate-300 mb-4" size={40} />
+                    <FileText className="mx-auto text-slate-400 opacity-20 mb-4" size={40} />
                     <p className="text-sm font-bold text-slate-400">Nenhum contrato gerado.</p>
                   </div>
                 )}
               </div>
 
               {/* Preview Section */}
-              <div className="bg-[var(--bg-primary)] rounded-[2.5rem] border border-[var(--border-primary)] overflow-hidden relative min-h-[400px] flex items-center justify-center">
+              <div className="bg-[var(--bg-primary)] rounded-[2.5rem] border border-[var(--border-primary)] overflow-hidden relative min-h-[400px] flex items-center justify-center shadow-inner">
                 {previewUrl ? (
                   <iframe src={previewUrl} className="w-full h-full border-none" title="PDF Preview" />
                 ) : (
                   <div className="text-center p-8">
-                    <div className="w-16 h-16 bg-white dark:bg-navy-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[var(--border-primary)] shadow-sm">
+                    <div className="w-16 h-16 bg-[var(--bg-secondary)] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[var(--border-primary)] shadow-sm">
                       <Eye className="text-slate-300" size={24} />
                     </div>
                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Visualize aqui o documento</p>
@@ -273,16 +280,10 @@ const PartnerContractModal = ({ isOpen, onClose, partner }) => {
             </div>
 
             {/* Footer Info */}
-            <div className="p-6 bg-slate-50 dark:bg-navy-900/40 border-t border-[var(--border-primary)] flex justify-between items-center">
+            <div className="p-6 bg-[var(--bg-primary)] border-t border-[var(--border-primary)] flex justify-between items-center">
               <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
                 <ShieldCheck size={14} className="text-gold" /> Documento gerado com validade jurídica via Assinafy
               </div>
-              <button 
-                onClick={onClose}
-                className="px-6 py-2 rounded-xl bg-white dark:bg-navy-900 text-[10px] font-black uppercase border border-[var(--border-primary)] hover:border-gold transition-all"
-              >
-                Fechar Painel
-              </button>
             </div>
           </motion.div>
         </div>
