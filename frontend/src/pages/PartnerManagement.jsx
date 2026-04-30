@@ -11,12 +11,15 @@ import {
   TrendingUp,
   UserPlus,
   Edit2,
-  Trash2
+  Trash2,
+  ShieldCheck,
+  FileText
 } from 'lucide-react';
 import api from '../services/api';
 import SystemLayout from '../components/SystemLayout';
 import { useNotification } from '../context/NotificationContext';
-import { maskPhone } from '../utils/masks';
+import { maskPhone, maskCPF, sanitizeValue } from '../utils/masks';
+import PartnerContractModal from '../components/PartnerContractModal';
 
 const PartnerManagement = () => {
   const { success, error, confirm } = useNotification();
@@ -25,12 +28,15 @@ const PartnerManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPartner, setEditingPartner] = useState(null);
+  const [selectedPartnerForContract, setSelectedPartnerForContract] = useState(null);
+  const [showContractModal, setShowContractModal] = useState(false);
   
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
-    phone: ''
+    phone: '',
+    cpf: ''
   });
 
   const fetchData = async () => {
@@ -51,7 +57,7 @@ const PartnerManagement = () => {
 
   const handleOpenRegister = () => {
     setEditingPartner(null);
-    setForm({ name: '', email: '', password: '', phone: '' });
+    setForm({ name: '', email: '', password: '', phone: '', cpf: '' });
     setShowModal(true);
   };
 
@@ -61,23 +67,30 @@ const PartnerManagement = () => {
       name: partner.name,
       email: partner.email,
       password: '',
-      phone: maskPhone(partner.phone || '')
+      phone: maskPhone(partner.phone || ''),
+      cpf: maskCPF(partner.cpf || '')
     });
     setShowModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const sanitizedForm = {
+      ...form,
+      cpf: sanitizeValue(form.cpf),
+      phone: sanitizeValue(form.phone)
+    };
+
     try {
       if (editingPartner) {
-        await api.put(`/admin/partners/${editingPartner.id}`, form);
+        await api.put(`/admin/partners/${editingPartner.id}`, sanitizedForm);
         success('Parceiro atualizado!');
       } else {
-        await api.post('/admin/register-partner', form);
+        await api.post('/admin/register-partner', sanitizedForm);
         success('Parceiro cadastrado com sucesso!');
       }
       setShowModal(false);
-      setForm({ name: '', email: '', password: '', phone: '' });
+      setForm({ name: '', email: '', password: '', phone: '', cpf: '' });
       fetchData();
     } catch (err) {
       error(err.response?.data?.error || 'Erro ao processar solicitação');
@@ -202,6 +215,16 @@ const PartnerManagement = () => {
                     <td className="px-8 py-6 text-right">
                       <div className="flex justify-end gap-2">
                         <button 
+                          onClick={() => {
+                            setSelectedPartnerForContract(p);
+                            setShowContractModal(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-all"
+                          title="Gerenciar Contrato"
+                        >
+                          <FileText size={16} />
+                        </button>
+                        <button 
                           onClick={() => handleOpenEdit(p)}
                           className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                           title="Editar Parceiro"
@@ -298,6 +321,17 @@ const PartnerManagement = () => {
                   </div>
                 </div>
 
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-black text-slate-400">CPF do Parceiro</label>
+                  <input
+                    type="text"
+                    value={form.cpf}
+                    onChange={e => setForm({...form, cpf: maskCPF(e.target.value)})}
+                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4 rounded-2xl outline-none focus:border-gold font-bold transition-all"
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+
                 <button type="submit" className="w-full btn-primary py-5 font-black text-lg mt-4 shadow-xl shadow-gold/20">
                   {editingPartner ? 'Salvar Alterações' : 'Confirmar Cadastro'}
                 </button>
@@ -306,6 +340,13 @@ const PartnerManagement = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Contract Modal */}
+      <PartnerContractModal 
+        isOpen={showContractModal}
+        onClose={() => setShowContractModal(false)}
+        partner={selectedPartnerForContract}
+      />
     </SystemLayout>
   );
 };

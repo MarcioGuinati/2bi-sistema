@@ -101,7 +101,7 @@ class AdminController {
     try {
       const partners = await User.findAll({
         where: { role: 'partner' },
-        attributes: ['id', 'name', 'email', 'phone', 'createdAt'],
+        attributes: ['id', 'name', 'email', 'phone', 'cpf', 'createdAt'],
         include: [{
           model: User,
           as: 'Clients',

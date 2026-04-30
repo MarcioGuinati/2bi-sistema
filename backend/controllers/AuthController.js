@@ -258,7 +258,7 @@ class AuthController {
       return res.status(403).json({ error: 'Only admins can register partners' });
     }
 
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, cpf } = req.body;
 
     const userExists = await User.findOne({ where: { email } });
     if (userExists) return res.status(400).json({ error: 'User already exists' });
@@ -270,7 +270,8 @@ class AuthController {
       email,
       password: passwordHash,
       role: 'partner',
-      phone
+      phone,
+      cpf
     });
 
     return res.json(partner);
@@ -283,14 +284,14 @@ class AuthController {
 
     try {
       const { id } = req.params;
-      const { name, email, password, phone } = req.body;
+      const { name, email, password, phone, cpf } = req.body;
       const partner = await User.findByPk(id);
 
       if (!partner || partner.role !== 'partner') {
         return res.status(404).json({ error: 'Parceiro não encontrado' });
       }
 
-      const updateData = { name, email, phone };
+      const updateData = { name, email, phone, cpf };
       if (password && password.trim() !== '') {
         updateData.password = await bcrypt.hash(password, 8);
       }

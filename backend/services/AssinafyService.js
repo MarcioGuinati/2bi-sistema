@@ -27,7 +27,7 @@ class AssinafyService {
       const accountId = await this.getAccountId();
       if (!accountId) return null;
 
-      const response = await axios.get(`${this.baseUrl}/accounts/${accountId}/documents/${documentId}`, {
+      const response = await axios.get(`${this.baseUrl}/documents/${documentId}`, {
         headers: { 'X-Api-Key': this.token }
       });
       return response.data;

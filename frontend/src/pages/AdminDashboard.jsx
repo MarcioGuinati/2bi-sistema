@@ -12,6 +12,7 @@ import {
   LogOut,
   X,
   FileText,
+  Download,
   MessageSquare,
   ExternalLink,
   Edit2,
@@ -36,6 +37,7 @@ import { useNotification } from '../context/NotificationContext';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { maskCPF, maskPhone, maskCurrency, sanitizeValue } from '../utils/masks';
+import { generateContractPDF } from '../utils/pdfGenerator';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -98,6 +100,7 @@ const AdminDashboard = () => {
 
   const [partners, setPartners] = useState([]);
   const [partnerFilter, setPartnerFilter] = useState('all');
+  const [partnerContract, setPartnerContract] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -121,7 +124,19 @@ const AdminDashboard = () => {
       fetchAnnouncements();
       fetchPartners();
     }
+    if (user?.role === 'partner') {
+      fetchPartnerContract();
+    }
   }, [partnerFilter]);
+
+  const fetchPartnerContract = async () => {
+    try {
+      const res = await api.get(`/contracts/${user.id}`);
+      if (res.data && res.data.length > 0) {
+        setPartnerContract(res.data[0]);
+      }
+    } catch (err) { console.error('Error fetching partner contract'); }
+  };
 
   const fetchPartners = async () => {
     try {
@@ -292,176 +307,10 @@ const AdminDashboard = () => {
     });
   };
 
-  const generateContractPDF = async (contract) => {
-    const doc = new jsPDF();
-    const client = selectedClient;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    // 1. Background / Watermark
-    doc.setTextColor(240, 240, 240);
-    doc.setFontSize(60);
-    doc.setFont('helvetica', 'bold');
-    doc.saveGraphicsState();
-    doc.setGState(new doc.GState({ opacity: 0.1 }));
-    doc.text('2BI PLANEJAMENTO', pageWidth / 2, pageHeight / 2, { align: 'center', angle: 45 });
-    doc.restoreGraphicsState();
-
-    // 2. Premium Header Bar
-    doc.setFillColor(10, 25, 47); // Navy 900
-    doc.rect(0, 0, pageWidth, 40, 'F');
-
-    // 2.1 Logo
-    try {
-      const logo = await preloadImage('/logo_2bi.png');
-      // Position logo at the left
-      doc.addImage(logo, 'PNG', 20, 8, 20, 20);
-    } catch (err) {
-      console.error('Erro ao carregar logo para o PDF (Admin):', err);
-    }
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CONTRATO DE PRESTAÇÃO DE SERVIÇOS', 45, 25);
-
-    doc.setTextColor(197, 160, 89); // Gold
-    doc.setFontSize(8);
-    doc.text('ESTRATÉGIA • PATRIMÔNIO • INTELIGÊNCIA FINANCEIRA', 45, 32);
-
-    // 3. Document ID / Date
-    doc.setTextColor(100, 116, 139); // Slate 400
-    doc.setFontSize(7);
-    const docId = `REF: 2BI-${Date.now().toString().slice(-6)}`;
-    doc.text(docId, pageWidth - 20, 15, { align: 'right' });
-    doc.text(`GERADO EM: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - 20, 20, { align: 'right' });
-
-    // Summary of Fees for the header logic
-    const hasSetup = Number(contract.setupValue) > 0;
-    const hasMonthly = Number(contract.monthlyValue) > 0;
-
-    let y = 60;
-
-    // 4. Section: PARTES
-    doc.setDrawColor(197, 160, 89); // Gold
-    doc.setLineWidth(0.5);
-    doc.line(20, y, 40, y);
-
-    doc.setTextColor(10, 25, 47);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('I. DAS PARTES', 20, y + 8);
-
-    y += 18;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(51, 65, 85);
-
-    doc.text('CONTRATADA:', 20, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text('2BI PLANEJAMENTO ESTRATÉGICO LTDA', 50, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text('CNPJ: 57.967.874/0001-30', 50, y + 5);
-
-    y += 15;
-    doc.text('CONTRATANTE:', 20, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text(client.name.toUpperCase(), 50, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`CPF: ${client.cpf || 'NÃO INFORMADO'} | E-mail: ${client.email}`, 50, y + 5);
-
-    // 5. Section: OBJETO
-    y += 25;
-    doc.line(20, y, 40, y);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(10, 25, 47);
-    doc.text('II. DO OBJETO', 20, y + 8);
-
-    y += 18;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(51, 65, 85);
-    const objetoText = `O presente instrumento tem por objeto a prestação de serviços especializados de ${contract.title.toUpperCase()}, visando a otimização de fluxos, organização de ativos e o alinhamento estratégico reportado nas sessões de mentoria.`;
-    const objectLines = doc.splitTextToSize(objetoText, pageWidth - 40);
-    doc.text(objectLines, 20, y);
-
-    // 6. Section: VALORES
-    y += 30;
-    doc.line(20, y, 40, y);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(10, 25, 47);
-    doc.text('III. VALORES E CONDIÇÕES', 20, y + 8);
-
-    y += 18;
-
-    // Setup Box
-    if (hasSetup) {
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(20, y - 5, (pageWidth - 40) / (hasMonthly ? 2.1 : 1), 25, 3, 3, 'F');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.text('Valor Projeto:', 30, y + 5);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(197, 160, 89);
-      doc.text(`R$ ${Number(contract.setupValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 30, y + 13);
-    } else {
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(9);
-      doc.setTextColor(150, 150, 150);
-      doc.text('* Valor Projeto Isento', 20, y + 5);
-    }
-
-    // Monthly Box
-    if (hasMonthly) {
-      const startX = hasSetup ? (pageWidth / 2) + 5 : 20;
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(startX, y - 5, (pageWidth - 40) / (hasSetup ? 2.1 : 1), 25, 3, 3, 'F');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(10, 25, 47);
-      doc.text(`Mensalidade (${contract.recurrence} Meses):`, startX + 10, y + 5);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(197, 160, 89);
-      doc.text(`R$ ${Number(contract.monthlyValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, startX + 10, y + 13);
-    }
-
-    y += 30;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.setFont('helvetica', 'italic');
-    doc.text(`* Vigência iniciada em ${new Date(contract.startDate).toLocaleDateString('pt-BR')}.`, 20, y);
-
-    // 7. Signatures
-    y = pageHeight - 60;
-    doc.setDrawColor(226, 232, 240); // Slate 200
-    doc.line(20, y, 90, y);
-    doc.line(120, y, pageWidth - 20, y);
-
-    doc.setFontSize(8);
-    doc.setTextColor(100, 116, 139);
-    doc.text(client.name, 55, y + 5, { align: 'center' });
-    doc.text('Contratante', 55, y + 10, { align: 'center' });
-
-    doc.text('2BI PLANEJAMENTO', 155, y + 5, { align: 'center' });
-    doc.text('Contratada', 155, y + 10, { align: 'center' });
-
-    // 8. Footer
-    doc.setFillColor(10, 25, 47);
-    doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(7);
-    doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINACEIRO - WWW.2BI.ORIONCHAT.CLOUD', pageWidth / 2, pageHeight - 7, { align: 'center' });
-
-    return doc;
-  };
 
   const handleDownloadContract = async (contract) => {
     try {
-      const doc = await generateContractPDF(contract);
+      const doc = await generateContractPDF(contract, selectedClient, 'client');
       doc.save(`Contrato_${selectedClient.name}_${contract.title}.pdf`);
       success('Contrato baixado!');
     } catch (err) {
@@ -496,7 +345,7 @@ const AdminDashboard = () => {
       onConfirm: async () => {
         try {
           // 1. Gera o PDF dinamicamente
-          const doc = await generateContractPDF(contract);
+          const doc = await generateContractPDF(contract, selectedClient, 'client');
           
           // 2. Extrai o Base64 (apenas a parte dos dados)
           const pdfData = doc.output('datauristring').split(',')[1];
@@ -535,7 +384,7 @@ const AdminDashboard = () => {
 
   const handlePreviewContract = async (contract) => {
     try {
-      const doc = await generateContractPDF(contract);
+      const doc = await generateContractPDF(contract, selectedClient, 'client');
       setPreviewUrl(doc.output('datauristring'));
     } catch (err) {
       console.error('Erro ao gerar preview:', err);
@@ -663,6 +512,63 @@ const AdminDashboard = () => {
   return (
     <SystemLayout>
       <div className="space-y-8">
+        {/* Partner Contract Notice */}
+        {user?.role === 'partner' && partnerContract && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-navy-900 border border-gold/30 rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center border border-gold/20">
+                <ShieldCheck className="text-gold" size={24} />
+              </div>
+              <div>
+                <h4 className="text-white font-bold">Seu Contrato de Parceria</h4>
+                <p className="text-slate-400 text-xs">
+                  Status: <span className={partnerContract.signature_status === 'signed' ? 'text-green-400' : 'text-gold'}>
+                    {partnerContract.signature_status === 'signed' ? 'Assinado' : 'Pendente de Assinatura'}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={async () => {
+                  const doc = await generateContractPDF(partnerContract, user, 'partner');
+                  const blob = doc.output('blob');
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, '_blank');
+                }}
+                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase rounded-xl border border-white/10 transition-all flex items-center gap-2"
+              >
+                <Eye size={14} /> Visualizar
+              </button>
+              {partnerContract.signature_status === 'signed' ? (
+                <button 
+                  onClick={async () => {
+                    try {
+                      const response = await api.get(`/contracts/${partnerContract.id}/signature/download`, { responseType: 'blob' });
+                      const url = window.URL.createObjectURL(new Blob([response.data]));
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', `Contrato_Parceria_Assinado.pdf`);
+                      document.body.appendChild(link);
+                      link.click();
+                    } catch (e) { error('Erro ao baixar assinado'); }
+                  }}
+                  className="px-6 py-2.5 bg-green-600 text-white text-[10px] font-black uppercase rounded-xl hover:bg-green-500 transition-all flex items-center gap-2"
+                >
+                  <Download size={14} /> Baixar Assinado
+                </button>
+              ) : (
+                <div className="text-[9px] text-slate-400 max-w-[150px] italic leading-tight">
+                  Verifique seu e-mail para assinar via Assinafy.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>

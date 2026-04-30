@@ -100,7 +100,7 @@ class BillingController {
     try {
       const { userId } = req.params;
 
-      if (req.userRole === 'partner') {
+      if (req.userRole === 'partner' && String(req.userId) !== String(userId)) {
         const client = await User.findByPk(userId);
         if (!client || String(client.partner_id) !== String(req.userId)) {
           return res.status(403).json({ error: 'Não autorizado: Cliente não pertence a você' });
