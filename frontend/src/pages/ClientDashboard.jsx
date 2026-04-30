@@ -26,7 +26,7 @@ const ClientDashboard = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
   const { success, error } = useNotification();
-  
+
   const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
   const [dashboardData, setDashboardData] = useState({ monthlyData: [], categoryData: [] });
   const [transactions, setTransactions] = useState([]);
@@ -49,9 +49,9 @@ const ClientDashboard = () => {
 
   const years = useMemo(() => [2026, 2027, 2028, 2029, 2030], []);
 
-  const formatCurrency = useCallback((val) => 
-    `R$ ${Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 
-  []);
+  const formatCurrency = useCallback((val) =>
+    `R$ ${Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+    []);
 
   const getDateRange = useCallback((month, year) => {
     const start = new Date(year, month, 1).toISOString().split('T')[0];
@@ -290,7 +290,7 @@ const ClientDashboard = () => {
     doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(7);
-    doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINACEIRO - WWW.2BI.ORIONCHAT.CLOUD', pageWidth / 2, pageHeight - 7, { align: 'center' });
+    doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINACEIRO - WWW.2BIPLANEJAMENTO.CLOUD', pageWidth / 2, pageHeight - 7, { align: 'center' });
 
     return doc;
   };
@@ -324,7 +324,7 @@ const ClientDashboard = () => {
   return (
     <SystemLayout>
       <div className="space-y-8">
-        <DashboardHeader 
+        <DashboardHeader
           user={user}
           selectedMonth={selectedMonth}
           setSelectedMonth={setSelectedMonth}
@@ -362,7 +362,7 @@ const ClientDashboard = () => {
             <DailyQuote />
             <StatsGrid stats={stats} />
             <PerformanceIndicators stats={stats} dashboardData={dashboardData} />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <MainCharts data={mainChartData} formatCurrency={formatCurrency} />
               <BudgetOverview goals={goals} onOpenGoalModal={handleOpenGoalModal} />
@@ -371,13 +371,13 @@ const ClientDashboard = () => {
             <RecentTransactions transactions={transactions} />
           </>
         ) : activeTab === 'billing' ? (
-          <BillingSection 
-            contracts={contracts} 
-            payments={payments} 
-            onDownloadContract={handleDownloadContract} 
+          <BillingSection
+            contracts={contracts}
+            payments={payments}
+            onDownloadContract={handleDownloadContract}
           />
         ) : (
-          <StrategicDashboard 
+          <StrategicDashboard
             dashboardData={dashboardData}
             selectedYear={selectedYear}
             theme={theme}
@@ -387,7 +387,7 @@ const ClientDashboard = () => {
         )}
       </div>
 
-      <GoalModal 
+      <GoalModal
         show={showGoalModal}
         onClose={() => setShowGoalModal(false)}
         onSubmit={handleGoalSubmit}

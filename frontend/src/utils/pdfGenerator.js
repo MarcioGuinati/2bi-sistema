@@ -179,12 +179,12 @@ export const generateContractPDF = async (contract, user, type = 'client') => {
       doc.setDrawColor(197, 160, 89);
       doc.setLineWidth(0.3);
       doc.line(20, y, 35, y);
-      
+
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(10, 25, 47);
       doc.text(clause.title, 20, y + 6);
-      
+
       y += 12;
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
@@ -202,7 +202,7 @@ export const generateContractPDF = async (contract, user, type = 'client') => {
   } else {
     y = pageHeight - 60;
   }
-  
+
   doc.setDrawColor(226, 232, 240);
   doc.line(20, y, 90, y);
   doc.line(120, y, pageWidth - 20, y);
@@ -220,7 +220,7 @@ export const generateContractPDF = async (contract, user, type = 'client') => {
   doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(7);
-  doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINANCEIRO - WWW.2BI.ORIONCHAT.CLOUD', pageWidth / 2, pageHeight - 7, { align: 'center' });
+  doc.text('2BI PLANEJAMENTO ESTRATÉGICO FINANCEIRO - WWW.APP.2BIPLANEJAMENTO.CLOUD', pageWidth / 2, pageHeight - 7, { align: 'center' });
 
   return doc;
 };
