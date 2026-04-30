@@ -39,6 +39,7 @@ import UserProfile from './pages/UserProfile';
 import AppLandingPage from './pages/AppLandingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import Agenda from './pages/Agenda';
+import KnowledgeBase from './pages/KnowledgeBase';
 
 const Institutional = () => (
   <div className="min-h-screen">
@@ -99,6 +100,14 @@ function App() {
             element={
               <ProtectedRoute role={['admin', 'partner']}>
                 <Agenda />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/knowledge-base" 
+            element={
+              <ProtectedRoute role={['admin', 'partner']}>
+                <KnowledgeBase />
               </ProtectedRoute>
             } 
           />

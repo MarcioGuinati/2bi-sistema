@@ -23,7 +23,8 @@ import {
   Trophy,
   Briefcase,
   Zap,
-  Star
+  Star,
+  Book
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -52,6 +53,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Agenda', path: '/agenda', icon: Calendar },
     { name: 'Mentoria & CRM', path: '/admin/mentorship', icon: Star },
     { name: 'Financeiro', path: '/admin/finances', icon: TrendingUp },
+    { name: 'Base Conhecimento', path: '/admin/knowledge-base', icon: Book },
   ];
 
   const adminLinks = [
@@ -62,6 +64,7 @@ const Sidebar = ({ isOpen, isCollapsed, toggleCollapse, onClose }) => {
     { name: 'Configuração IA', path: '/admin/ai', icon: Cpu },
     { name: 'Finanças', path: '/admin/finances', icon: TrendingUp },
     { name: 'Mentoria Master', path: '/admin/mentorship', icon: Star },
+    { name: 'Base Conhecimento', path: '/admin/knowledge-base', icon: Book },
     { name: 'Segurança', path: '/admin/security', icon: ShieldCheck },
     { name: 'Logs de Auditoria', path: '/admin/audit-logs', icon: Shield },
   ];

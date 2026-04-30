@@ -15,6 +15,7 @@ const AIController = require('./controllers/AIController');
 const AuditController = require('./controllers/AuditController');
 const ReportController = require('./controllers/ReportController');
 const ScheduleController = require('./controllers/ScheduleController');
+const KnowledgeBaseController = require('./controllers/KnowledgeBaseController');
 const authMiddleware = require('./middleware/auth');
 const multer = require('multer');
 
@@ -139,5 +140,11 @@ routes.get('/schedules', ScheduleController.index);
 routes.post('/schedules', ScheduleController.store);
 routes.put('/schedules/:id', ScheduleController.update);
 routes.delete('/schedules/:id', ScheduleController.delete);
+
+// Base de Conhecimento
+routes.get('/knowledge-base', KnowledgeBaseController.index);
+routes.post('/knowledge-base', KnowledgeBaseController.store);
+routes.put('/knowledge-base/:id', KnowledgeBaseController.update);
+routes.delete('/knowledge-base/:id', KnowledgeBaseController.delete);
 
 module.exports = routes;

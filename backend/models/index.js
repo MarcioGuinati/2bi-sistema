@@ -16,6 +16,7 @@ const Setting = require('./Setting')(sequelize, DataTypes);
 const Insight = require('./Insight')(sequelize, DataTypes);
 const AuditLog = require('./AuditLog')(sequelize, DataTypes);
 const Report = require('./Report')(sequelize, DataTypes);
+const KnowledgeBase = require('./KnowledgeBase')(sequelize, DataTypes);
 
 // Audit Logs
 User.hasMany(AuditLog, { foreignKey: 'userId' });
@@ -119,5 +120,6 @@ module.exports = {
   Setting,
   Insight,
   AuditLog,
-  Report
+  Report,
+  KnowledgeBase
 };
