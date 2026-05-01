@@ -68,7 +68,7 @@ class ConfigController {
           'name',
           'email',
           [sequelize.fn('COUNT', sequelize.col('Insights.id')), 'total_insights'],
-          [sequelize.fn('MAX', sequelize.col('Insights.createdAt')), 'last_use']
+          [sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'last_use']
         ],
         include: [{
           model: Insight,
@@ -76,8 +76,8 @@ class ConfigController {
           required: true, // Somente usuários que tem insights
           where: whereInsight
         }],
-        group: ['User.id'],
-        order: [[sequelize.fn('MAX', sequelize.col('Insights.createdAt')), 'DESC']],
+        group: ['User.id', 'User.name', 'User.email'],
+        order: [[sequelize.fn('MAX', sequelize.col('Insights.created_at')), 'DESC']],
         raw: true
       });
 
